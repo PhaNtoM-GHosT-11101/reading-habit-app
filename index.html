@@ -2,931 +2,891 @@
 <html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>PageHabit — Read More, Scroll Less</title>
-  <meta name="description" content="Break books into bite-sized chunks and build a daily reading habit. Track your streak, earn XP, and level up your reading." />
+  <meta name="description" content="Break books into bite-sized chunks and build a daily reading habit." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Merriweather:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet" />
-  <!-- JSZip for EPUB parsing -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <style>
+    /* ═══════════════════════ TOKENS ═══════════════════════ */
     :root {
-      --bg: #0f0f13;
-      --bg2: #1a1a24;
-      --bg3: #22222f;
-      --card: #1e1e2a;
-      --border: rgba(255,255,255,0.08);
-      --text: #f0f0f5;
-      --text2: #9898b0;
-      --text3: #5a5a70;
-      --accent: #7c6aff;
-      --accent2: #a78bfa;
-      --accent-glow: rgba(124,106,255,0.25);
-      --green: #22c55e;
-      --green-bg: rgba(34,197,94,0.15);
-      --gold: #f59e0b;
-      --gold-bg: rgba(245,158,11,0.15);
-      --red: #ef4444;
-      --radius: 16px;
-      --radius-sm: 10px;
-      --shadow: 0 8px 32px rgba(0,0,0,0.4);
+      --bg:        #111111;
+      --surface:   #1c1c1e;
+      --surface2:  #2c2c2e;
+      --border:    rgba(255,255,255,0.09);
+      --text:      #f2f2f7;
+      --text2:     #8e8e93;
+      --text3:     #48484a;
+      --accent:    #6366f1;
+      --accent-lt: #818cf8;
+      --glow:      rgba(99,102,241,0.22);
+      --green:     #30d158;
+      --gold:      #ffd60a;
+      --red:       #ff453a;
+      --r:         14px;
+      --r-sm:      10px;
     }
     [data-theme="light"] {
-      --bg: #f5f4f0; --bg2: #ebe9e2; --bg3: #e0ddd5;
-      --card: #ffffff; --border: rgba(0,0,0,0.08);
-      --text: #1a1a2e; --text2: #5a5a70; --text3: #9898b0;
-      --accent: #6c5ce7; --accent2: #a78bfa;
-      --accent-glow: rgba(108,92,231,0.2);
-      --shadow: 0 8px 32px rgba(0,0,0,0.1);
+      --bg:       #f2f2f7;
+      --surface:  #ffffff;
+      --surface2: #e5e5ea;
+      --border:   rgba(0,0,0,0.08);
+      --text:     #1c1c1e;
+      --text2:    #6d6d72;
+      --text3:    #aeaeb2;
+      --accent:   #5856d6;
+      --accent-lt:#7c7bf0;
+      --glow:     rgba(88,86,214,0.15);
+      --green:    #34c759;
     }
-    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100dvh; overflow-x: hidden; transition: background 0.3s, color 0.3s; }
 
-    /* LAYOUT */
-    #app { display: flex; flex-direction: column; min-height: 100dvh; }
-    .view { display: none; flex: 1; flex-direction: column; padding-bottom: 80px; }
+    /* ═══════════════════════ RESET ═══════════════════════ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    html { height: 100%; }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); height: 100%; overflow: hidden; transition: background .3s, color .3s; }
+    #app { height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
+
+    /* ═══════════════════════ VIEWS ═══════════════════════ */
+    .view { display: none; flex: 1; flex-direction: column; overflow: hidden; }
     .view.active { display: flex; }
+    .scroll { flex: 1; overflow-y: auto; overscroll-behavior: contain; }
+    .scroll::-webkit-scrollbar { display: none; }
 
-    /* HEADER */
-    .header { position: sticky; top: 0; z-index: 50; background: var(--bg); padding: 16px 20px 12px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; backdrop-filter: blur(12px); }
-    .header h1 { font-size: 22px; font-weight: 800; letter-spacing: -0.5px; }
-    .header h1 span { color: var(--accent); }
-    .theme-btn { width: 38px; height: 38px; border-radius: 50%; background: var(--bg3); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 18px; transition: all 0.2s; }
-    .theme-btn:hover { background: var(--accent); }
-
-    /* BOTTOM NAV */
-    .nav { position: fixed; bottom: 0; left: 0; right: 0; z-index: 100; background: var(--bg2); border-top: 1px solid var(--border); display: flex; padding: 8px 0 max(8px, env(safe-area-inset-bottom)); }
-    .nav-btn { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 6px 0; cursor: pointer; border: none; background: none; color: var(--text3); transition: all 0.2s; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
-    .nav-btn svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    /* ═══════════════════════ NAV ═══════════════════════ */
+    .nav {
+      display: flex; background: var(--surface);
+      border-top: 1px solid var(--border);
+      padding: 0 0 env(safe-area-inset-bottom);
+      flex-shrink: 0;
+    }
+    .nav-btn {
+      flex: 1; display: flex; flex-direction: column; align-items: center;
+      gap: 3px; padding: 10px 0; border: none; background: none;
+      color: var(--text3); font-size: 10px; font-weight: 600;
+      letter-spacing: .4px; text-transform: uppercase; cursor: pointer;
+      transition: color .2s; font-family: 'Inter', sans-serif;
+    }
+    .nav-btn svg { width: 24px; height: 24px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; transition: filter .2s; }
     .nav-btn.active { color: var(--accent); }
-    .nav-btn.active svg { filter: drop-shadow(0 0 6px var(--accent)); }
+    .nav-btn.active svg { filter: drop-shadow(0 0 5px var(--accent)); }
 
-    /* SCROLL */
-    .scroll { flex: 1; overflow-y: auto; padding: 16px 20px; }
-    .scroll::-webkit-scrollbar { width: 4px; }
-    .scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+    /* ═══════════════════════ HEADER ═══════════════════════ */
+    .header {
+      padding: 16px 20px 12px;
+      display: flex; align-items: center; justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .logo { font-size: 20px; font-weight: 800; letter-spacing: -.5px; }
+    .logo span { color: var(--accent); }
+    .hdr-right { display: flex; align-items: center; gap: 10px; }
+    .pill { display: inline-flex; align-items: center; gap: 5px; padding: 5px 12px; border-radius: 100px; background: var(--surface2); font-size: 12px; font-weight: 700; color: var(--text2); }
+    .pill.gold { background: rgba(255,214,10,.12); color: var(--gold); }
+    .icon-btn { width: 36px; height: 36px; border-radius: 50%; background: var(--surface2); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 17px; transition: background .2s; }
+    .icon-btn:hover { background: var(--accent); }
 
-    /* CARD */
-    .card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; margin-bottom: 14px; box-shadow: var(--shadow); }
+    /* ═══════════════════════ LIBRARY ═══════════════════════ */
+    .lib-top { padding: 20px 20px 0; }
+    .streak-banner {
+      background: linear-gradient(135deg, rgba(99,102,241,.18) 0%, rgba(129,140,248,.1) 100%);
+      border: 1px solid rgba(99,102,241,.25);
+      border-radius: var(--r); padding: 18px 20px;
+      display: flex; align-items: center; gap: 16px;
+    }
+    .streak-num { font-size: 42px; font-weight: 800; color: var(--accent-lt); line-height: 1; }
+    .streak-info { flex: 1; }
+    .streak-label { font-size: 13px; font-weight: 700; color: var(--text); }
+    .streak-sub { font-size: 11px; color: var(--text2); margin-top: 2px; }
 
-    /* BUTTONS */
-    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 13px 22px; border-radius: var(--radius-sm); font-weight: 600; font-size: 15px; cursor: pointer; border: none; transition: all 0.2s; width: 100%; font-family: 'Inter', sans-serif; }
+    .section-hd { display: flex; align-items: center; justify-content: space-between; padding: 20px 20px 10px; }
+    .section-hd h2 { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: .6px; color: var(--text2); }
+    .text-btn { font-size: 13px; font-weight: 600; color: var(--accent); background: none; border: none; cursor: pointer; font-family: 'Inter', sans-serif; }
+
+    .book-row {
+      margin: 0 20px 12px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--r); overflow: hidden;
+      transition: transform .15s, box-shadow .15s;
+    }
+    .book-row:active { transform: scale(.98); }
+    .book-row-inner { display: flex; align-items: center; gap: 14px; padding: 14px 16px; }
+    .book-emoji { font-size: 34px; flex-shrink: 0; }
+    .book-info { flex: 1; min-width: 0; }
+    .book-name { font-size: 15px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .book-sub { font-size: 12px; color: var(--text2); margin-top: 2px; }
+    .book-actions { display: flex; gap: 8px; padding: 0 16px 14px; }
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; padding: 11px 18px; border-radius: var(--r-sm); font-weight: 600; font-size: 14px; cursor: pointer; border: none; font-family: 'Inter', sans-serif; transition: all .15s; width: 100%; }
+    .btn:active { transform: scale(.97); }
     .btn-primary { background: var(--accent); color: #fff; }
-    .btn-primary:hover { filter: brightness(1.15); transform: translateY(-1px); }
-    .btn-primary:active { transform: translateY(0); }
-    .btn-outline { background: transparent; color: var(--text); border: 1px solid var(--border); }
-    .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
-    .btn-danger { background: var(--red); color: #fff; }
-    .btn-green { background: var(--green); color: #fff; font-size: 17px; padding: 16px 22px; }
-    .btn-green:hover { filter: brightness(1.1); transform: translateY(-1px); }
-    .btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none !important; }
+    .btn-ghost { background: var(--surface2); color: var(--text2); }
+    .btn-ghost:hover { color: var(--text); }
+    .btn-green { background: var(--green); color: #000; font-size: 16px; font-weight: 700; padding: 15px; }
+    .btn-red { background: var(--red); color: #fff; }
 
-    /* STREAK HERO */
-    .streak-hero { background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #1e1b4b 100%); border-radius: var(--radius); padding: 24px; margin-bottom: 14px; text-align: center; position: relative; overflow: hidden; }
-    [data-theme="light"] .streak-hero { background: linear-gradient(135deg, #ede9fe 0%, #ddd6fe 50%, #ede9fe 100%); }
-    .streak-hero::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(ellipse at center, rgba(124,106,255,0.15) 0%, transparent 60%); animation: pulse-bg 4s ease-in-out infinite; }
-    @keyframes pulse-bg { 0%,100%{opacity:0.5} 50%{opacity:1} }
-    .streak-number { font-size: 64px; font-weight: 800; color: var(--accent2); line-height: 1; margin-bottom: 4px; position: relative; }
-    .streak-label { font-size: 13px; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: 1px; position: relative; }
-    .streak-fire { font-size: 28px; position: relative; }
+    .progress-track { background: var(--surface2); border-radius: 100px; height: 3px; margin: 8px 16px 0; }
+    .progress-fill { height: 100%; border-radius: 100px; background: var(--accent); transition: width .4s; }
+    .progress-row { display: flex; justify-content: space-between; padding: 4px 16px 12px; font-size: 11px; color: var(--text3); font-weight: 600; }
 
-    /* STAT GRID */
-    .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
-    .stat-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; text-align: center; }
-    .stat-val { font-size: 28px; font-weight: 800; color: var(--accent); }
-    .stat-sub { font-size: 11px; color: var(--text2); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
+    .loading-box { display: flex; flex-direction: column; align-items: center; padding: 60px 20px; gap: 14px; color: var(--text2); font-size: 14px; }
+    .spinner { width: 32px; height: 32px; border: 2.5px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin .7s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* PROGRESS */
-    .progress-wrap { background: var(--bg3); border-radius: 100px; height: 8px; overflow: hidden; margin-top: 10px; }
-    .progress-bar { height: 100%; border-radius: 100px; background: linear-gradient(90deg, var(--accent), var(--accent2)); transition: width 0.5s cubic-bezier(0.4,0,0.2,1); }
+    .empty-msg { text-align: center; padding: 40px 20px; color: var(--text3); font-size: 14px; line-height: 1.6; }
+    .dl-bar { height: 2px; background: var(--accent); border-radius: 100px; width: 0%; transition: width .3s; margin: 0 16px 12px; display: none; }
 
-    /* BOOK CARD */
-    .book-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; margin-bottom: 12px; transition: all 0.2s; }
-    .book-card:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 8px 24px var(--accent-glow); }
-    .book-title { font-size: 16px; font-weight: 700; margin-bottom: 4px; color: var(--text); }
-    .book-meta { font-size: 12px; color: var(--text2); margin-bottom: 10px; }
-    .book-pct { font-size: 12px; font-weight: 600; color: var(--accent); margin-top: 6px; display: flex; justify-content: space-between; }
+    /* ═══════════════════════ READER ═══════════════════════ */
+    #view-reader { position: relative; background: var(--bg); }
 
-    /* GITHUB LIBRARY */
-    .github-book-item { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; margin-bottom: 12px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 14px; }
-    .github-book-item:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 8px 24px var(--accent-glow); }
-    .github-book-item:active { transform: translateY(0); }
-    .gbi-emoji { font-size: 36px; flex-shrink: 0; }
-    .gbi-info { flex: 1; min-width: 0; }
-    .gbi-title { font-weight: 700; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .gbi-sub { font-size: 12px; color: var(--text2); margin-top: 3px; }
-    .gbi-badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; background: var(--accent-glow); color: var(--accent2); border-radius: 100px; font-size: 11px; font-weight: 700; margin-top: 6px; }
-    .gbi-badge.loaded { background: var(--green-bg); color: var(--green); }
-    .gbi-action { flex-shrink: 0; }
+    .reading-canvas {
+      flex: 1; overflow-y: auto; padding: 48px 28px 120px;
+      cursor: pointer; user-select: none;
+    }
+    .reading-canvas::-webkit-scrollbar { display: none; }
 
-    /* READER */
-    .reader-header { padding: 16px 20px; border-bottom: 1px solid var(--border); }
-    .reader-book-title { font-size: 13px; color: var(--text2); font-weight: 600; }
-    .reader-chunk-info { font-size: 12px; color: var(--text3); margin-top: 2px; }
-    .reading-area { flex: 1; padding: 24px; overflow-y: auto; line-height: 1.9; font-family: 'Merriweather', serif; font-size: 17px; color: var(--text); }
-    .reading-area::-webkit-scrollbar { display: none; }
-    .reader-controls { padding: 16px 20px; border-top: 1px solid var(--border); background: var(--bg); }
-    .chunk-nav { display: flex; gap: 10px; margin-top: 10px; }
-    .chunk-nav .btn { flex: 1; }
-    .xp-badge { display: inline-flex; align-items: center; gap: 6px; background: var(--gold-bg); color: var(--gold); padding: 4px 12px; border-radius: 100px; font-size: 12px; font-weight: 700; margin-bottom: 10px; }
-    .no-book { text-align: center; padding: 60px 20px; color: var(--text2); }
-    .no-book .icon { font-size: 56px; margin-bottom: 16px; }
-    .no-book h3 { font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+    .reading-text {
+      font-family: 'Lora', Georgia, serif;
+      font-size: 19px; line-height: 1.9;
+      color: var(--text);
+      max-width: 640px; margin: 0 auto;
+    }
+    [data-theme="light"] .reading-text { color: #1c1c1e; }
 
-    /* SETTINGS */
-    .settings-row { display: flex; align-items: center; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid var(--border); }
-    .settings-row:last-child { border-bottom: none; }
-    .settings-label { font-size: 15px; font-weight: 500; }
-    .settings-sub { font-size: 12px; color: var(--text2); margin-top: 2px; }
-    .num-input { display: flex; align-items: center; gap: 10px; }
-    .num-input button { width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--border); background: var(--bg3); color: var(--text); font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
-    .num-input button:hover { background: var(--accent); border-color: var(--accent); }
-    .num-input span { font-size: 18px; font-weight: 700; min-width: 32px; text-align: center; color: var(--accent); }
-    select { background: var(--bg3); color: var(--text); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 8px 12px; font-size: 14px; font-family: 'Inter', sans-serif; }
+    .reading-text p { margin-bottom: 1.2em; }
 
-    /* BADGES */
-    .badge-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-    .badge-item { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 14px 8px; text-align: center; transition: all 0.2s; }
-    .badge-item.unlocked { border-color: var(--gold); background: var(--gold-bg); }
-    .badge-icon { font-size: 28px; margin-bottom: 6px; filter: grayscale(1) opacity(0.4); }
-    .badge-item.unlocked .badge-icon { filter: none; }
-    .badge-name { font-size: 10px; font-weight: 700; color: var(--text2); text-transform: uppercase; letter-spacing: 0.3px; }
+    /* No book */
+    .reader-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; gap: 14px; color: var(--text2); text-align: center; padding: 40px; }
+    .reader-empty .big-icon { font-size: 64px; }
+    .reader-empty h3 { font-size: 20px; font-weight: 700; color: var(--text); }
+    .reader-empty p { font-size: 14px; line-height: 1.6; }
 
-    /* CALENDAR */
-    .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; margin-top: 12px; }
-    .cal-day { aspect-ratio: 1; border-radius: 6px; background: var(--bg3); transition: all 0.2s; }
-    .cal-day.read { background: var(--accent); }
-    .cal-day.today { border: 2px solid var(--accent2); }
-    .cal-labels { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; margin-top: 8px; }
-    .cal-label { font-size: 9px; color: var(--text3); text-align: center; font-weight: 600; text-transform: uppercase; }
+    /* Reader overlay controls — appear on tap */
+    .reader-overlay {
+      position: absolute; inset: 0; pointer-events: none;
+      display: flex; flex-direction: column; justify-content: space-between;
+    }
 
-    /* TOAST */
-    .toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--card); border: 1px solid var(--border); padding: 12px 20px; border-radius: 100px; font-size: 14px; font-weight: 600; z-index: 999; opacity: 0; transition: all 0.3s; white-space: nowrap; box-shadow: var(--shadow); pointer-events: none; }
+    /* Top bar */
+    .reader-topbar {
+      pointer-events: all;
+      background: linear-gradient(to bottom, var(--bg) 60%, transparent);
+      padding: 14px 20px 24px;
+      opacity: 0; transform: translateY(-8px);
+      transition: opacity .25s, transform .25s;
+    }
+    .reader-topbar.visible { opacity: 1; transform: translateY(0); }
+    .reader-top-row { display: flex; align-items: center; gap: 12px; }
+    .reader-book-name { flex: 1; font-size: 13px; font-weight: 600; color: var(--text2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .reader-chunk-lbl { font-size: 12px; color: var(--text3); }
+    .reader-prog-track { background: var(--surface2); border-radius: 100px; height: 2px; margin-top: 10px; }
+    .reader-prog-fill { height: 100%; border-radius: 100px; background: var(--accent); transition: width .4s; }
+
+    /* Bottom panel */
+    .reader-bottom {
+      pointer-events: all;
+      background: linear-gradient(to top, var(--bg) 60%, transparent);
+      padding: 24px 20px 16px;
+      opacity: 0; transform: translateY(8px);
+      transition: opacity .25s, transform .25s;
+    }
+    .reader-bottom.visible { opacity: 1; transform: translateY(0); }
+
+    /* Slider */
+    .slider-row { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+    .slider-label { font-size: 12px; font-weight: 600; color: var(--text2); white-space: nowrap; }
+    .slider-val { font-size: 13px; font-weight: 800; color: var(--accent); min-width: 28px; text-align: right; white-space: nowrap; }
+    input[type=range] {
+      flex: 1; -webkit-appearance: none; appearance: none;
+      height: 4px; border-radius: 100px;
+      background: var(--surface2); outline: none; cursor: pointer;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none; width: 22px; height: 22px;
+      border-radius: 50%; background: var(--accent);
+      box-shadow: 0 2px 8px rgba(99,102,241,.5);
+      cursor: pointer; transition: transform .15s;
+    }
+    input[type=range]::-webkit-slider-thumb:active { transform: scale(1.25); }
+    input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border-radius: 50%; background: var(--accent); border: none; cursor: pointer; }
+
+    /* Nav row */
+    .nav-row { display: flex; gap: 10px; margin-top: 10px; }
+    .nav-row .btn { flex: 1; padding: 12px; }
+
+    /* XP toast that floats up */
+    .xp-pop {
+      position: fixed; left: 50%; transform: translateX(-50%) translateY(0);
+      bottom: 120px; background: rgba(255,214,10,.15); color: var(--gold);
+      padding: 8px 18px; border-radius: 100px; font-size: 14px; font-weight: 800;
+      border: 1px solid rgba(255,214,10,.3); z-index: 500;
+      opacity: 0; pointer-events: none;
+      transition: opacity .2s, transform .5s cubic-bezier(.22,1,.36,1);
+    }
+    .xp-pop.show { opacity: 1; transform: translateX(-50%) translateY(-30px); }
+
+    /* ═══════════════════════ STATS ═══════════════════════ */
+    .stats-scroll { padding: 20px; }
+    .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+    .stat-tile { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 16px; text-align: center; }
+    .stat-num { font-size: 30px; font-weight: 800; color: var(--accent); }
+    .stat-lbl { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: var(--text2); margin-top: 3px; }
+
+    .cal-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 16px; margin-bottom: 16px; }
+    .cal-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; margin-top: 10px; }
+    .cal-day-labels { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
+    .cal-dl { font-size: 9px; text-align: center; font-weight: 600; text-transform: uppercase; color: var(--text3); }
+    .cal-d { aspect-ratio: 1; border-radius: 5px; background: var(--surface2); }
+    .cal-d.on { background: var(--accent); }
+    .cal-d.now { outline: 2px solid var(--accent-lt); outline-offset: 1px; }
+
+    .badge-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 16px; }
+    .badge-tile { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-sm); padding: 14px 8px; text-align: center; }
+    .badge-tile.on { border-color: var(--gold); background: rgba(255,214,10,.07); }
+    .badge-ico { font-size: 26px; margin-bottom: 5px; filter: grayscale(1) opacity(.3); }
+    .badge-tile.on .badge-ico { filter: none; }
+    .badge-lbl { font-size: 10px; font-weight: 700; color: var(--text2); text-transform: uppercase; letter-spacing: .3px; }
+
+    .settings-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; margin-bottom: 16px; }
+    .s-row { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; border-bottom: 1px solid var(--border); }
+    .s-row:last-child { border-bottom: none; }
+    .s-lbl { font-size: 15px; font-weight: 500; }
+    .s-sub { font-size: 11px; color: var(--text2); margin-top: 2px; }
+    .s-right { font-size: 13px; font-weight: 600; color: var(--accent); }
+    select { background: var(--surface2); color: var(--text); border: 1px solid var(--border); border-radius: var(--r-sm); padding: 7px 10px; font-size: 13px; font-family: 'Inter', sans-serif; }
+
+    .section-title { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: .6px; color: var(--text2); margin-bottom: 10px; }
+
+    /* ═══════════════════════ TOAST ═══════════════════════ */
+    .toast { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%) translateY(6px); background: var(--surface); border: 1px solid var(--border); padding: 10px 18px; border-radius: 100px; font-size: 13px; font-weight: 600; z-index: 999; opacity: 0; transition: all .25s; white-space: nowrap; pointer-events: none; box-shadow: 0 8px 24px rgba(0,0,0,.3); }
     .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-    /* XP BURST */
-    .xp-burst { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0); font-size: 48px; font-weight: 900; color: var(--gold); z-index: 999; pointer-events: none; opacity: 0; text-shadow: 0 0 30px rgba(245,158,11,0.6); transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
-    .xp-burst.show { transform: translate(-50%, -80%) scale(1); opacity: 1; }
-    .xp-burst.hide { transform: translate(-50%, -120%) scale(0.5); opacity: 0; }
+    /* ═══════════════════════ TOP LOADING BAR ═══════════════════════ */
+    .top-bar { position: fixed; top: 0; left: 0; height: 2px; background: var(--accent); z-index: 999; transition: width .3s; pointer-events: none; }
 
-    /* LOADING */
-    .loading-bar { height: 3px; background: linear-gradient(90deg, var(--accent), var(--accent2)); position: fixed; top: 0; left: 0; z-index: 9999; transition: width 0.3s; pointer-events: none; }
-
-    /* SPINNER */
-    .spinner { width: 40px; height: 40px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .loading-state { text-align: center; padding: 40px 20px; color: var(--text2); }
-    .loading-state p { margin-top: 14px; font-size: 14px; }
-
-    /* MISC */
-    .section-title { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text2); margin-bottom: 12px; margin-top: 4px; }
-    .empty-state { text-align: center; padding: 40px 0; color: var(--text2); font-size: 14px; }
-    .chip { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; background: var(--bg3); border-radius: 100px; font-size: 12px; font-weight: 600; color: var(--text2); }
-    .chip.purple { background: var(--accent-glow); color: var(--accent2); }
-    .divider { height: 1px; background: var(--border); margin: 4px 0; }
-
-    /* ANIMATIONS */
-    @keyframes fadeInUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
-    .fade-in { animation: fadeInUp 0.35s ease forwards; }
-
-    /* REFRESH BTN */
-    .refresh-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
-    .icon-btn { background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 8px 14px; color: var(--text2); font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 6px; }
-    .icon-btn:hover { border-color: var(--accent); color: var(--accent); }
-
-    /* DOWNLOAD PROGRESS */
-    .dl-progress { background: var(--bg3); border-radius: 100px; height: 6px; overflow: hidden; margin-top: 8px; display: none; }
-    .dl-progress-bar { height: 100%; width: 0%; border-radius: 100px; background: linear-gradient(90deg, var(--accent), var(--accent2)); transition: width 0.3s; }
+    /* ═══════════════════════ ANIMATIONS ═══════════════════════ */
+    @keyframes fadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:none; } }
+    .fade-up { animation: fadeUp .3s ease both; }
   </style>
 </head>
 <body>
 <div id="app">
+  <div class="top-bar" id="topBar" style="width:0"></div>
+  <div class="toast" id="toast"></div>
+  <div class="xp-pop" id="xpPop">+10 ⭐</div>
 
-  <div class="loading-bar" id="loadingBar" style="width:0"></div>
-
-  <!-- ═══════════════════════════════ LIBRARY VIEW ═══════════════════════════════ -->
+  <!-- ═══════════════════ LIBRARY ═══════════════════ -->
   <div class="view active" id="view-library">
     <div class="header">
-      <h1>Page<span>Habit</span></h1>
-      <div style="display:flex;gap:8px;align-items:center">
-        <div class="chip purple" id="xp-chip">⭐ 0 XP</div>
-        <div class="theme-btn" id="themeBtn">🌙</div>
+      <div class="logo">Page<span>Habit</span></div>
+      <div class="hdr-right">
+        <div class="pill gold" id="xpPill">⭐ 0 XP</div>
+        <button class="icon-btn" id="themeBtn">🌙</button>
       </div>
     </div>
-    <div class="scroll" id="library-scroll">
-      <div class="streak-hero">
-        <div class="streak-fire">🔥</div>
-        <div class="streak-number" id="lib-streak">0</div>
-        <div class="streak-label">Day Streak</div>
-      </div>
 
-      <div class="refresh-row">
-        <div class="section-title" style="margin:0">📚 Your Books</div>
-        <button class="icon-btn" id="refreshBtn" onclick="app.fetchGithubBooks()">🔄 Refresh</button>
-      </div>
-
-      <div id="githubBookList">
-        <div class="loading-state">
-          <div class="spinner"></div>
-          <p>Loading books from GitHub…</p>
+    <div class="scroll" style="padding-bottom:10px">
+      <!-- Streak -->
+      <div class="lib-top">
+        <div class="streak-banner">
+          <div>
+            <div style="font-size:26px">🔥</div>
+          </div>
+          <div class="streak-info">
+            <div class="streak-num" id="lib-streak">0</div>
+            <div class="streak-label">Day Streak</div>
+            <div class="streak-sub">Keep reading every day!</div>
+          </div>
         </div>
       </div>
 
-      <!-- Already loaded books from cache -->
-      <div id="loadedBooksSection" style="display:none">
-        <div class="section-title" style="margin-top:8px">✅ Cached (available offline)</div>
-        <div id="loadedBookList"></div>
+      <div class="section-hd">
+        <h2>📚 Your Books</h2>
+        <button class="text-btn" id="refreshBtn" onclick="App.fetchBooks()">Refresh</button>
+      </div>
+
+      <div id="bookList">
+        <div class="loading-box"><div class="spinner"></div>Loading from GitHub…</div>
       </div>
     </div>
   </div>
 
-  <!-- ═══════════════════════════════ READER VIEW ═══════════════════════════════ -->
+  <!-- ═══════════════════ READER ═══════════════════ -->
   <div class="view" id="view-reader">
-    <div class="reader-header">
-      <div style="display:flex;align-items:center;justify-content:space-between">
-        <div style="min-width:0;flex:1">
-          <div class="reader-book-title" id="reader-book-title">No book selected</div>
-          <div class="reader-chunk-info" id="reader-chunk-info"></div>
+
+    <!-- tap-to-reveal overlay -->
+    <div class="reader-overlay" id="readerOverlay">
+      <div class="reader-topbar" id="readerTop">
+        <div class="reader-top-row">
+          <button class="icon-btn" onclick="App.go('library')" style="flex-shrink:0">←</button>
+          <div class="reader-book-name" id="rdrTitle">—</div>
+          <div class="reader-chunk-lbl" id="rdrChunkLbl"></div>
         </div>
-        <button class="btn btn-outline" id="changeBookBtn" onclick="app.showView('library')" style="width:auto;padding:8px 14px;font-size:13px;flex-shrink:0;margin-left:10px">📚 Library</button>
+        <div class="reader-prog-track" style="margin-top:10px"><div class="reader-prog-fill" id="rdrProg" style="width:0%"></div></div>
       </div>
-      <div style="margin-top:10px">
-        <div class="progress-wrap"><div class="progress-bar" id="reader-progress-bar" style="width:0%"></div></div>
+
+      <div class="reader-bottom" id="readerBottom">
+        <!-- Slider -->
+        <div class="slider-row">
+          <div class="slider-label">📏 Sentences</div>
+          <input type="range" id="sentSlider" min="1" max="20" value="5" oninput="App.onSlider(this.value)" />
+          <div class="slider-val" id="sliderVal">5</div>
+        </div>
+        <button class="btn btn-green" id="doneBtn" onclick="App.markDone()">✅ Done — Next Chunk</button>
+        <div class="nav-row">
+          <button class="btn btn-ghost" id="prevBtn" onclick="App.navigate(-1)">← Prev</button>
+          <button class="btn btn-ghost" id="nextBtn" onclick="App.navigate(1)">Next →</button>
+        </div>
       </div>
     </div>
 
-    <div class="reading-area" id="readingArea">
-      <div class="no-book" id="no-book-msg">
-        <div class="icon">📖</div>
-        <h3>Pick a book to start reading</h3>
-        <p>Go to the Library tab, tap a book to download it, then come back here.</p>
+    <!-- actual reading area -->
+    <div class="reading-canvas" id="readingCanvas" onclick="App.toggleControls()">
+      <div class="reader-empty" id="rdrEmpty">
+        <div class="big-icon">📖</div>
+        <h3>Nothing to read yet</h3>
+        <p>Go to Library, pick a book, and tap Read.</p>
       </div>
-    </div>
-
-    <div class="reader-controls" id="reader-controls" style="display:none">
-      <div class="xp-badge">⭐ +10 XP per chunk</div>
-      <button class="btn btn-green" id="doneBtn">✅ Done Reading This Chunk</button>
-      <div class="chunk-nav">
-        <button class="btn btn-outline" id="prevChunkBtn">← Prev</button>
-        <button class="btn btn-outline" id="nextChunkBtn">Next →</button>
-      </div>
+      <div class="reading-text" id="rdrText" style="display:none"></div>
     </div>
   </div>
 
-  <!-- ═══════════════════════════════ STATS VIEW ═══════════════════════════════ -->
+  <!-- ═══════════════════ STATS ═══════════════════ -->
   <div class="view" id="view-stats">
     <div class="header">
-      <h1>Your <span>Stats</span></h1>
-      <div class="theme-btn" id="themeBtnStats">🌙</div>
+      <div class="logo">Your <span>Stats</span></div>
+      <button class="icon-btn" id="themeBtnStats">🌙</button>
     </div>
     <div class="scroll">
-      <div class="streak-hero">
-        <div class="streak-fire">🔥</div>
-        <div class="streak-number" id="stats-streak">0</div>
-        <div class="streak-label">Day Streak · Longest: <span id="stats-longest">0</span> days</div>
-      </div>
-      <div class="stat-grid">
-        <div class="stat-card"><div class="stat-val" id="stats-xp">0</div><div class="stat-sub">Total XP</div></div>
-        <div class="stat-card"><div class="stat-val" id="stats-pages">0</div><div class="stat-sub">Est. Pages</div></div>
-        <div class="stat-card"><div class="stat-val" id="stats-chunks">0</div><div class="stat-sub">Chunks Done</div></div>
-        <div class="stat-card"><div class="stat-val" id="stats-books">0</div><div class="stat-sub">Books Started</div></div>
-      </div>
+      <div class="stats-scroll">
 
-      <div class="section-title">Activity — Last 28 Days</div>
-      <div class="card" style="padding:16px">
-        <div class="cal-labels">
-          <div class="cal-label">S</div><div class="cal-label">M</div><div class="cal-label">T</div>
-          <div class="cal-label">W</div><div class="cal-label">T</div><div class="cal-label">F</div>
-          <div class="cal-label">S</div>
-        </div>
-        <div class="cal-grid" id="calGrid"></div>
-      </div>
-
-      <div class="section-title">Badges</div>
-      <div class="badge-grid" id="badgeGrid"></div>
-
-      <div class="section-title" style="margin-top:20px">Settings</div>
-      <div class="card">
-        <div class="settings-row">
-          <div><div class="settings-label">Chunk Mode</div><div class="settings-sub">How to split reading</div></div>
-          <select id="chunkMode" onchange="app.saveSettings()">
-            <option value="sentences">Sentences</option>
-            <option value="words">Words</option>
-          </select>
-        </div>
-        <div class="settings-row">
-          <div><div class="settings-label">Chunk Size</div><div class="settings-sub" id="chunkAmountSub">Sentences per chunk</div></div>
-          <div class="num-input">
-            <button onclick="app.changeChunk(-1)">−</button>
-            <span id="chunkAmountDisplay">10</span>
-            <button onclick="app.changeChunk(1)">+</button>
+        <div class="streak-banner" style="margin-bottom:16px">
+          <div style="font-size:26px">🔥</div>
+          <div class="streak-info">
+            <div class="streak-num" id="stStreak">0</div>
+            <div class="streak-label">Day Streak</div>
+            <div class="streak-sub">Longest: <span id="stLongest">0</span> days</div>
           </div>
         </div>
-        <div class="settings-row">
-          <div><div class="settings-label">Daily Goal</div><div class="settings-sub">Chunks per day</div></div>
-          <div class="num-input">
-            <button onclick="app.changeGoal(-1)">−</button>
-            <span id="goalDisplay">3</span>
-            <button onclick="app.changeGoal(1)">+</button>
+
+        <div class="stat-grid">
+          <div class="stat-tile"><div class="stat-num" id="stXp">0</div><div class="stat-lbl">Total XP</div></div>
+          <div class="stat-tile"><div class="stat-num" id="stPages">0</div><div class="stat-lbl">Est. Pages</div></div>
+          <div class="stat-tile"><div class="stat-num" id="stChunks">0</div><div class="stat-lbl">Chunks Done</div></div>
+          <div class="stat-tile"><div class="stat-num" id="stBooks">0</div><div class="stat-lbl">Books Read</div></div>
+        </div>
+
+        <div class="section-title">Last 28 Days</div>
+        <div class="cal-wrap">
+          <div class="cal-day-labels">
+            <div class="cal-dl">S</div><div class="cal-dl">M</div><div class="cal-dl">T</div>
+            <div class="cal-dl">W</div><div class="cal-dl">T</div><div class="cal-dl">F</div><div class="cal-dl">S</div>
           </div>
+          <div class="cal-days" id="calGrid"></div>
         </div>
-        <div class="divider"></div>
-        <div class="settings-row">
-          <div><div class="settings-label">Export Backup</div><div class="settings-sub">Save your progress</div></div>
-          <button class="btn btn-outline" onclick="app.exportData()" style="width:auto;padding:8px 14px;font-size:13px">💾 Export</button>
-        </div>
-        <div class="settings-row">
-          <div><div class="settings-label">Import Backup</div><div class="settings-sub">Restore progress</div></div>
-          <label style="cursor:pointer">
-            <input type="file" accept=".json" style="display:none" onchange="app.importData(event)" />
-            <span class="btn btn-outline" style="width:auto;padding:8px 14px;font-size:13px;display:inline-flex">📂 Import</span>
-          </label>
-        </div>
-        <div class="settings-row">
-          <div><div class="settings-label">Clear Cached Books</div><div class="settings-sub">Free up storage</div></div>
-          <button class="btn btn-danger" onclick="app.clearCache()" style="width:auto;padding:8px 14px;font-size:13px">🗑️ Clear</button>
-        </div>
-        <div class="settings-row">
-          <div><div class="settings-label">Reset All Data</div><div class="settings-sub">Wipes everything</div></div>
-          <button class="btn btn-danger" onclick="app.resetAll()" style="width:auto;padding:8px 14px;font-size:13px">⚠️ Reset</button>
+
+        <div class="section-title">Badges</div>
+        <div class="badge-grid" id="badgeGrid"></div>
+
+        <div class="section-title">Settings</div>
+        <div class="settings-card">
+          <div class="s-row">
+            <div><div class="s-lbl">Default sentences / chunk</div><div class="s-sub">You can also adjust while reading</div></div>
+            <div class="s-right" id="settingChunkVal">5</div>
+          </div>
+          <div class="s-row">
+            <div><div class="s-lbl">Daily Goal</div><div class="s-sub">Chunks per day</div></div>
+            <div style="display:flex;align-items:center;gap:10px">
+              <button onclick="App.changeGoal(-1)" class="icon-btn" style="font-size:18px">−</button>
+              <span class="s-right" id="goalVal">3</span>
+              <button onclick="App.changeGoal(1)" class="icon-btn" style="font-size:18px">+</button>
+            </div>
+          </div>
+          <div class="s-row">
+            <div><div class="s-lbl">Clear Cached Books</div><div class="s-sub">Re-download from GitHub</div></div>
+            <button class="btn btn-ghost" onclick="App.clearCache()" style="width:auto;padding:8px 14px;font-size:13px">🗑️ Clear</button>
+          </div>
+          <div class="s-row">
+            <div><div class="s-lbl">Export Progress</div><div class="s-sub">Download backup JSON</div></div>
+            <button class="btn btn-ghost" onclick="App.exportData()" style="width:auto;padding:8px 14px;font-size:13px">💾 Export</button>
+          </div>
+          <div class="s-row">
+            <div><div class="s-lbl">Import Backup</div></div>
+            <label style="cursor:pointer">
+              <input type="file" accept=".json" style="display:none" onchange="App.importData(event)"/>
+              <span class="btn btn-ghost" style="width:auto;padding:8px 14px;font-size:13px;display:inline-flex">📂 Import</span>
+            </label>
+          </div>
+          <div class="s-row">
+            <div><div class="s-lbl" style="color:var(--red)">Reset Everything</div></div>
+            <button class="btn btn-red" onclick="App.resetAll()" style="width:auto;padding:8px 14px;font-size:13px">⚠️ Reset</button>
+          </div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- BOTTOM NAV -->
+  <!-- NAV -->
   <nav class="nav">
-    <button class="nav-btn active" id="nav-library" onclick="app.showView('library')">
+    <button class="nav-btn active" id="nav-library" onclick="App.go('library')">
       <svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
       Library
     </button>
-    <button class="nav-btn" id="nav-reader" onclick="app.showView('reader')">
+    <button class="nav-btn" id="nav-reader" onclick="App.go('reader')">
       <svg viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
       Read
     </button>
-    <button class="nav-btn" id="nav-stats" onclick="app.showView('stats')">
+    <button class="nav-btn" id="nav-stats" onclick="App.go('stats')">
       <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
       Stats
     </button>
   </nav>
-
-  <div class="toast" id="toast"></div>
-  <div class="xp-burst" id="xpBurst">+10 ⭐</div>
 </div>
 
 <script>
-// ═══════════════════════ CONFIG ═══════════════════════
-const GITHUB_OWNER = 'PhaNtoM-GHosT-11101';
-const GITHUB_REPO  = 'reading-habit-app';
-const GITHUB_BOOKS_PATH = 'books';
-const RAW_BASE = `https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/main/${GITHUB_BOOKS_PATH}`;
-const API_BASE = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_BOOKS_PATH}`;
+// ═══════════════════════════════════════════════
+//  CONFIG
+// ═══════════════════════════════════════════════
+const GH_OWNER = 'PhaNtoM-GHosT-11101';
+const GH_REPO  = 'reading-habit-app';
+const GH_PATH  = 'books';
+const GH_API   = `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${GH_PATH}`;
+const GH_RAW   = `https://raw.githubusercontent.com/${GH_OWNER}/${GH_REPO}/main/${GH_PATH}`;
 
-const BOOK_EMOJIS = ['📗','📘','📙','📕','📓','📔','📒','📖','🗒️','📃'];
+const EMOJIS = ['📗','📘','📙','📕','📓','📔','📒','📖','📃','🗒️'];
 
 const BADGES = [
-  { id: 'first_chunk', icon: '📖', name: 'First Read',    check: s => s.totalChunks >= 1 },
-  { id: 'streak_3',   icon: '🔥', name: '3-Day Fire',    check: s => s.streak >= 3 },
-  { id: 'streak_7',   icon: '🏆', name: 'Week Warrior',  check: s => s.streak >= 7 },
-  { id: 'streak_30',  icon: '💎', name: 'Diamond',       check: s => s.streak >= 30 },
-  { id: 'pages_10',   icon: '📄', name: '10 Pages',      check: s => s.totalPages >= 10 },
-  { id: 'pages_100',  icon: '📚', name: 'Centurion',     check: s => s.totalPages >= 100 },
-  { id: 'chunks_50',  icon: '⚡', name: 'Speedster',     check: s => s.totalChunks >= 50 },
-  { id: 'xp_500',     icon: '⭐', name: 'Star Reader',   check: s => s.xp >= 500 },
-  { id: 'books_3',    icon: '🌟', name: 'Collector',     check: s => s.booksStarted >= 3 },
+  { id:'first',    icon:'📖', name:'First Chunk',   check:s=>s.chunks>=1 },
+  { id:'s3',       icon:'🔥', name:'3-Day Streak',  check:s=>s.streak>=3 },
+  { id:'s7',       icon:'🏆', name:'Week Warrior',  check:s=>s.streak>=7 },
+  { id:'s30',      icon:'💎', name:'Diamond',       check:s=>s.streak>=30 },
+  { id:'p10',      icon:'📄', name:'10 Pages',      check:s=>s.pages>=10 },
+  { id:'p100',     icon:'📚', name:'Centurion',     check:s=>s.pages>=100 },
+  { id:'c50',      icon:'⚡', name:'Speedster',     check:s=>s.chunks>=50 },
+  { id:'xp500',    icon:'⭐', name:'Star Reader',   check:s=>s.xp>=500 },
+  { id:'b3',       icon:'🌟', name:'Collector',     check:s=>s.booksStarted>=3 },
 ];
 
-// ═══════════════════════ APP ═══════════════════════
-const app = (() => {
+// ═══════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════
+let S = {
+  books:    {},   // filename → { title, emoji, text }
+  progress: {},   // filename → { cur, done:[] }
+  stats: { xp:0, chunks:0, pages:0, streak:0, longest:0, booksStarted:0,
+           lastDay:null, days:[], dailyDone:{}, goal:3 },
+  settings: { sentences:5, theme:'dark', active:null },
+  badges: [],
+};
 
-  let state = {
-    books: {},        // { filename: { title, emoji, text, chunkCount } } — parsed book cache
-    progress: {},     // { filename: { currentChunk, doneChunks: [] } }
-    stats: { xp: 0, totalChunks: 0, totalPages: 0, streak: 0, longestStreak: 0,
-             booksStarted: 0, lastReadDate: null, readDays: [], dailyChunks: {}, dailyGoal: 3 },
-    settings: { chunkMode: 'sentences', chunkAmount: 10, theme: 'dark', activeBook: null },
-    unlockedBadges: [],
-  };
+function save() {
+  try { localStorage.setItem('ph4', JSON.stringify(S)); } catch(e){}
+}
+function load() {
+  try { const d=localStorage.getItem('ph4'); if(d) S={...S,...JSON.parse(d)}; } catch(e){}
+}
 
-  // ── PERSIST ──
-  function save() {
-    try { localStorage.setItem('pagehabit_v3', JSON.stringify(state)); } catch(e) {}
+// ═══════════════════════════════════════════════
+//  UTILS
+// ═══════════════════════════════════════════════
+function today() { return new Date().toISOString().slice(0,10); }
+
+function toast(msg, ms=2500) {
+  const el=document.getElementById('toast');
+  el.textContent=msg; el.classList.add('show');
+  clearTimeout(el._t); el._t=setTimeout(()=>el.classList.remove('show'),ms);
+}
+
+function bar(pct) {
+  const el=document.getElementById('topBar');
+  el.style.width = pct ? pct+'%' : '0';
+}
+
+function xpPop() {
+  const el=document.getElementById('xpPop');
+  el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'),1000);
+}
+
+function updateStreak() {
+  const t=today(), days=S.stats.days||[];
+  if(!days.includes(t)) days.push(t);
+  S.stats.days=days; S.stats.lastDay=t;
+  let streak=0, d=new Date();
+  while(true){
+    const ds=d.toISOString().slice(0,10);
+    if(days.includes(ds)){streak++;d.setDate(d.getDate()-1);}else break;
   }
-  function load() {
-    try {
-      const d = localStorage.getItem('pagehabit_v3');
-      if (d) state = { ...state, ...JSON.parse(d) };
-    } catch(e) {}
+  S.stats.streak=streak;
+  if(streak>(S.stats.longest||0)) S.stats.longest=streak;
+  save();
+}
+
+function checkBadges() {
+  BADGES.forEach(b=>{
+    const st={...S.stats, chunks:S.stats.chunks, pages:S.stats.pages, xp:S.stats.xp, streak:S.stats.streak, booksStarted:S.stats.booksStarted};
+    if(!S.badges.includes(b.id) && b.check(st)){
+      S.badges.push(b.id);
+      setTimeout(()=>toast(`🏆 Badge: ${b.name}!`),700);
+    }
+  });
+}
+
+// ═══════════════════════════════════════════════
+//  EPUB PARSER
+// ═══════════════════════════════════════════════
+async function parseEpub(buf) {
+  const zip = await JSZip.loadAsync(buf);
+
+  // Find OPF
+  let opfPath='';
+  const cont = await zip.file('META-INF/container.xml')?.async('string');
+  if(cont){ const m=cont.match(/full-path="([^"]+\.opf)"/i); if(m) opfPath=m[1]; }
+  if(!opfPath){ opfPath=Object.keys(zip.files).find(f=>f.endsWith('.opf'))||''; }
+
+  let opfDir = opfPath.includes('/') ? opfPath.slice(0,opfPath.lastIndexOf('/')+1) : '';
+  let spine=[];
+
+  if(opfPath){
+    const opf=await zip.file(opfPath)?.async('string')||'';
+    const items={};
+    const mr=/<item[^>]+id="([^"]+)"[^>]+href="([^"]+)"[^>]*>/gi; let m;
+    while((m=mr.exec(opf))!==null) items[m[1]]=m[2];
+    const sr=/<itemref[^>]+idref="([^"]+)"/gi;
+    while((m=sr.exec(opf))!==null){ const h=items[m[1]]; if(h) spine.push(opfDir+h); }
   }
+  if(!spine.length) spine=Object.keys(zip.files).filter(f=>/\.(html|xhtml|htm)$/i.test(f)).sort();
 
-  // ── DATE UTILS ──
-  function today() { return new Date().toISOString().split('T')[0]; }
-
-  function updateStreak() {
-    const t = today();
-    const rd = state.stats.readDays || [];
-    if (!rd.includes(t)) rd.push(t);
-    state.stats.readDays = rd;
-    state.stats.lastReadDate = t;
-    let streak = 0, d = new Date();
-    while (true) {
-      const ds = d.toISOString().split('T')[0];
-      if (rd.includes(ds)) { streak++; d.setDate(d.getDate() - 1); } else break;
-    }
-    state.stats.streak = streak;
-    if (streak > (state.stats.longestStreak || 0)) state.stats.longestStreak = streak;
-    save();
+  let out='';
+  for(const fp of spine){
+    const f=zip.file(fp)||zip.file(fp.replace(/^\//,''));
+    if(!f) continue;
+    const html=await f.async('string');
+    const clean=html
+      .replace(/<style[^>]*>[\s\S]*?<\/style>/gi,'')
+      .replace(/<script[^>]*>[\s\S]*?<\/script>/gi,'')
+      .replace(/<br\s*\/?>/gi,'\n')
+      .replace(/<\/p>/gi,'\n\n')
+      .replace(/<[^>]+>/g,' ')
+      .replace(/&nbsp;/g,' ').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&#39;/g,"'")
+      .replace(/[ \t]+/g,' ').replace(/\n{3,}/g,'\n\n').trim();
+    if(clean.length>50) out+=clean+'\n\n';
   }
+  return out.trim();
+}
 
-  // ── EPUB PARSING ──
-  async function parseEpub(arrayBuffer, filename) {
-    const zip = await JSZip.loadAsync(arrayBuffer);
-
-    // 1. Find OPF file via container.xml
-    let opfPath = '';
-    const containerXml = await zip.file('META-INF/container.xml')?.async('string');
-    if (containerXml) {
-      const m = containerXml.match(/full-path="([^"]+\.opf)"/i);
-      if (m) opfPath = m[1];
-    }
-    if (!opfPath) {
-      // Fallback: search for .opf
-      const opfFile = Object.keys(zip.files).find(f => f.endsWith('.opf'));
-      opfPath = opfFile || '';
-    }
-
-    // 2. Parse OPF for spine order
-    let opfDir = opfPath.includes('/') ? opfPath.substring(0, opfPath.lastIndexOf('/') + 1) : '';
-    let spineFiles = [];
-
-    if (opfPath) {
-      const opfXml = await zip.file(opfPath)?.async('string');
-      if (opfXml) {
-        // Get manifest items
-        const manifestItems = {};
-        const manifestRegex = /<item[^>]+id="([^"]+)"[^>]+href="([^"]+)"[^>]*>/gi;
-        let mm;
-        while ((mm = manifestRegex.exec(opfXml)) !== null) {
-          manifestItems[mm[1]] = mm[2];
-        }
-        // Get spine order
-        const spineRegex = /<itemref[^>]+idref="([^"]+)"/gi;
-        let sm;
-        while ((sm = spineRegex.exec(opfXml)) !== null) {
-          const href = manifestItems[sm[1]];
-          if (href) spineFiles.push(opfDir + href);
-        }
-      }
-    }
-
-    // Fallback: grab all html/xhtml files
-    if (spineFiles.length === 0) {
-      spineFiles = Object.keys(zip.files).filter(f => /\.(html|xhtml|htm)$/i.test(f)).sort();
-    }
-
-    // 3. Extract text from each HTML file
-    let fullText = '';
-    for (const filePath of spineFiles) {
-      const file = zip.file(filePath) || zip.file(filePath.replace(/^\//, ''));
-      if (!file) continue;
-      const html = await file.async('string');
-      // Strip HTML tags, decode entities
-      const cleaned = html
-        .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
-        .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
-        .replace(/<[^>]+>/g, ' ')
-        .replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').replace(/&lt;/g, '<')
-        .replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'")
-        .replace(/\s{3,}/g, '\n\n').trim();
-      if (cleaned.length > 50) fullText += cleaned + '\n\n';
-    }
-
-    return fullText.trim();
+// ═══════════════════════════════════════════════
+//  CHUNKING
+// ═══════════════════════════════════════════════
+function chunk(text, n) {
+  if(!text) return [];
+  const sents = text.match(/[^.!?…]+(?:[.!?…]+\s*)+/g) || [text];
+  const chunks=[];
+  for(let i=0;i<sents.length;i+=n){
+    const c=sents.slice(i,i+n).join('').trim();
+    if(c.length>10) chunks.push(c);
   }
+  return chunks;
+}
 
-  // ── CHUNKING ──
-  function getChunks(text) {
-    if (!text) return [];
-    const mode = state.settings.chunkMode;
-    const amount = state.settings.chunkAmount;
+// ═══════════════════════════════════════════════
+//  RENDER HELPERS
+// ═══════════════════════════════════════════════
+function renderLibrary() {
+  document.getElementById('lib-streak').textContent = S.stats.streak||0;
+  document.getElementById('xpPill').textContent = `⭐ ${S.stats.xp||0} XP`;
+}
 
-    if (mode === 'sentences') {
-      // Smart sentence splitter
-      const sentences = text.match(/[^.!?…]+(?:[.!?…]+(?:\s|$))+/g) || [text];
-      const chunks = [];
-      for (let i = 0; i < sentences.length; i += amount) {
-        const chunk = sentences.slice(i, i + amount).join('').trim();
-        if (chunk.length > 10) chunks.push(chunk);
-      }
-      return chunks;
-    } else {
-      // Words
-      const words = text.split(/\s+/).filter(Boolean);
-      const chunks = [];
-      for (let i = 0; i < words.length; i += amount) {
-        chunks.push(words.slice(i, i + amount).join(' '));
-      }
-      return chunks;
-    }
-  }
+function renderReader() {
+  const ab = S.settings.active;
+  const book = ab ? S.books[ab] : null;
+  const empty = document.getElementById('rdrEmpty');
+  const text  = document.getElementById('rdrText');
+  const controls = document.getElementById('reader-controls');
 
-  // ── GITHUB FETCH ──
-  async function fetchGithubBooks() {
-    const el = document.getElementById('githubBookList');
-    el.innerHTML = `<div class="loading-state"><div class="spinner"></div><p>Fetching books from GitHub…</p></div>`;
-    document.getElementById('refreshBtn').disabled = true;
-
-    try {
-      const res = await fetch(API_BASE, { headers: { 'Accept': 'application/vnd.github.v3+json' } });
-      if (!res.ok) throw new Error('GitHub API error: ' + res.status);
-      const files = await res.json();
-      const epubs = files.filter(f => f.name.toLowerCase().endsWith('.epub'));
-
-      if (epubs.length === 0) {
-        el.innerHTML = `<div class="empty-state">📂 No EPUB files found in the /books/ folder yet.<br><br>Upload .epub files to your GitHub repo at <code>books/</code></div>`;
-        document.getElementById('refreshBtn').disabled = false;
-        return;
-      }
-
-      renderGithubBooks(epubs);
-    } catch(e) {
-      el.innerHTML = `<div class="empty-state">❌ Couldn't load from GitHub.<br><small>${e.message}</small><br><br>Check your connection and try refreshing.</div>`;
-    }
-    document.getElementById('refreshBtn').disabled = false;
+  if(!book) {
+    empty.style.display='flex'; text.style.display='none';
+    document.getElementById('rdrTitle').textContent='No book selected';
+    document.getElementById('rdrChunkLbl').textContent='';
+    document.getElementById('rdrProg').style.width='0%';
+    return;
   }
 
-  function renderGithubBooks(files) {
-    const el = document.getElementById('githubBookList');
-    el.innerHTML = '';
+  empty.style.display='none'; text.style.display='block';
 
-    files.forEach((f, i) => {
-      const isLoaded = !!state.books[f.name];
-      const emoji = BOOK_EMOJIS[i % BOOK_EMOJIS.length];
-      const title = f.name.replace(/\.epub$/i, '').replace(/[-_]/g, ' ').replace(/\s+/g, ' ').trim();
-      const sizeMB = (f.size / 1024 / 1024).toFixed(1);
-      const prog = state.progress[f.name];
-      const chunks = isLoaded ? getChunks(state.books[f.name].text) : [];
-      const done = prog?.doneChunks?.length || 0;
-      const pct = chunks.length > 0 ? Math.round((done / chunks.length) * 100) : 0;
+  const n   = S.settings.sentences||5;
+  const chunks = chunk(book.text, n);
+  const prog = S.progress[ab]||{cur:0,done:[]};
+  if(!S.progress[ab]) S.progress[ab]=prog;
+  const ci  = Math.min(prog.cur||0, chunks.length-1);
+  const pct = chunks.length ? Math.round(((ci+1)/chunks.length)*100) : 0;
+  const c   = chunks[ci]||'';
 
-      const div = document.createElement('div');
-      div.className = 'github-book-item';
-      div.id = 'gbi-' + f.name.replace(/[^a-z0-9]/gi, '_');
-      div.innerHTML = `
-        <div class="gbi-emoji">${emoji}</div>
-        <div class="gbi-info" style="min-width:0">
-          <div class="gbi-title">${title}</div>
-          <div class="gbi-sub">${sizeMB} MB · EPUB</div>
-          ${isLoaded
-            ? `<div><span class="gbi-badge loaded">✅ Ready · ${pct}% done</span></div>
-               <div class="progress-wrap" style="margin-top:6px"><div class="progress-bar" style="width:${pct}%"></div></div>`
-            : `<div><span class="gbi-badge">☁️ Tap to download</span></div>`
-          }
-          <div class="dl-progress" id="dl-${f.name.replace(/[^a-z0-9]/gi,'_')}"><div class="dl-progress-bar"></div></div>
+  document.getElementById('rdrTitle').textContent = `${book.emoji} ${book.title}`;
+  document.getElementById('rdrChunkLbl').textContent = `${ci+1} / ${chunks.length}`;
+  document.getElementById('rdrProg').style.width = pct+'%';
+
+  // Format paragraphs
+  text.innerHTML = c.split('\n\n').map(p=>`<p class="fade-up">${p.trim()}</p>`).filter(p=>p.length>7).join('') || `<p>${c}</p>`;
+  document.getElementById('readingCanvas').scrollTop=0;
+
+  const isDone=(prog.done||[]).includes(ci);
+  const btn=document.getElementById('doneBtn');
+  btn.textContent = isDone ? '↩️ Already done — Next?' : '✅ Done — Next Chunk';
+  btn.style.background = isDone ? 'var(--surface2)' : 'var(--green)';
+  btn.style.color = isDone ? 'var(--text2)' : '#000';
+
+  document.getElementById('prevBtn').disabled = ci===0;
+  document.getElementById('nextBtn').disabled = ci>=chunks.length-1;
+
+  // Sync slider
+  document.getElementById('sentSlider').value = n;
+  document.getElementById('sliderVal').textContent = n;
+}
+
+function renderStats() {
+  document.getElementById('stStreak').textContent  = S.stats.streak||0;
+  document.getElementById('stLongest').textContent = S.stats.longest||0;
+  document.getElementById('stXp').textContent      = S.stats.xp||0;
+  document.getElementById('stPages').textContent   = S.stats.pages||0;
+  document.getElementById('stChunks').textContent  = S.stats.chunks||0;
+  document.getElementById('stBooks').textContent   = S.stats.booksStarted||0;
+  document.getElementById('goalVal').textContent   = S.stats.goal||3;
+  document.getElementById('settingChunkVal').textContent = (S.settings.sentences||5)+' sentences';
+
+  // Calendar
+  const grid=document.getElementById('calGrid'); grid.innerHTML='';
+  const days=[]; const now=new Date();
+  for(let i=27;i>=0;i--){ const d=new Date(now); d.setDate(d.getDate()-i); days.push(d.toISOString().slice(0,10)); }
+  const rd=S.stats.days||[], t=today();
+  days.forEach(d=>{
+    const el=document.createElement('div');
+    el.className='cal-d'+(rd.includes(d)?' on':'')+(d===t?' now':'');
+    grid.appendChild(el);
+  });
+
+  // Badges
+  document.getElementById('badgeGrid').innerHTML=BADGES.map(b=>{
+    const on=b.check({...S.stats,chunks:S.stats.chunks,pages:S.stats.pages,xp:S.stats.xp,streak:S.stats.streak,booksStarted:S.stats.booksStarted});
+    return `<div class="badge-tile ${on?'on':''}"><div class="badge-ico">${b.icon}</div><div class="badge-lbl">${b.name}</div></div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════
+//  GITHUB FETCH
+// ═══════════════════════════════════════════════
+async function fetchBooksFromGH() {
+  const el=document.getElementById('bookList');
+  el.innerHTML='<div class="loading-box"><div class="spinner"></div>Loading books…</div>';
+  try {
+    const res=await fetch(GH_API,{headers:{'Accept':'application/vnd.github.v3+json'}});
+    if(!res.ok) throw new Error(res.status);
+    const files=await res.json();
+    const epubs=files.filter(f=>f.name.toLowerCase().endsWith('.epub'));
+    if(!epubs.length){ el.innerHTML='<div class="empty-msg">No EPUB files found in /books/ yet.<br>Upload some to your GitHub repo!</div>'; return; }
+    renderBookList(epubs);
+  } catch(e){
+    el.innerHTML=`<div class="empty-msg">❌ Couldn't load from GitHub.<br><small>${e.message}</small></div>`;
+  }
+}
+
+function renderBookList(files) {
+  const el=document.getElementById('bookList');
+  el.innerHTML='';
+  files.forEach((f,i)=>{
+    const cached=!!S.books[f.name];
+    const emoji=EMOJIS[i%EMOJIS.length];
+    const title=f.name.replace(/\.epub$/i,'').replace(/[-_]/g,' ').trim();
+    const sizeMB=(f.size/1024/1024).toFixed(1);
+    const prog=S.progress[f.name];
+    const chunks=cached?chunk(S.books[f.name].text, S.settings.sentences||5):[];
+    const done=(prog?.done||[]).length;
+    const pct=chunks.length?Math.round((done/chunks.length)*100):0;
+
+    const div=document.createElement('div');
+    div.className='book-row fade-up';
+    div.innerHTML=`
+      <div class="book-row-inner">
+        <div class="book-emoji">${emoji}</div>
+        <div class="book-info">
+          <div class="book-name">${title}</div>
+          <div class="book-sub">${cached?`${pct}% done · ${chunks.length} chunks`:`${sizeMB} MB · tap Download`}</div>
         </div>
-        <div class="gbi-action">
-          ${isLoaded
-            ? `<button class="btn btn-primary" onclick="app.startReading('${f.name}','${emoji}','${title.replace(/'/g,"\\'")}');event.stopPropagation()" style="width:auto;padding:10px 16px;font-size:13px">📖 Read</button>`
-            : `<button class="btn btn-outline" onclick="app.downloadBook('${f.name}','${emoji}','${title.replace(/'/g,"\\'")}','${f.download_url}');event.stopPropagation()" style="width:auto;padding:10px 16px;font-size:13px" id="dl-btn-${f.name.replace(/[^a-z0-9]/gi,'_')}">⬇️</button>`
-          }
-        </div>`;
-      el.appendChild(div);
-    });
-  }
-
-  async function downloadBook(filename, emoji, title, url) {
-    const safeId = filename.replace(/[^a-z0-9]/gi, '_');
-    const btn = document.getElementById('dl-btn-' + safeId);
-    const dlBar = document.getElementById('dl-' + safeId);
-    const dlBarInner = dlBar?.querySelector('.dl-progress-bar');
-    if (btn) { btn.disabled = true; btn.textContent = '⏳'; }
-    if (dlBar) dlBar.style.display = 'block';
-    showBar(20);
-    toast('⬇️ Downloading ' + title + '…');
-
-    try {
-      const res = await fetch(url);
-      if (!res.ok) throw new Error('Download failed');
-      const buffer = await res.arrayBuffer();
-      showBar(60);
-      if (dlBarInner) dlBarInner.style.width = '60%';
-      toast('📖 Parsing EPUB…');
-
-      const text = await parseEpub(buffer, filename);
-      if (!text || text.length < 100) throw new Error('Could not extract text from this EPUB');
-
-      showBar(90);
-      if (dlBarInner) dlBarInner.style.width = '100%';
-
-      state.books[filename] = { title, emoji, text };
-      if (!state.progress[filename]) state.progress[filename] = { currentChunk: 0, doneChunks: [] };
-      if (!state.settings.activeBook) state.settings.activeBook = filename;
-      state.stats.booksStarted = Object.keys(state.books).length;
-      save();
-
-      showBar(0);
-      if (dlBar) dlBar.style.display = 'none';
-      toast('✅ ' + title + ' is ready to read!', 3000);
-
-      // Refresh the list
-      fetchGithubBooks();
-      renderLoadedBooks();
-    } catch(e) {
-      if (btn) { btn.disabled = false; btn.textContent = '⬇️'; }
-      if (dlBar) dlBar.style.display = 'none';
-      showBar(0);
-      toast('❌ ' + e.message);
-    }
-  }
-
-  function startReading(filename, emoji, title) {
-    state.settings.activeBook = { filename, emoji, title };
-    save();
-    showView('reader');
-  }
-
-  function renderLoadedBooks() {
-    const section = document.getElementById('loadedBooksSection');
-    const list = document.getElementById('loadedBookList');
-    const keys = Object.keys(state.books);
-    if (keys.length === 0) { section.style.display = 'none'; return; }
-    section.style.display = 'block';
-    list.innerHTML = keys.map(fn => {
-      const b = state.books[fn];
-      const chunks = getChunks(b.text);
-      const prog = state.progress[fn] || { doneChunks: [] };
-      const done = prog.doneChunks?.length || 0;
-      const pct = chunks.length > 0 ? Math.round((done / chunks.length) * 100) : 0;
-      return `<div class="book-card" onclick="app.startReading('${fn}','${b.emoji}','${b.title.replace(/'/g,"\\'")}')">
-        <div style="display:flex;gap:12px;align-items:center">
-          <div style="font-size:32px">${b.emoji}</div>
-          <div style="flex:1;min-width:0">
-            <div class="book-title" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${b.title}</div>
-            <div class="book-meta">${chunks.length} chunks · tap to read</div>
-            <div class="progress-wrap"><div class="progress-bar" style="width:${pct}%"></div></div>
-            <div class="book-pct"><span>${pct}% done</span><span>${done}/${chunks.length}</span></div>
-          </div>
+      </div>
+      ${cached?`
+        <div class="progress-track"><div class="progress-fill" style="width:${pct}%"></div></div>
+        <div class="progress-row"><span>${done}/${chunks.length} chunks</span><span>${pct}%</span></div>
+        <div class="book-actions">
+          <button class="btn btn-primary" onclick="App.startRead('${f.name}','${emoji}','${title.replace(/'/g,"\\'")}')">📖 Read Now</button>
         </div>
-      </div>`;
-    }).join('');
-  }
+      `:`
+        <div class="dl-bar" id="dlbar-${i}"></div>
+        <div class="book-actions">
+          <button class="btn btn-primary" id="dlbtn-${i}" onclick="App.download('${f.name}','${emoji}','${title.replace(/'/g,"\\'")}','${f.download_url}',${i})">⬇️ Download</button>
+        </div>
+      `}`;
+    el.appendChild(div);
+  });
+}
 
-  // ── READER ──
-  function renderReader() {
-    const ab = state.settings.activeBook;
-    const noMsg = document.getElementById('no-book-msg');
-    const controls = document.getElementById('reader-controls');
-    const area = document.getElementById('readingArea');
+// ═══════════════════════════════════════════════
+//  APP OBJECT
+// ═══════════════════════════════════════════════
+const App = {
 
-    if (!ab || !state.books[ab.filename]) {
-      noMsg.style.display = 'block'; controls.style.display = 'none';
-      document.getElementById('reader-book-title').textContent = 'No book selected';
-      document.getElementById('reader-chunk-info').textContent = '';
-      document.getElementById('reader-progress-bar').style.width = '0%';
-      return;
+  go(view) {
+    document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+    document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+    document.getElementById('view-'+view).classList.add('active');
+    document.getElementById('nav-'+view).classList.add('active');
+    if(view==='library') { renderLibrary(); fetchBooksFromGH(); }
+    if(view==='reader')  renderReader();
+    if(view==='stats')   renderStats();
+  },
+
+  fetchBooks() {
+    fetchBooksFromGH();
+  },
+
+  async download(filename, emoji, title, url, idx) {
+    const btn=document.getElementById('dlbtn-'+idx);
+    const bar2=document.getElementById('dlbar-'+idx);
+    if(btn){ btn.disabled=true; btn.textContent='⏳ Downloading…'; }
+    if(bar2){ bar2.style.display='block'; bar2.style.width='20%'; }
+    bar(20);
+    try {
+      const res=await fetch(url); if(!res.ok) throw new Error('Download failed');
+      const buf=await res.arrayBuffer();
+      if(bar2) bar2.style.width='60%';
+      bar(60); toast('📖 Parsing EPUB…');
+      const text=await parseEpub(buf);
+      if(!text||text.length<50) throw new Error('No readable text found');
+      if(bar2) bar2.style.width='100%';
+      bar(90);
+      S.books[filename]={title,emoji,text};
+      if(!S.progress[filename]) S.progress[filename]={cur:0,done:[]};
+      if(!S.settings.active) S.settings.active=filename;
+      S.stats.booksStarted=Object.keys(S.books).length;
+      save(); bar(0); toast('✅ Ready to read!',3000);
+      fetchBooksFromGH();
+    } catch(e) {
+      if(btn){btn.disabled=false;btn.textContent='⬇️ Download';}
+      if(bar2) bar2.style.display='none';
+      bar(0); toast('❌ '+e.message);
     }
+  },
 
-    noMsg.style.display = 'none'; controls.style.display = 'block';
+  startRead(filename, emoji, title) {
+    S.settings.active=filename;
+    // Ensure emoji/title stored
+    if(S.books[filename]){ S.books[filename].emoji=emoji; S.books[filename].title=title; }
+    save(); this.go('reader');
+  },
 
-    const book = state.books[ab.filename];
-    const chunks = getChunks(book.text);
-    const prog = state.progress[ab.filename] || { currentChunk: 0, doneChunks: [] };
-    if (!state.progress[ab.filename]) state.progress[ab.filename] = prog;
+  // tap-to-toggle controls
+  toggleControls() {
+    const top=document.getElementById('readerTop');
+    const bot=document.getElementById('readerBottom');
+    const visible=top.classList.contains('visible');
+    if(visible){ top.classList.remove('visible'); bot.classList.remove('visible'); }
+    else { top.classList.add('visible'); bot.classList.add('visible'); }
+  },
 
-    const ci = Math.min(prog.currentChunk || 0, chunks.length - 1);
-    const chunk = chunks[ci] || '';
-    const pct = chunks.length > 0 ? Math.round(((ci + 1) / chunks.length) * 100) : 0;
-    const isDone = (prog.doneChunks || []).includes(ci);
-
-    document.getElementById('reader-book-title').textContent = `${ab.emoji || '📖'} ${ab.title}`;
-    document.getElementById('reader-chunk-info').textContent = `Chunk ${ci + 1} of ${chunks.length}`;
-    document.getElementById('reader-progress-bar').style.width = pct + '%';
-
-    area.innerHTML = `<div class="fade-in" style="max-width:680px;margin:0 auto">${chunk.replace(/\n\n+/g,'</p><p style="margin-top:1.3em">').replace(/\n/g,'<br/>')}</div>`;
-    area.scrollTop = 0;
-
-    const doneBtn = document.getElementById('doneBtn');
-    doneBtn.textContent = isDone ? '✅ Already Read — Reread?' : '✅ Done Reading This Chunk';
-    doneBtn.style.background = isDone ? 'var(--text3)' : 'var(--green)';
-
-    document.getElementById('prevChunkBtn').disabled = ci === 0;
-    document.getElementById('nextChunkBtn').disabled = ci >= chunks.length - 1;
-  }
-
-  function markDone() {
-    const ab = state.settings.activeBook;
-    if (!ab || !state.books[ab.filename]) return;
-    const chunks = getChunks(state.books[ab.filename].text);
-    const prog = state.progress[ab.filename];
-    const ci = prog.currentChunk || 0;
-    const alreadyDone = (prog.doneChunks || []).includes(ci);
-
-    if (!alreadyDone) {
-      if (!prog.doneChunks) prog.doneChunks = [];
-      prog.doneChunks.push(ci);
-      state.stats.xp += 10;
-      state.stats.totalChunks++;
-      const pagesPerChunk = 250 / chunks.length; // rough estimate
-      state.stats.totalPages = Math.round((state.stats.totalPages || 0) + pagesPerChunk);
-      const t = today();
-      if (!state.stats.dailyChunks) state.stats.dailyChunks = {};
-      state.stats.dailyChunks[t] = (state.stats.dailyChunks[t] || 0) + 1;
-      if (state.stats.dailyChunks[t] >= state.stats.dailyGoal) toast('🎉 Daily goal reached!', 3000);
-      updateStreak();
-      checkBadges();
-      xpBurst();
-      save();
-    }
-
-    if (ci < chunks.length - 1) {
-      prog.currentChunk = ci + 1;
-      save(); renderReader();
-      toast('✅ Great job! Keep going.');
-    } else {
-      toast('🎉 You finished this book!', 3000);
-      renderReader();
-    }
-  }
-
-  function navigate(dir) {
-    const ab = state.settings.activeBook;
-    if (!ab || !state.books[ab.filename]) return;
-    const chunks = getChunks(state.books[ab.filename].text);
-    const prog = state.progress[ab.filename];
-    prog.currentChunk = Math.max(0, Math.min(chunks.length - 1, (prog.currentChunk || 0) + dir));
+  onSlider(val) {
+    const n=parseInt(val);
+    S.settings.sentences=n;
+    document.getElementById('sliderVal').textContent=n;
+    document.getElementById('sentSlider').value=n;
     save(); renderReader();
-  }
+    // keep controls visible after slider interaction
+    document.getElementById('readerTop').classList.add('visible');
+    document.getElementById('readerBottom').classList.add('visible');
+  },
 
-  // ── STATS ──
-  function renderStats() {
-    document.getElementById('stats-streak').textContent = state.stats.streak || 0;
-    document.getElementById('stats-longest').textContent = state.stats.longestStreak || 0;
-    document.getElementById('stats-xp').textContent = state.stats.xp || 0;
-    document.getElementById('stats-pages').textContent = state.stats.totalPages || 0;
-    document.getElementById('stats-chunks').textContent = state.stats.totalChunks || 0;
-    document.getElementById('stats-books').textContent = state.stats.booksStarted || 0;
-    document.getElementById('chunkAmountDisplay').textContent = state.settings.chunkAmount;
-    document.getElementById('goalDisplay').textContent = state.stats.dailyGoal || 3;
-    document.getElementById('chunkMode').value = state.settings.chunkMode;
-    updateChunkSub();
-
-    const grid = document.getElementById('calGrid');
-    const days = [], now = new Date();
-    for (let i = 27; i >= 0; i--) {
-      const d = new Date(now); d.setDate(d.getDate() - i);
-      days.push(d.toISOString().split('T')[0]);
+  markDone() {
+    const ab=S.settings.active; if(!ab||!S.books[ab]) return;
+    const chunks=chunk(S.books[ab].text, S.settings.sentences||5);
+    const prog=S.progress[ab]; if(!prog) return;
+    const ci=prog.cur||0;
+    if(!(prog.done||[]).includes(ci)){
+      if(!prog.done) prog.done=[];
+      prog.done.push(ci);
+      S.stats.xp+=10; S.stats.chunks++;
+      S.stats.pages=Math.round((S.stats.pages||0)+(250/chunks.length));
+      const t=today();
+      if(!S.stats.dailyDone) S.stats.dailyDone={};
+      S.stats.dailyDone[t]=(S.stats.dailyDone[t]||0)+1;
+      if(S.stats.dailyDone[t]>=(S.stats.goal||3)) toast('🎉 Daily goal hit!',3000);
+      updateStreak(); checkBadges(); xpPop(); save();
     }
-    const rd = state.stats.readDays || [], t = today();
-    grid.innerHTML = days.map(d => `<div class="cal-day ${rd.includes(d)?'read':''} ${d===t?'today':''}" title="${d}"></div>`).join('');
+    if(ci<chunks.length-1){ prog.cur=ci+1; save(); renderReader(); toast('✅ Next chunk!'); }
+    else { toast('🎉 Book complete!',3000); renderReader(); }
+  },
 
-    document.getElementById('badgeGrid').innerHTML = BADGES.map(b => {
-      const unlocked = b.check(state.stats);
-      return `<div class="badge-item ${unlocked?'unlocked':''}" title="${b.name}">
-        <div class="badge-icon">${b.icon}</div><div class="badge-name">${b.name}</div></div>`;
-    }).join('');
-  }
+  navigate(dir) {
+    const ab=S.settings.active; if(!ab||!S.books[ab]) return;
+    const chunks=chunk(S.books[ab].text,S.settings.sentences||5);
+    const prog=S.progress[ab]||{cur:0,done:[]};
+    prog.cur=Math.max(0,Math.min(chunks.length-1,(prog.cur||0)+dir));
+    S.progress[ab]=prog; save(); renderReader();
+  },
 
-  // ── LIBRARY ──
-  function renderLibrary() {
-    document.getElementById('lib-streak').textContent = state.stats.streak || 0;
-    document.getElementById('xp-chip').textContent = `⭐ ${state.stats.xp || 0} XP`;
-    renderLoadedBooks();
-  }
-
-  // ── HELPERS ──
-  function showView(name) {
-    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-    document.getElementById('view-' + name).classList.add('active');
-    document.getElementById('nav-' + name).classList.add('active');
-    if (name === 'library') { renderLibrary(); fetchGithubBooks(); }
-    if (name === 'reader') renderReader();
-    if (name === 'stats') renderStats();
-  }
-
-  function toast(msg, dur = 2500) {
-    const el = document.getElementById('toast');
-    el.textContent = msg; el.classList.add('show');
-    clearTimeout(el._t); el._t = setTimeout(() => el.classList.remove('show'), dur);
-  }
-
-  function xpBurst() {
-    const el = document.getElementById('xpBurst');
-    el.classList.remove('hide'); el.classList.add('show');
-    setTimeout(() => { el.classList.remove('show'); el.classList.add('hide'); }, 1200);
-  }
-
-  function showBar(pct) {
-    document.getElementById('loadingBar').style.width = pct ? pct + '%' : '0';
-    if (pct === 0) setTimeout(() => document.getElementById('loadingBar').style.width = '0', 300);
-  }
-
-  function checkBadges() {
-    for (const b of BADGES) {
-      if (!state.unlockedBadges.includes(b.id) && b.check(state.stats)) {
-        state.unlockedBadges.push(b.id);
-        setTimeout(() => toast(`🏆 Badge unlocked: ${b.name}!`), 600);
-      }
-    }
-  }
-
-  function updateChunkSub() {
-    document.getElementById('chunkAmountSub').textContent =
-      state.settings.chunkMode === 'sentences' ? 'Sentences per chunk' : 'Words per chunk';
-  }
-
-  function saveSettings() {
-    state.settings.chunkMode = document.getElementById('chunkMode').value;
-    const defaults = { sentences: 10, words: 150 };
-    state.settings.chunkAmount = defaults[state.settings.chunkMode];
-    document.getElementById('chunkAmountDisplay').textContent = state.settings.chunkAmount;
-    updateChunkSub(); save();
-  }
-
-  function changeChunk(d) {
-    const limits = { sentences: [3, 50], words: [50, 500] };
-    const [min, max] = limits[state.settings.chunkMode] || [3, 50];
-    state.settings.chunkAmount = Math.max(min, Math.min(max, (state.settings.chunkAmount || 10) + d));
-    document.getElementById('chunkAmountDisplay').textContent = state.settings.chunkAmount;
+  changeGoal(d) {
+    S.stats.goal=Math.max(1,Math.min(20,(S.stats.goal||3)+d));
+    document.getElementById('goalVal').textContent=S.stats.goal;
     save();
-  }
+  },
 
-  function changeGoal(d) {
-    state.stats.dailyGoal = Math.max(1, Math.min(20, (state.stats.dailyGoal || 3) + d));
-    document.getElementById('goalDisplay').textContent = state.stats.dailyGoal;
+  toggleTheme() {
+    const next=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';
+    document.documentElement.setAttribute('data-theme',next);
+    S.settings.theme=next;
+    const icon=next==='dark'?'🌙':'☀️';
+    document.getElementById('themeBtn').textContent=icon;
+    document.getElementById('themeBtnStats').textContent=icon;
     save();
+  },
+
+  clearCache() {
+    if(!confirm('Clear all cached books? They will re-download from GitHub.')) return;
+    S.books={}; S.settings.active=null; save();
+    fetchBooksFromGH(); toast('🗑️ Cache cleared');
+  },
+
+  exportData() {
+    const blob=new Blob([JSON.stringify(S,null,2)],{type:'application/json'});
+    const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+    a.download=`pagehabit_${today()}.json`; a.click(); toast('💾 Saved!');
+  },
+
+  importData(e) {
+    const f=e.target.files[0]; if(!f) return;
+    const r=new FileReader();
+    r.onload=ev=>{ try{ S={...S,...JSON.parse(ev.target.result)}; save(); renderLibrary(); renderStats(); toast('📂 Imported!'); }catch{ toast('❌ Bad file'); }};
+    r.readAsText(f);
+  },
+
+  resetAll() {
+    if(!confirm('Reset ALL data?')) return;
+    if(!confirm('Really? No undo.')) return;
+    localStorage.removeItem('ph4'); location.reload();
   }
+};
 
-  function toggleTheme() {
-    const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-    document.documentElement.setAttribute('data-theme', next);
-    state.settings.theme = next;
-    const icon = next === 'dark' ? '🌙' : '☀️';
-    document.getElementById('themeBtn').textContent = icon;
-    document.getElementById('themeBtnStats').textContent = icon;
-    save();
-  }
-
-  function exportData() {
-    const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
-    const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
-    a.download = `pagehabit_backup_${today()}.json`; a.click();
-    toast('💾 Backup saved!');
-  }
-
-  function importData(e) {
-    const file = e.target.files[0]; if (!file) return;
-    const reader = new FileReader();
-    reader.onload = ev => {
-      try {
-        const parsed = JSON.parse(ev.target.result);
-        state = { ...state, ...parsed };
-        save(); renderLibrary(); renderStats();
-        toast('📂 Data imported!');
-      } catch { toast('❌ Invalid file'); }
-    };
-    reader.readAsText(file);
-  }
-
-  function clearCache() {
-    if (!confirm('Clear all downloaded books? Your progress stats will be kept.')) return;
-    state.books = {};
-    state.settings.activeBook = null;
-    save(); renderLibrary(); fetchGithubBooks();
-    toast('🗑️ Cache cleared');
-  }
-
-  function resetAll() {
-    if (!confirm('Reset ALL data? This cannot be undone!')) return;
-    if (!confirm('Last chance — really reset everything?')) return;
-    localStorage.removeItem('pagehabit_v3'); location.reload();
-  }
-
-  // ── INIT ──
-  function init() {
-    load();
-    document.documentElement.setAttribute('data-theme', state.settings.theme || 'dark');
-    const icon = (state.settings.theme || 'dark') === 'dark' ? '🌙' : '☀️';
-    document.getElementById('themeBtn').textContent = icon;
-    document.getElementById('themeBtnStats').textContent = icon;
-    document.getElementById('chunkMode').value = state.settings.chunkMode || 'sentences';
-    updateChunkSub();
-
-    document.getElementById('themeBtn').addEventListener('click', toggleTheme);
-    document.getElementById('themeBtnStats').addEventListener('click', toggleTheme);
-    document.getElementById('doneBtn').addEventListener('click', markDone);
-    document.getElementById('prevChunkBtn').addEventListener('click', () => navigate(-1));
-    document.getElementById('nextChunkBtn').addEventListener('click', () => navigate(1));
-  }
-
-  return {
-    showView, fetchGithubBooks, downloadBook, startReading,
-    changeChunk, changeGoal, saveSettings, exportData, importData, clearCache, resetAll
-  };
+// ═══════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════
+(function init(){
+  load();
+  document.documentElement.setAttribute('data-theme', S.settings.theme||'dark');
+  const icon=(S.settings.theme||'dark')==='dark'?'🌙':'☀️';
+  document.getElementById('themeBtn').textContent=icon;
+  document.getElementById('themeBtnStats').textContent=icon;
+  document.getElementById('themeBtn').addEventListener('click',()=>App.toggleTheme());
+  document.getElementById('themeBtnStats').addEventListener('click',()=>App.toggleTheme());
+  document.getElementById('sentSlider').value=S.settings.sentences||5;
+  document.getElementById('sliderVal').textContent=S.settings.sentences||5;
+  App.go('library');
 })();
-
-// Boot
-app.showView('library');
 </script>
 </body>
 </html>
