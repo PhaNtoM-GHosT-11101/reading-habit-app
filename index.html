@@ -3,269 +3,319 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="theme-color" content="#111111" id="themeColor" />
   <title>PageHabit — Read More, Scroll Less</title>
   <meta name="description" content="Break books into bite-sized chunks and build a daily reading habit." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <style>
-    /* ═══════════════════════ TOKENS ═══════════════════════ */
+    /* ─── TOKENS ─── */
     :root {
-      --bg:        #111111;
-      --surface:   #1c1c1e;
-      --surface2:  #2c2c2e;
-      --border:    rgba(255,255,255,0.09);
-      --text:      #f2f2f7;
-      --text2:     #8e8e93;
-      --text3:     #48484a;
-      --accent:    #6366f1;
-      --accent-lt: #818cf8;
-      --glow:      rgba(99,102,241,0.22);
-      --green:     #30d158;
-      --gold:      #ffd60a;
-      --red:       #ff453a;
-      --r:         14px;
-      --r-sm:      10px;
+      --bg:       #111;
+      --surf:     #1c1c1e;
+      --surf2:    #2c2c2e;
+      --border:   rgba(255,255,255,.09);
+      --text:     #f2f2f7;
+      --text2:    #8e8e93;
+      --text3:    #48484a;
+      --accent:   #6366f1;
+      --accent-l: #818cf8;
+      --green:    #30d158;
+      --gold:     #ffd60a;
+      --red:      #ff453a;
+      --r:        16px;
+      --rsm:      10px;
+      /* spacing helpers */
+      --safe-b:   env(safe-area-inset-bottom, 0px);
+      --safe-t:   env(safe-area-inset-top, 0px);
     }
     [data-theme="light"] {
-      --bg:       #f2f2f7;
-      --surface:  #ffffff;
-      --surface2: #e5e5ea;
-      --border:   rgba(0,0,0,0.08);
-      --text:     #1c1c1e;
-      --text2:    #6d6d72;
-      --text3:    #aeaeb2;
-      --accent:   #5856d6;
-      --accent-lt:#7c7bf0;
-      --glow:     rgba(88,86,214,0.15);
-      --green:    #34c759;
+      --bg:#f2f2f7; --surf:#fff; --surf2:#e5e5ea;
+      --border:rgba(0,0,0,.08); --text:#1c1c1e;
+      --text2:#6d6d72; --text3:#aeaeb2;
+      --accent:#5856d6; --accent-l:#7c7bf0; --green:#34c759;
     }
 
-    /* ═══════════════════════ RESET ═══════════════════════ */
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-    html { height: 100%; }
-    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); height: 100%; overflow: hidden; transition: background .3s, color .3s; }
-    #app { height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
+    /* ─── RESET ─── */
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+    html,body{height:100%;overflow:hidden;}
+    body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);
+         /* Force at least 16px to prevent iOS zoom on inputs */
+         font-size:16px; transition:background .3s,color .3s;}
+    button,select,input{font-family:'Inter',sans-serif;}
 
-    /* ═══════════════════════ VIEWS ═══════════════════════ */
-    .view { display: none; flex: 1; flex-direction: column; overflow: hidden; }
-    .view.active { display: flex; }
-    .scroll { flex: 1; overflow-y: auto; overscroll-behavior: contain; }
-    .scroll::-webkit-scrollbar { display: none; }
+    /* ─── APP SHELL ─── */
+    #app{height:100dvh;display:flex;flex-direction:column;overflow:hidden;}
+    .view{display:none;flex:1;flex-direction:column;overflow:hidden;min-height:0;}
+    .view.active{display:flex;}
+    .scroll{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;}
+    .scroll::-webkit-scrollbar{display:none;}
 
-    /* ═══════════════════════ NAV ═══════════════════════ */
-    .nav {
-      display: flex; background: var(--surface);
-      border-top: 1px solid var(--border);
-      padding: 0 0 env(safe-area-inset-bottom);
-      flex-shrink: 0;
+    /* ─── BOTTOM NAV ─── */
+    .nav{
+      display:flex;background:var(--surf);
+      border-top:1px solid var(--border);
+      /* tall enough + safe area for iPhone home bar */
+      padding-bottom:var(--safe-b);
+      flex-shrink:0; z-index:100;
     }
-    .nav-btn {
-      flex: 1; display: flex; flex-direction: column; align-items: center;
-      gap: 3px; padding: 10px 0; border: none; background: none;
-      color: var(--text3); font-size: 10px; font-weight: 600;
-      letter-spacing: .4px; text-transform: uppercase; cursor: pointer;
-      transition: color .2s; font-family: 'Inter', sans-serif;
+    .nav-btn{
+      flex:1;display:flex;flex-direction:column;align-items:center;
+      gap:4px;padding:12px 0 10px;
+      border:none;background:none;color:var(--text3);
+      font-size:11px;font-weight:700;letter-spacing:.3px;
+      text-transform:uppercase;cursor:pointer;transition:color .2s;
+      /* minimum 48px tap target */
+      min-height:56px;
     }
-    .nav-btn svg { width: 24px; height: 24px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; transition: filter .2s; }
-    .nav-btn.active { color: var(--accent); }
-    .nav-btn.active svg { filter: drop-shadow(0 0 5px var(--accent)); }
+    .nav-btn svg{width:26px;height:26px;stroke:currentColor;fill:none;
+      stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+    .nav-btn.active{color:var(--accent);}
+    .nav-btn.active svg{filter:drop-shadow(0 0 6px var(--accent));}
 
-    /* ═══════════════════════ HEADER ═══════════════════════ */
-    .header {
-      padding: 16px 20px 12px;
-      display: flex; align-items: center; justify-content: space-between;
-      border-bottom: 1px solid var(--border);
-      flex-shrink: 0;
+    /* ─── HEADER ─── */
+    .header{
+      padding:calc(14px + var(--safe-t)) 20px 14px;
+      display:flex;align-items:center;justify-content:space-between;
+      border-bottom:1px solid var(--border);flex-shrink:0;
     }
-    .logo { font-size: 20px; font-weight: 800; letter-spacing: -.5px; }
-    .logo span { color: var(--accent); }
-    .hdr-right { display: flex; align-items: center; gap: 10px; }
-    .pill { display: inline-flex; align-items: center; gap: 5px; padding: 5px 12px; border-radius: 100px; background: var(--surface2); font-size: 12px; font-weight: 700; color: var(--text2); }
-    .pill.gold { background: rgba(255,214,10,.12); color: var(--gold); }
-    .icon-btn { width: 36px; height: 36px; border-radius: 50%; background: var(--surface2); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 17px; transition: background .2s; }
-    .icon-btn:hover { background: var(--accent); }
-
-    /* ═══════════════════════ LIBRARY ═══════════════════════ */
-    .lib-top { padding: 20px 20px 0; }
-    .streak-banner {
-      background: linear-gradient(135deg, rgba(99,102,241,.18) 0%, rgba(129,140,248,.1) 100%);
-      border: 1px solid rgba(99,102,241,.25);
-      border-radius: var(--r); padding: 18px 20px;
-      display: flex; align-items: center; gap: 16px;
+    .logo{font-size:22px;font-weight:800;letter-spacing:-.5px;}
+    .logo span{color:var(--accent);}
+    .hdr-r{display:flex;align-items:center;gap:10px;}
+    .pill{display:inline-flex;align-items:center;gap:5px;padding:7px 14px;
+      border-radius:100px;background:rgba(255,214,10,.12);font-size:13px;font-weight:700;color:var(--gold);}
+    /* 48px tap target for icon buttons */
+    .ico-btn{
+      width:44px;height:44px;border-radius:50%;background:var(--surf2);
+      border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;
+      font-size:18px;transition:background .2s;flex-shrink:0;
     }
-    .streak-num { font-size: 42px; font-weight: 800; color: var(--accent-lt); line-height: 1; }
-    .streak-info { flex: 1; }
-    .streak-label { font-size: 13px; font-weight: 700; color: var(--text); }
-    .streak-sub { font-size: 11px; color: var(--text2); margin-top: 2px; }
+    .ico-btn:active{background:var(--accent);}
 
-    .section-hd { display: flex; align-items: center; justify-content: space-between; padding: 20px 20px 10px; }
-    .section-hd h2 { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: .6px; color: var(--text2); }
-    .text-btn { font-size: 13px; font-weight: 600; color: var(--accent); background: none; border: none; cursor: pointer; font-family: 'Inter', sans-serif; }
-
-    .book-row {
-      margin: 0 20px 12px;
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: var(--r); overflow: hidden;
-      transition: transform .15s, box-shadow .15s;
+    /* ─── STREAK BANNER ─── */
+    .streak-banner{
+      margin:16px 16px 0;
+      background:linear-gradient(135deg,rgba(99,102,241,.18),rgba(129,140,248,.08));
+      border:1px solid rgba(99,102,241,.25);border-radius:var(--r);
+      padding:20px;display:flex;align-items:center;gap:16px;
     }
-    .book-row:active { transform: scale(.98); }
-    .book-row-inner { display: flex; align-items: center; gap: 14px; padding: 14px 16px; }
-    .book-emoji { font-size: 34px; flex-shrink: 0; }
-    .book-info { flex: 1; min-width: 0; }
-    .book-name { font-size: 15px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .book-sub { font-size: 12px; color: var(--text2); margin-top: 2px; }
-    .book-actions { display: flex; gap: 8px; padding: 0 16px 14px; }
-    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; padding: 11px 18px; border-radius: var(--r-sm); font-weight: 600; font-size: 14px; cursor: pointer; border: none; font-family: 'Inter', sans-serif; transition: all .15s; width: 100%; }
-    .btn:active { transform: scale(.97); }
-    .btn-primary { background: var(--accent); color: #fff; }
-    .btn-ghost { background: var(--surface2); color: var(--text2); }
-    .btn-ghost:hover { color: var(--text); }
-    .btn-green { background: var(--green); color: #000; font-size: 16px; font-weight: 700; padding: 15px; }
-    .btn-red { background: var(--red); color: #fff; }
+    .streak-num{font-size:48px;font-weight:800;color:var(--accent-l);line-height:1;}
+    .streak-info{flex:1;}
+    .streak-lbl{font-size:15px;font-weight:700;}
+    .streak-sub{font-size:12px;color:var(--text2);margin-top:3px;}
 
-    .progress-track { background: var(--surface2); border-radius: 100px; height: 3px; margin: 8px 16px 0; }
-    .progress-fill { height: 100%; border-radius: 100px; background: var(--accent); transition: width .4s; }
-    .progress-row { display: flex; justify-content: space-between; padding: 4px 16px 12px; font-size: 11px; color: var(--text3); font-weight: 600; }
+    /* ─── SECTION HEADER ─── */
+    .sec-hd{display:flex;align-items:center;justify-content:space-between;padding:20px 16px 10px;}
+    .sec-hd h2{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--text2);}
+    .text-btn{font-size:14px;font-weight:600;color:var(--accent);background:none;border:none;cursor:pointer;padding:4px 0;}
 
-    .loading-box { display: flex; flex-direction: column; align-items: center; padding: 60px 20px; gap: 14px; color: var(--text2); font-size: 14px; }
-    .spinner { width: 32px; height: 32px; border: 2.5px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin .7s linear infinite; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    .empty-msg { text-align: center; padding: 40px 20px; color: var(--text3); font-size: 14px; line-height: 1.6; }
-    .dl-bar { height: 2px; background: var(--accent); border-radius: 100px; width: 0%; transition: width .3s; margin: 0 16px 12px; display: none; }
-
-    /* ═══════════════════════ READER ═══════════════════════ */
-    #view-reader { position: relative; background: var(--bg); }
-
-    .reading-canvas {
-      flex: 1; overflow-y: auto; padding: 48px 28px 120px;
-      cursor: pointer; user-select: none;
+    /* ─── BOOK CARD ─── */
+    .book-card{
+      margin:0 16px 12px;
+      background:var(--surf);border:1px solid var(--border);border-radius:var(--r);
+      overflow:hidden;transition:transform .12s;
     }
-    .reading-canvas::-webkit-scrollbar { display: none; }
-
-    .reading-text {
-      font-family: 'Lora', Georgia, serif;
-      font-size: 19px; line-height: 1.9;
-      color: var(--text);
-      max-width: 640px; margin: 0 auto;
+    .book-card:active{transform:scale(.98);}
+    .book-top{display:flex;align-items:center;gap:14px;padding:16px;}
+    .book-emoji{font-size:40px;flex-shrink:0;}
+    .book-info{flex:1;min-width:0;}
+    .book-name{font-size:16px;font-weight:700;line-height:1.3;
+      /* allow wrapping on mobile */
+      word-break:break-word;}
+    .book-sub{font-size:13px;color:var(--text2);margin-top:4px;}
+    .prog-track{height:3px;background:var(--surf2);margin:0 16px;}
+    .prog-fill{height:100%;border-radius:100px;background:var(--accent);transition:width .4s;}
+    .prog-row{display:flex;justify-content:space-between;padding:6px 16px 14px;font-size:12px;color:var(--text3);font-weight:600;}
+    /* big tappable buttons */
+    .book-btns{display:flex;gap:10px;padding:0 16px 16px;}
+    .btn{
+      display:inline-flex;align-items:center;justify-content:center;gap:8px;
+      border:none;cursor:pointer;border-radius:var(--rsm);font-weight:700;
+      font-size:15px;transition:all .12s;width:100%;
+      /* minimum 48px height on mobile */
+      min-height:50px;padding:0 16px;
     }
-    [data-theme="light"] .reading-text { color: #1c1c1e; }
+    .btn:active{transform:scale(.97);}
+    .btn-primary{background:var(--accent);color:#fff;}
+    .btn-ghost{background:var(--surf2);color:var(--text2);}
+    .btn-red{background:var(--red);color:#fff;}
 
-    .reading-text p { margin-bottom: 1.2em; }
+    /* Download progress */
+    .dl-bar{height:3px;background:var(--accent);border-radius:100px;width:0%;transition:width .3s;margin:0 16px 14px;display:none;}
 
-    /* No book */
-    .reader-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; gap: 14px; color: var(--text2); text-align: center; padding: 40px; }
-    .reader-empty .big-icon { font-size: 64px; }
-    .reader-empty h3 { font-size: 20px; font-weight: 700; color: var(--text); }
-    .reader-empty p { font-size: 14px; line-height: 1.6; }
+    /* Loading */
+    .load-box{display:flex;flex-direction:column;align-items:center;padding:64px 20px;gap:16px;color:var(--text2);font-size:15px;}
+    .spinner{width:36px;height:36px;border:2.5px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;}
+    @keyframes spin{to{transform:rotate(360deg);}}
+    .empty-msg{text-align:center;padding:48px 24px;color:var(--text3);font-size:15px;line-height:1.7;}
 
-    /* Reader overlay controls — appear on tap */
-    .reader-overlay {
-      position: absolute; inset: 0; pointer-events: none;
-      display: flex; flex-direction: column; justify-content: space-between;
+    /* ═══════════════════════════════════ READER ═══════════════════════════════════ */
+    #view-reader{position:relative;background:var(--bg);}
+
+    /* Scrollable text area */
+    .read-canvas{
+      flex:1;overflow-y:auto;overflow-x:hidden;
+      -webkit-overflow-scrolling:touch;
+      overscroll-behavior:contain;
+      /* padding-bottom: space for the floating done button */
+      padding:28px 24px 200px;
     }
+    .read-canvas::-webkit-scrollbar{display:none;}
 
-    /* Top bar */
-    .reader-topbar {
-      pointer-events: all;
-      background: linear-gradient(to bottom, var(--bg) 60%, transparent);
-      padding: 14px 20px 24px;
-      opacity: 0; transform: translateY(-8px);
-      transition: opacity .25s, transform .25s;
+    .read-text{
+      font-family:'Lora',Georgia,serif;
+      font-size:20px;line-height:2;color:var(--text);
+      max-width:640px;margin:0 auto;
     }
-    .reader-topbar.visible { opacity: 1; transform: translateY(0); }
-    .reader-top-row { display: flex; align-items: center; gap: 12px; }
-    .reader-book-name { flex: 1; font-size: 13px; font-weight: 600; color: var(--text2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .reader-chunk-lbl { font-size: 12px; color: var(--text3); }
-    .reader-prog-track { background: var(--surface2); border-radius: 100px; height: 2px; margin-top: 10px; }
-    .reader-prog-fill { height: 100%; border-radius: 100px; background: var(--accent); transition: width .4s; }
+    [data-theme="light"] .read-text{color:#1c1c1e;}
+    .read-text p{margin-bottom:1.4em;}
 
-    /* Bottom panel */
-    .reader-bottom {
-      pointer-events: all;
-      background: linear-gradient(to top, var(--bg) 60%, transparent);
-      padding: 24px 20px 16px;
-      opacity: 0; transform: translateY(8px);
-      transition: opacity .25s, transform .25s;
+    /* ── TOP INFO BAR (tap name to reveal/hide) ── */
+    .read-topbar{
+      padding:calc(12px + var(--safe-t)) 16px 12px;
+      border-bottom:1px solid var(--border);
+      flex-shrink:0;cursor:pointer;
+      transition:background .2s;
     }
-    .reader-bottom.visible { opacity: 1; transform: translateY(0); }
+    .read-topbar:active{background:var(--surf);}
+    .read-topbar-row{display:flex;align-items:center;gap:12px;}
+    .read-back{
+      width:44px;height:44px;border-radius:50%;background:var(--surf2);
+      border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;
+      font-size:20px;flex-shrink:0;
+    }
+    .read-back:active{background:var(--accent);}
+    .read-title{flex:1;font-size:15px;font-weight:600;color:var(--text2);
+      white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .read-chunk{font-size:13px;color:var(--text3);font-weight:600;flex-shrink:0;}
+    .read-prog-track{height:2px;background:var(--surf2);margin-top:10px;}
+    .read-prog-fill{height:100%;background:var(--accent);transition:width .4s;}
+
+    /* ── FLOATING DONE BUTTON (always visible) ── */
+    .done-float{
+      position:absolute;
+      bottom:calc(16px + var(--safe-b));
+      left:16px;right:16px;
+      background:var(--green);color:#000;
+      font-size:17px;font-weight:800;
+      min-height:58px;border-radius:var(--r);border:none;
+      display:flex;align-items:center;justify-content:center;gap:10px;
+      cursor:pointer;z-index:50;
+      box-shadow:0 8px 32px rgba(48,209,88,.35);
+      transition:all .15s;
+    }
+    .done-float:active{transform:scale(.97);box-shadow:none;}
+    .done-float.already{background:var(--surf2);color:var(--text2);box-shadow:none;}
+
+    /* ── SLIDE-UP PANEL (appears on tapping top bar) ── */
+    .controls-panel{
+      position:absolute;bottom:0;left:0;right:0;
+      background:var(--surf);border-top:1px solid var(--border);
+      border-radius:var(--r) var(--r) 0 0;
+      padding:0 20px calc(20px + var(--safe-b));
+      z-index:60;
+      transform:translateY(100%);
+      transition:transform .28s cubic-bezier(.4,0,.2,1);
+    }
+    .controls-panel.open{transform:translateY(0);}
+    .panel-handle{width:40px;height:4px;background:var(--surf2);border-radius:100px;margin:14px auto 20px;}
 
     /* Slider */
-    .slider-row { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
-    .slider-label { font-size: 12px; font-weight: 600; color: var(--text2); white-space: nowrap; }
-    .slider-val { font-size: 13px; font-weight: 800; color: var(--accent); min-width: 28px; text-align: right; white-space: nowrap; }
-    input[type=range] {
-      flex: 1; -webkit-appearance: none; appearance: none;
-      height: 4px; border-radius: 100px;
-      background: var(--surface2); outline: none; cursor: pointer;
+    .slider-section{margin-bottom:20px;}
+    .slider-hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
+    .slider-hd-lbl{font-size:15px;font-weight:700;}
+    .slider-hd-val{font-size:22px;font-weight:800;color:var(--accent);}
+    .slider-sub{font-size:12px;color:var(--text2);margin-bottom:12px;}
+    input[type=range]{
+      -webkit-appearance:none;appearance:none;
+      width:100%;height:6px;border-radius:100px;
+      background:var(--surf2);outline:none;cursor:pointer;
     }
-    input[type=range]::-webkit-slider-thumb {
-      -webkit-appearance: none; width: 22px; height: 22px;
-      border-radius: 50%; background: var(--accent);
-      box-shadow: 0 2px 8px rgba(99,102,241,.5);
-      cursor: pointer; transition: transform .15s;
+    input[type=range]::-webkit-slider-thumb{
+      -webkit-appearance:none;
+      /* BIG thumb = easy to drag on phone */
+      width:30px;height:30px;border-radius:50%;
+      background:var(--accent);
+      box-shadow:0 2px 12px rgba(99,102,241,.5);
+      cursor:pointer;transition:transform .12s;
     }
-    input[type=range]::-webkit-slider-thumb:active { transform: scale(1.25); }
-    input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border-radius: 50%; background: var(--accent); border: none; cursor: pointer; }
+    input[type=range]::-webkit-slider-thumb:active{transform:scale(1.3);}
+    input[type=range]::-moz-range-thumb{width:30px;height:30px;border-radius:50%;background:var(--accent);border:none;}
 
-    /* Nav row */
-    .nav-row { display: flex; gap: 10px; margin-top: 10px; }
-    .nav-row .btn { flex: 1; padding: 12px; }
+    .panel-nav{display:flex;gap:10px;margin-top:8px;}
+    .panel-nav .btn{flex:1;min-height:52px;font-size:15px;}
 
-    /* XP toast that floats up */
-    .xp-pop {
-      position: fixed; left: 50%; transform: translateX(-50%) translateY(0);
-      bottom: 120px; background: rgba(255,214,10,.15); color: var(--gold);
-      padding: 8px 18px; border-radius: 100px; font-size: 14px; font-weight: 800;
-      border: 1px solid rgba(255,214,10,.3); z-index: 500;
-      opacity: 0; pointer-events: none;
-      transition: opacity .2s, transform .5s cubic-bezier(.22,1,.36,1);
+    /* Empty reader state */
+    .read-empty{
+      display:flex;flex-direction:column;align-items:center;justify-content:center;
+      height:100%;gap:16px;text-align:center;padding:40px;
     }
-    .xp-pop.show { opacity: 1; transform: translateX(-50%) translateY(-30px); }
+    .read-empty-icon{font-size:72px;}
+    .read-empty h3{font-size:22px;font-weight:800;color:var(--text);}
+    .read-empty p{font-size:16px;color:var(--text2);line-height:1.6;}
+    .read-empty .btn{margin-top:8px;max-width:260px;}
 
-    /* ═══════════════════════ STATS ═══════════════════════ */
-    .stats-scroll { padding: 20px; }
-    .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
-    .stat-tile { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 16px; text-align: center; }
-    .stat-num { font-size: 30px; font-weight: 800; color: var(--accent); }
-    .stat-lbl { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: var(--text2); margin-top: 3px; }
+    /* ═══════════════════════════════════ STATS ═══════════════════════════════════ */
+    .stats-pad{padding:16px;}
+    .stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;}
+    .stat-tile{background:var(--surf);border:1px solid var(--border);border-radius:var(--r);padding:18px;text-align:center;}
+    .stat-num{font-size:32px;font-weight:800;color:var(--accent);}
+    .stat-lbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text2);margin-top:4px;}
 
-    .cal-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 16px; margin-bottom: 16px; }
-    .cal-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; margin-top: 10px; }
-    .cal-day-labels { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
-    .cal-dl { font-size: 9px; text-align: center; font-weight: 600; text-transform: uppercase; color: var(--text3); }
-    .cal-d { aspect-ratio: 1; border-radius: 5px; background: var(--surface2); }
-    .cal-d.on { background: var(--accent); }
-    .cal-d.now { outline: 2px solid var(--accent-lt); outline-offset: 1px; }
+    .cal-card{background:var(--surf);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:16px;}
+    .cal-dlabels{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;}
+    .cal-dl{font-size:10px;text-align:center;font-weight:700;text-transform:uppercase;color:var(--text3);padding:4px 0;}
+    .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:8px;}
+    .cal-d{aspect-ratio:1;border-radius:6px;background:var(--surf2);}
+    .cal-d.on{background:var(--accent);}
+    .cal-d.now{outline:2px solid var(--accent-l);outline-offset:1px;}
 
-    .badge-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 16px; }
-    .badge-tile { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-sm); padding: 14px 8px; text-align: center; }
-    .badge-tile.on { border-color: var(--gold); background: rgba(255,214,10,.07); }
-    .badge-ico { font-size: 26px; margin-bottom: 5px; filter: grayscale(1) opacity(.3); }
-    .badge-tile.on .badge-ico { filter: none; }
-    .badge-lbl { font-size: 10px; font-weight: 700; color: var(--text2); text-transform: uppercase; letter-spacing: .3px; }
+    .badge-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px;}
+    .badge-tile{background:var(--surf);border:1px solid var(--border);border-radius:var(--rsm);padding:16px 8px;text-align:center;}
+    .badge-tile.on{border-color:var(--gold);background:rgba(255,214,10,.07);}
+    .badge-ico{font-size:28px;margin-bottom:6px;filter:grayscale(1) opacity(.3);}
+    .badge-tile.on .badge-ico{filter:none;}
+    .badge-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;color:var(--text2);}
 
-    .settings-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; margin-bottom: 16px; }
-    .s-row { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; border-bottom: 1px solid var(--border); }
-    .s-row:last-child { border-bottom: none; }
-    .s-lbl { font-size: 15px; font-weight: 500; }
-    .s-sub { font-size: 11px; color: var(--text2); margin-top: 2px; }
-    .s-right { font-size: 13px; font-weight: 600; color: var(--accent); }
-    select { background: var(--surface2); color: var(--text); border: 1px solid var(--border); border-radius: var(--r-sm); padding: 7px 10px; font-size: 13px; font-family: 'Inter', sans-serif; }
+    .settings-card{background:var(--surf);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:16px;}
+    .s-row{display:flex;align-items:center;justify-content:space-between;padding:16px;border-bottom:1px solid var(--border);gap:12px;min-height:60px;}
+    .s-row:last-child{border-bottom:none;}
+    .s-lbl{font-size:16px;font-weight:500;}
+    .s-sub{font-size:12px;color:var(--text2);margin-top:3px;}
+    .s-val{font-size:15px;font-weight:700;color:var(--accent);flex-shrink:0;}
+    .s-ctrl{display:flex;align-items:center;gap:12px;flex-shrink:0;}
+    .s-ctrl .ico-btn{background:var(--surf2);}
+    select{background:var(--surf2);color:var(--text);border:1px solid var(--border);border-radius:var(--rsm);padding:10px 12px;font-size:15px;min-height:44px;}
 
-    .section-title { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: .6px; color: var(--text2); margin-bottom: 10px; }
+    .sec-title{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--text2);margin-bottom:10px;}
 
-    /* ═══════════════════════ TOAST ═══════════════════════ */
-    .toast { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%) translateY(6px); background: var(--surface); border: 1px solid var(--border); padding: 10px 18px; border-radius: 100px; font-size: 13px; font-weight: 600; z-index: 999; opacity: 0; transition: all .25s; white-space: nowrap; pointer-events: none; box-shadow: 0 8px 24px rgba(0,0,0,.3); }
-    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    /* ─── TOAST ─── */
+    .toast{position:fixed;bottom:calc(80px + var(--safe-b));left:50%;transform:translateX(-50%) translateY(6px);
+      background:var(--surf);border:1px solid var(--border);padding:12px 20px;
+      border-radius:100px;font-size:14px;font-weight:600;z-index:999;
+      opacity:0;transition:all .25s;white-space:nowrap;pointer-events:none;
+      box-shadow:0 8px 24px rgba(0,0,0,.3);}
+    .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 
-    /* ═══════════════════════ TOP LOADING BAR ═══════════════════════ */
-    .top-bar { position: fixed; top: 0; left: 0; height: 2px; background: var(--accent); z-index: 999; transition: width .3s; pointer-events: none; }
+    /* ─── XP POP ─── */
+    .xp-pop{position:fixed;bottom:calc(150px + var(--safe-b));left:50%;
+      transform:translateX(-50%) translateY(0);
+      background:rgba(255,214,10,.15);color:var(--gold);
+      padding:10px 22px;border-radius:100px;font-size:16px;font-weight:800;
+      border:1px solid rgba(255,214,10,.3);z-index:500;
+      opacity:0;pointer-events:none;
+      transition:opacity .2s,transform .5s cubic-bezier(.22,1,.36,1);}
+    .xp-pop.show{opacity:1;transform:translateX(-50%) translateY(-30px);}
 
-    /* ═══════════════════════ ANIMATIONS ═══════════════════════ */
-    @keyframes fadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:none; } }
-    .fade-up { animation: fadeUp .3s ease both; }
+    /* ─── PROGRESS BAR ─── */
+    .top-bar{position:fixed;top:0;left:0;height:2px;background:var(--accent);z-index:9999;transition:width .3s;pointer-events:none;}
+
+    /* ─── ANIMATIONS ─── */
+    @keyframes fadeUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:none;}}
+    .fade-up{animation:fadeUp .3s ease both;}
   </style>
 </head>
 <body>
@@ -274,96 +324,113 @@
   <div class="toast" id="toast"></div>
   <div class="xp-pop" id="xpPop">+10 ⭐</div>
 
-  <!-- ═══════════════════ LIBRARY ═══════════════════ -->
+  <!-- ══════════════════════════════ LIBRARY ══════════════════════════════ -->
   <div class="view active" id="view-library">
     <div class="header">
       <div class="logo">Page<span>Habit</span></div>
-      <div class="hdr-right">
-        <div class="pill gold" id="xpPill">⭐ 0 XP</div>
-        <button class="icon-btn" id="themeBtn">🌙</button>
+      <div class="hdr-r">
+        <div class="pill" id="xpPill">⭐ 0 XP</div>
+        <button class="ico-btn" id="themeBtn">🌙</button>
       </div>
     </div>
-
-    <div class="scroll" style="padding-bottom:10px">
+    <div class="scroll">
       <!-- Streak -->
-      <div class="lib-top">
-        <div class="streak-banner">
-          <div>
-            <div style="font-size:26px">🔥</div>
-          </div>
-          <div class="streak-info">
-            <div class="streak-num" id="lib-streak">0</div>
-            <div class="streak-label">Day Streak</div>
-            <div class="streak-sub">Keep reading every day!</div>
-          </div>
+      <div class="streak-banner">
+        <div style="font-size:32px">🔥</div>
+        <div class="streak-info">
+          <div class="streak-num" id="libStreak">0</div>
+          <div class="streak-lbl">Day Streak</div>
+          <div class="streak-sub">Read a chunk daily to keep it going!</div>
         </div>
       </div>
 
-      <div class="section-hd">
-        <h2>📚 Your Books</h2>
-        <button class="text-btn" id="refreshBtn" onclick="App.fetchBooks()">Refresh</button>
+      <div class="sec-hd">
+        <h2>📚 Books</h2>
+        <button class="text-btn" onclick="App.fetchBooks()">🔄 Refresh</button>
       </div>
-
       <div id="bookList">
-        <div class="loading-box"><div class="spinner"></div>Loading from GitHub…</div>
+        <div class="load-box"><div class="spinner"></div>Loading from GitHub…</div>
       </div>
+      <div style="height:20px"></div>
     </div>
   </div>
 
-  <!-- ═══════════════════ READER ═══════════════════ -->
+  <!-- ══════════════════════════════ READER ══════════════════════════════ -->
   <div class="view" id="view-reader">
 
-    <!-- tap-to-reveal overlay -->
-    <div class="reader-overlay" id="readerOverlay">
-      <div class="reader-topbar" id="readerTop">
-        <div class="reader-top-row">
-          <button class="icon-btn" onclick="App.go('library')" style="flex-shrink:0">←</button>
-          <div class="reader-book-name" id="rdrTitle">—</div>
-          <div class="reader-chunk-lbl" id="rdrChunkLbl"></div>
+    <!-- Top info bar — tap to open slider panel -->
+    <div class="read-topbar" id="readTopbar" onclick="App.openPanel()">
+      <div class="read-topbar-row">
+        <button class="read-back" onclick="event.stopPropagation();App.go('library')">←</button>
+        <div class="read-title" id="rTitle">No book selected</div>
+        <div class="read-chunk" id="rChunk"></div>
+      </div>
+      <div class="read-prog-track"><div class="read-prog-fill" id="rProg" style="width:0%"></div></div>
+    </div>
+
+    <!-- Text -->
+    <div class="read-canvas" id="readCanvas">
+      <div class="read-empty" id="rEmpty">
+        <div class="read-empty-icon">📖</div>
+        <h3>Nothing to read</h3>
+        <p>Go to Library, download a book, and tap Read.</p>
+        <button class="btn btn-primary" onclick="App.go('library')">Go to Library</button>
+      </div>
+      <div class="read-text" id="rText" style="display:none"></div>
+    </div>
+
+    <!-- Always-visible floating DONE button -->
+    <button class="done-float" id="doneFloat" onclick="App.markDone()" style="display:none">
+      ✅ Done — Next Chunk
+    </button>
+
+    <!-- Slide-up controls panel (opens on tapping top bar) -->
+    <div class="controls-panel" id="ctrlPanel">
+      <div class="panel-handle"></div>
+
+      <!-- Slider -->
+      <div class="slider-section">
+        <div class="slider-hd">
+          <div class="slider-hd-lbl">📏 Sentences per chunk</div>
+          <div class="slider-hd-val" id="sliderVal">5</div>
         </div>
-        <div class="reader-prog-track" style="margin-top:10px"><div class="reader-prog-fill" id="rdrProg" style="width:0%"></div></div>
+        <div class="slider-sub">Drag to change how much you read at once</div>
+        <input type="range" id="sentSlider" min="1" max="20" value="5"
+               oninput="App.onSlider(this.value)"
+               onchange="App.onSliderCommit()" />
       </div>
 
-      <div class="reader-bottom" id="readerBottom">
-        <!-- Slider -->
-        <div class="slider-row">
-          <div class="slider-label">📏 Sentences</div>
-          <input type="range" id="sentSlider" min="1" max="20" value="5" oninput="App.onSlider(this.value)" />
-          <div class="slider-val" id="sliderVal">5</div>
-        </div>
-        <button class="btn btn-green" id="doneBtn" onclick="App.markDone()">✅ Done — Next Chunk</button>
-        <div class="nav-row">
-          <button class="btn btn-ghost" id="prevBtn" onclick="App.navigate(-1)">← Prev</button>
-          <button class="btn btn-ghost" id="nextBtn" onclick="App.navigate(1)">Next →</button>
-        </div>
+      <!-- Prev / Next -->
+      <div class="panel-nav">
+        <button class="btn btn-ghost" id="prevBtn" onclick="App.navigate(-1)">← Prev</button>
+        <button class="btn btn-ghost" id="nextBtn" onclick="App.navigate(1)">Next →</button>
+      </div>
+
+      <!-- Close handle area -->
+      <div style="text-align:center;margin-top:20px">
+        <button class="text-btn" onclick="App.closePanel()">Close ↓</button>
       </div>
     </div>
 
-    <!-- actual reading area -->
-    <div class="reading-canvas" id="readingCanvas" onclick="App.toggleControls()">
-      <div class="reader-empty" id="rdrEmpty">
-        <div class="big-icon">📖</div>
-        <h3>Nothing to read yet</h3>
-        <p>Go to Library, pick a book, and tap Read.</p>
-      </div>
-      <div class="reading-text" id="rdrText" style="display:none"></div>
-    </div>
+    <!-- Tap-outside closes panel -->
+    <div id="panelBackdrop" onclick="App.closePanel()"
+         style="display:none;position:absolute;inset:0;z-index:55;"></div>
   </div>
 
-  <!-- ═══════════════════ STATS ═══════════════════ -->
+  <!-- ══════════════════════════════ STATS ══════════════════════════════ -->
   <div class="view" id="view-stats">
     <div class="header">
       <div class="logo">Your <span>Stats</span></div>
-      <button class="icon-btn" id="themeBtnStats">🌙</button>
+      <button class="ico-btn" id="themeBtnStats">🌙</button>
     </div>
     <div class="scroll">
-      <div class="stats-scroll">
+      <div class="stats-pad">
 
-        <div class="streak-banner" style="margin-bottom:16px">
-          <div style="font-size:26px">🔥</div>
+        <div class="streak-banner" style="margin:0 0 16px">
+          <div style="font-size:32px">🔥</div>
           <div class="streak-info">
             <div class="streak-num" id="stStreak">0</div>
-            <div class="streak-label">Day Streak</div>
+            <div class="streak-lbl">Day Streak</div>
             <div class="streak-sub">Longest: <span id="stLongest">0</span> days</div>
           </div>
         </div>
@@ -375,57 +442,59 @@
           <div class="stat-tile"><div class="stat-num" id="stBooks">0</div><div class="stat-lbl">Books Read</div></div>
         </div>
 
-        <div class="section-title">Last 28 Days</div>
-        <div class="cal-wrap">
-          <div class="cal-day-labels">
+        <div class="sec-title">Last 28 Days</div>
+        <div class="cal-card">
+          <div class="cal-dlabels">
             <div class="cal-dl">S</div><div class="cal-dl">M</div><div class="cal-dl">T</div>
             <div class="cal-dl">W</div><div class="cal-dl">T</div><div class="cal-dl">F</div><div class="cal-dl">S</div>
           </div>
-          <div class="cal-days" id="calGrid"></div>
+          <div class="cal-grid" id="calGrid"></div>
         </div>
 
-        <div class="section-title">Badges</div>
+        <div class="sec-title">Badges</div>
         <div class="badge-grid" id="badgeGrid"></div>
 
-        <div class="section-title">Settings</div>
+        <div class="sec-title">Settings</div>
         <div class="settings-card">
           <div class="s-row">
-            <div><div class="s-lbl">Default sentences / chunk</div><div class="s-sub">You can also adjust while reading</div></div>
-            <div class="s-right" id="settingChunkVal">5</div>
+            <div><div class="s-lbl">Sentences / chunk</div><div class="s-sub">Also adjustable while reading</div></div>
+            <div class="s-val" id="stChunkSz">5</div>
           </div>
           <div class="s-row">
             <div><div class="s-lbl">Daily Goal</div><div class="s-sub">Chunks per day</div></div>
-            <div style="display:flex;align-items:center;gap:10px">
-              <button onclick="App.changeGoal(-1)" class="icon-btn" style="font-size:18px">−</button>
-              <span class="s-right" id="goalVal">3</span>
-              <button onclick="App.changeGoal(1)" class="icon-btn" style="font-size:18px">+</button>
+            <div class="s-ctrl">
+              <button class="ico-btn" onclick="App.changeGoal(-1)">−</button>
+              <span class="s-val" id="goalVal">3</span>
+              <button class="ico-btn" onclick="App.changeGoal(1)">+</button>
             </div>
           </div>
           <div class="s-row">
-            <div><div class="s-lbl">Clear Cached Books</div><div class="s-sub">Re-download from GitHub</div></div>
-            <button class="btn btn-ghost" onclick="App.clearCache()" style="width:auto;padding:8px 14px;font-size:13px">🗑️ Clear</button>
+            <div><div class="s-lbl">Clear Book Cache</div><div class="s-sub">Re-download from GitHub</div></div>
+            <button class="btn btn-ghost" onclick="App.clearCache()" style="width:auto;min-height:44px;padding:0 16px;font-size:14px">🗑️ Clear</button>
           </div>
           <div class="s-row">
-            <div><div class="s-lbl">Export Progress</div><div class="s-sub">Download backup JSON</div></div>
-            <button class="btn btn-ghost" onclick="App.exportData()" style="width:auto;padding:8px 14px;font-size:13px">💾 Export</button>
+            <div><div class="s-lbl">Export Backup</div></div>
+            <button class="btn btn-ghost" onclick="App.exportData()" style="width:auto;min-height:44px;padding:0 16px;font-size:14px">💾 Export</button>
           </div>
           <div class="s-row">
             <div><div class="s-lbl">Import Backup</div></div>
             <label style="cursor:pointer">
               <input type="file" accept=".json" style="display:none" onchange="App.importData(event)"/>
-              <span class="btn btn-ghost" style="width:auto;padding:8px 14px;font-size:13px;display:inline-flex">📂 Import</span>
+              <span class="btn btn-ghost" style="width:auto;min-height:44px;padding:0 16px;font-size:14px;display:inline-flex">📂 Import</span>
             </label>
           </div>
           <div class="s-row">
-            <div><div class="s-lbl" style="color:var(--red)">Reset Everything</div></div>
-            <button class="btn btn-red" onclick="App.resetAll()" style="width:auto;padding:8px 14px;font-size:13px">⚠️ Reset</button>
+            <div><div class="s-lbl" style="color:var(--red)">Reset All Data</div></div>
+            <button class="btn btn-red" onclick="App.resetAll()" style="width:auto;min-height:44px;padding:0 16px;font-size:14px">⚠️ Reset</button>
           </div>
         </div>
+
+        <div style="height:16px"></div>
       </div>
     </div>
   </div>
 
-  <!-- NAV -->
+  <!-- ── BOTTOM NAV ── -->
   <nav class="nav">
     <button class="nav-btn active" id="nav-library" onclick="App.go('library')">
       <svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
@@ -443,129 +512,96 @@
 </div>
 
 <script>
-// ═══════════════════════════════════════════════
-//  CONFIG
-// ═══════════════════════════════════════════════
+// ── CONFIG ──
 const GH_OWNER = 'PhaNtoM-GHosT-11101';
 const GH_REPO  = 'reading-habit-app';
 const GH_PATH  = 'books';
 const GH_API   = `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${GH_PATH}`;
-const GH_RAW   = `https://raw.githubusercontent.com/${GH_OWNER}/${GH_REPO}/main/${GH_PATH}`;
-
-const EMOJIS = ['📗','📘','📙','📕','📓','📔','📒','📖','📃','🗒️'];
-
-const BADGES = [
-  { id:'first',    icon:'📖', name:'First Chunk',   check:s=>s.chunks>=1 },
-  { id:'s3',       icon:'🔥', name:'3-Day Streak',  check:s=>s.streak>=3 },
-  { id:'s7',       icon:'🏆', name:'Week Warrior',  check:s=>s.streak>=7 },
-  { id:'s30',      icon:'💎', name:'Diamond',       check:s=>s.streak>=30 },
-  { id:'p10',      icon:'📄', name:'10 Pages',      check:s=>s.pages>=10 },
-  { id:'p100',     icon:'📚', name:'Centurion',     check:s=>s.pages>=100 },
-  { id:'c50',      icon:'⚡', name:'Speedster',     check:s=>s.chunks>=50 },
-  { id:'xp500',    icon:'⭐', name:'Star Reader',   check:s=>s.xp>=500 },
-  { id:'b3',       icon:'🌟', name:'Collector',     check:s=>s.booksStarted>=3 },
+const EMOJIS   = ['📗','📘','📙','📕','📓','📔','📒','📖','📃','🗒️'];
+const BADGES   = [
+  {id:'b1', icon:'📖', name:'First Chunk',  check:s=>s.chunks>=1},
+  {id:'b2', icon:'🔥', name:'3-Day Streak', check:s=>s.streak>=3},
+  {id:'b3', icon:'🏆', name:'Week Warrior', check:s=>s.streak>=7},
+  {id:'b4', icon:'💎', name:'Diamond',      check:s=>s.streak>=30},
+  {id:'b5', icon:'📄', name:'10 Pages',     check:s=>s.pages>=10},
+  {id:'b6', icon:'📚', name:'Centurion',    check:s=>s.pages>=100},
+  {id:'b7', icon:'⚡', name:'Speedster',    check:s=>s.chunks>=50},
+  {id:'b8', icon:'⭐', name:'Star Reader',  check:s=>s.xp>=500},
+  {id:'b9', icon:'🌟', name:'Collector',    check:s=>s.booksStarted>=3},
 ];
 
-// ═══════════════════════════════════════════════
-//  STATE
-// ═══════════════════════════════════════════════
+// ── STATE ──
 let S = {
-  books:    {},   // filename → { title, emoji, text }
-  progress: {},   // filename → { cur, done:[] }
-  stats: { xp:0, chunks:0, pages:0, streak:0, longest:0, booksStarted:0,
-           lastDay:null, days:[], dailyDone:{}, goal:3 },
-  settings: { sentences:5, theme:'dark', active:null },
-  badges: [],
+  books:{}, progress:{},
+  stats:{xp:0,chunks:0,pages:0,streak:0,longest:0,booksStarted:0,lastDay:null,days:[],dailyDone:{},goal:3},
+  settings:{sentences:5,theme:'dark',active:null},
+  badges:[],
 };
+const save = ()=>{ try{localStorage.setItem('ph5',JSON.stringify(S));}catch(e){} };
+function load(){ try{const d=localStorage.getItem('ph5');if(d)S={...S,...JSON.parse(d)};}catch(e){} }
 
-function save() {
-  try { localStorage.setItem('ph4', JSON.stringify(S)); } catch(e){}
-}
-function load() {
-  try { const d=localStorage.getItem('ph4'); if(d) S={...S,...JSON.parse(d)}; } catch(e){}
-}
+// ── UTILS ──
+const today = ()=>new Date().toISOString().slice(0,10);
 
-// ═══════════════════════════════════════════════
-//  UTILS
-// ═══════════════════════════════════════════════
-function today() { return new Date().toISOString().slice(0,10); }
-
-function toast(msg, ms=2500) {
+function toast(msg,ms=2500){
   const el=document.getElementById('toast');
-  el.textContent=msg; el.classList.add('show');
-  clearTimeout(el._t); el._t=setTimeout(()=>el.classList.remove('show'),ms);
+  el.textContent=msg;el.classList.add('show');
+  clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('show'),ms);
 }
+function setBar(pct){ document.getElementById('topBar').style.width=pct?pct+'%':'0'; }
 
-function bar(pct) {
-  const el=document.getElementById('topBar');
-  el.style.width = pct ? pct+'%' : '0';
-}
-
-function xpPop() {
+function xpPop(){
   const el=document.getElementById('xpPop');
   el.classList.add('show');
-  setTimeout(()=>el.classList.remove('show'),1000);
+  setTimeout(()=>el.classList.remove('show'),1100);
 }
 
-function updateStreak() {
-  const t=today(), days=S.stats.days||[];
+function updateStreak(){
+  const t=today(),days=S.stats.days||[];
   if(!days.includes(t)) days.push(t);
   S.stats.days=days; S.stats.lastDay=t;
-  let streak=0, d=new Date();
-  while(true){
-    const ds=d.toISOString().slice(0,10);
-    if(days.includes(ds)){streak++;d.setDate(d.getDate()-1);}else break;
-  }
+  let streak=0,d=new Date();
+  while(true){const ds=d.toISOString().slice(0,10);if(days.includes(ds)){streak++;d.setDate(d.getDate()-1);}else break;}
   S.stats.streak=streak;
   if(streak>(S.stats.longest||0)) S.stats.longest=streak;
   save();
 }
 
-function checkBadges() {
+function checkBadges(){
   BADGES.forEach(b=>{
-    const st={...S.stats, chunks:S.stats.chunks, pages:S.stats.pages, xp:S.stats.xp, streak:S.stats.streak, booksStarted:S.stats.booksStarted};
-    if(!S.badges.includes(b.id) && b.check(st)){
+    if(!S.badges.includes(b.id)&&b.check(S.stats)){
       S.badges.push(b.id);
-      setTimeout(()=>toast(`🏆 Badge: ${b.name}!`),700);
+      setTimeout(()=>toast(`🏆 Badge unlocked: ${b.name}!`),700);
     }
   });
 }
 
-// ═══════════════════════════════════════════════
-//  EPUB PARSER
-// ═══════════════════════════════════════════════
-async function parseEpub(buf) {
-  const zip = await JSZip.loadAsync(buf);
-
-  // Find OPF
+// ── EPUB PARSER ──
+async function parseEpub(buf){
+  const zip=await JSZip.loadAsync(buf);
   let opfPath='';
-  const cont = await zip.file('META-INF/container.xml')?.async('string');
-  if(cont){ const m=cont.match(/full-path="([^"]+\.opf)"/i); if(m) opfPath=m[1]; }
-  if(!opfPath){ opfPath=Object.keys(zip.files).find(f=>f.endsWith('.opf'))||''; }
-
-  let opfDir = opfPath.includes('/') ? opfPath.slice(0,opfPath.lastIndexOf('/')+1) : '';
+  const cont=await zip.file('META-INF/container.xml')?.async('string');
+  if(cont){const m=cont.match(/full-path="([^"]+\.opf)"/i);if(m)opfPath=m[1];}
+  if(!opfPath) opfPath=Object.keys(zip.files).find(f=>f.endsWith('.opf'))||'';
+  const opfDir=opfPath.includes('/')?opfPath.slice(0,opfPath.lastIndexOf('/')+1):'';
   let spine=[];
-
   if(opfPath){
     const opf=await zip.file(opfPath)?.async('string')||'';
     const items={};
-    const mr=/<item[^>]+id="([^"]+)"[^>]+href="([^"]+)"[^>]*>/gi; let m;
+    let m,mr=/<item[^>]+id="([^"]+)"[^>]+href="([^"]+)"[^>]*>/gi;
     while((m=mr.exec(opf))!==null) items[m[1]]=m[2];
     const sr=/<itemref[^>]+idref="([^"]+)"/gi;
-    while((m=sr.exec(opf))!==null){ const h=items[m[1]]; if(h) spine.push(opfDir+h); }
+    while((m=sr.exec(opf))!==null){const h=items[m[1]];if(h)spine.push(opfDir+h);}
   }
   if(!spine.length) spine=Object.keys(zip.files).filter(f=>/\.(html|xhtml|htm)$/i.test(f)).sort();
-
   let out='';
   for(const fp of spine){
-    const f=zip.file(fp)||zip.file(fp.replace(/^\//,''));
-    if(!f) continue;
+    const f=zip.file(fp)||zip.file(fp.replace(/^\//,''));if(!f)continue;
     const html=await f.async('string');
     const clean=html
       .replace(/<style[^>]*>[\s\S]*?<\/style>/gi,'')
       .replace(/<script[^>]*>[\s\S]*?<\/script>/gi,'')
-      .replace(/<br\s*\/?>/gi,'\n')
-      .replace(/<\/p>/gi,'\n\n')
+      .replace(/<br\s*\/?>/gi,'\n').replace(/<\/p>/gi,'\n\n')
       .replace(/<[^>]+>/g,' ')
       .replace(/&nbsp;/g,' ').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&#39;/g,"'")
       .replace(/[ \t]+/g,' ').replace(/\n{3,}/g,'\n\n').trim();
@@ -574,12 +610,10 @@ async function parseEpub(buf) {
   return out.trim();
 }
 
-// ═══════════════════════════════════════════════
-//  CHUNKING
-// ═══════════════════════════════════════════════
-function chunk(text, n) {
+// ── CHUNKING ──
+function getChunks(text,n){
   if(!text) return [];
-  const sents = text.match(/[^.!?…]+(?:[.!?…]+\s*)+/g) || [text];
+  const sents=text.match(/[^.!?…]+(?:[.!?…]+\s*)+/g)||[text];
   const chunks=[];
   for(let i=0;i<sents.length;i+=n){
     const c=sents.slice(i,i+n).join('').trim();
@@ -588,303 +622,278 @@ function chunk(text, n) {
   return chunks;
 }
 
-// ═══════════════════════════════════════════════
-//  RENDER HELPERS
-// ═══════════════════════════════════════════════
-function renderLibrary() {
-  document.getElementById('lib-streak').textContent = S.stats.streak||0;
-  document.getElementById('xpPill').textContent = `⭐ ${S.stats.xp||0} XP`;
-}
-
-function renderReader() {
-  const ab = S.settings.active;
-  const book = ab ? S.books[ab] : null;
-  const empty = document.getElementById('rdrEmpty');
-  const text  = document.getElementById('rdrText');
-  const controls = document.getElementById('reader-controls');
-
-  if(!book) {
-    empty.style.display='flex'; text.style.display='none';
-    document.getElementById('rdrTitle').textContent='No book selected';
-    document.getElementById('rdrChunkLbl').textContent='';
-    document.getElementById('rdrProg').style.width='0%';
-    return;
-  }
-
-  empty.style.display='none'; text.style.display='block';
-
-  const n   = S.settings.sentences||5;
-  const chunks = chunk(book.text, n);
-  const prog = S.progress[ab]||{cur:0,done:[]};
-  if(!S.progress[ab]) S.progress[ab]=prog;
-  const ci  = Math.min(prog.cur||0, chunks.length-1);
-  const pct = chunks.length ? Math.round(((ci+1)/chunks.length)*100) : 0;
-  const c   = chunks[ci]||'';
-
-  document.getElementById('rdrTitle').textContent = `${book.emoji} ${book.title}`;
-  document.getElementById('rdrChunkLbl').textContent = `${ci+1} / ${chunks.length}`;
-  document.getElementById('rdrProg').style.width = pct+'%';
-
-  // Format paragraphs
-  text.innerHTML = c.split('\n\n').map(p=>`<p class="fade-up">${p.trim()}</p>`).filter(p=>p.length>7).join('') || `<p>${c}</p>`;
-  document.getElementById('readingCanvas').scrollTop=0;
-
-  const isDone=(prog.done||[]).includes(ci);
-  const btn=document.getElementById('doneBtn');
-  btn.textContent = isDone ? '↩️ Already done — Next?' : '✅ Done — Next Chunk';
-  btn.style.background = isDone ? 'var(--surface2)' : 'var(--green)';
-  btn.style.color = isDone ? 'var(--text2)' : '#000';
-
-  document.getElementById('prevBtn').disabled = ci===0;
-  document.getElementById('nextBtn').disabled = ci>=chunks.length-1;
-
-  // Sync slider
-  document.getElementById('sentSlider').value = n;
-  document.getElementById('sliderVal').textContent = n;
-}
-
-function renderStats() {
-  document.getElementById('stStreak').textContent  = S.stats.streak||0;
-  document.getElementById('stLongest').textContent = S.stats.longest||0;
-  document.getElementById('stXp').textContent      = S.stats.xp||0;
-  document.getElementById('stPages').textContent   = S.stats.pages||0;
-  document.getElementById('stChunks').textContent  = S.stats.chunks||0;
-  document.getElementById('stBooks').textContent   = S.stats.booksStarted||0;
-  document.getElementById('goalVal').textContent   = S.stats.goal||3;
-  document.getElementById('settingChunkVal').textContent = (S.settings.sentences||5)+' sentences';
-
-  // Calendar
-  const grid=document.getElementById('calGrid'); grid.innerHTML='';
-  const days=[]; const now=new Date();
-  for(let i=27;i>=0;i--){ const d=new Date(now); d.setDate(d.getDate()-i); days.push(d.toISOString().slice(0,10)); }
-  const rd=S.stats.days||[], t=today();
-  days.forEach(d=>{
-    const el=document.createElement('div');
-    el.className='cal-d'+(rd.includes(d)?' on':'')+(d===t?' now':'');
-    grid.appendChild(el);
-  });
-
-  // Badges
-  document.getElementById('badgeGrid').innerHTML=BADGES.map(b=>{
-    const on=b.check({...S.stats,chunks:S.stats.chunks,pages:S.stats.pages,xp:S.stats.xp,streak:S.stats.streak,booksStarted:S.stats.booksStarted});
-    return `<div class="badge-tile ${on?'on':''}"><div class="badge-ico">${b.icon}</div><div class="badge-lbl">${b.name}</div></div>`;
-  }).join('');
-}
-
-// ═══════════════════════════════════════════════
-//  GITHUB FETCH
-// ═══════════════════════════════════════════════
-async function fetchBooksFromGH() {
+// ── GITHUB ──
+async function fetchFromGH(){
   const el=document.getElementById('bookList');
-  el.innerHTML='<div class="loading-box"><div class="spinner"></div>Loading books…</div>';
-  try {
+  el.innerHTML='<div class="load-box"><div class="spinner"></div>Loading books…</div>';
+  try{
     const res=await fetch(GH_API,{headers:{'Accept':'application/vnd.github.v3+json'}});
-    if(!res.ok) throw new Error(res.status);
+    if(!res.ok) throw new Error('GitHub '+res.status);
     const files=await res.json();
     const epubs=files.filter(f=>f.name.toLowerCase().endsWith('.epub'));
-    if(!epubs.length){ el.innerHTML='<div class="empty-msg">No EPUB files found in /books/ yet.<br>Upload some to your GitHub repo!</div>'; return; }
+    if(!epubs.length){el.innerHTML='<div class="empty-msg">No EPUB files found in /books/ yet.<br>Upload .epub files to your GitHub repo!</div>';return;}
     renderBookList(epubs);
-  } catch(e){
-    el.innerHTML=`<div class="empty-msg">❌ Couldn't load from GitHub.<br><small>${e.message}</small></div>`;
+  }catch(e){
+    el.innerHTML=`<div class="empty-msg">❌ Couldn't connect to GitHub.<br><small style="color:var(--text3)">${e.message}</small><br><br><button class="btn btn-primary" onclick="App.fetchBooks()" style="max-width:200px;margin-top:8px">Retry</button></div>`;
   }
 }
 
-function renderBookList(files) {
-  const el=document.getElementById('bookList');
-  el.innerHTML='';
+function renderBookList(files){
+  const el=document.getElementById('bookList');el.innerHTML='';
   files.forEach((f,i)=>{
     const cached=!!S.books[f.name];
     const emoji=EMOJIS[i%EMOJIS.length];
     const title=f.name.replace(/\.epub$/i,'').replace(/[-_]/g,' ').trim();
     const sizeMB=(f.size/1024/1024).toFixed(1);
     const prog=S.progress[f.name];
-    const chunks=cached?chunk(S.books[f.name].text, S.settings.sentences||5):[];
+    const n=S.settings.sentences||5;
+    const chunks=cached?getChunks(S.books[f.name].text,n):[];
     const done=(prog?.done||[]).length;
     const pct=chunks.length?Math.round((done/chunks.length)*100):0;
+    const safeTitle=title.replace(/'/g,"\\'");
 
     const div=document.createElement('div');
-    div.className='book-row fade-up';
+    div.className='book-card fade-up';
     div.innerHTML=`
-      <div class="book-row-inner">
+      <div class="book-top">
         <div class="book-emoji">${emoji}</div>
         <div class="book-info">
           <div class="book-name">${title}</div>
-          <div class="book-sub">${cached?`${pct}% done · ${chunks.length} chunks`:`${sizeMB} MB · tap Download`}</div>
+          <div class="book-sub">${cached?`${pct}% complete · ${chunks.length} chunks`:`${sizeMB} MB · EPUB · not downloaded yet`}</div>
         </div>
       </div>
       ${cached?`
-        <div class="progress-track"><div class="progress-fill" style="width:${pct}%"></div></div>
-        <div class="progress-row"><span>${done}/${chunks.length} chunks</span><span>${pct}%</span></div>
-        <div class="book-actions">
-          <button class="btn btn-primary" onclick="App.startRead('${f.name}','${emoji}','${title.replace(/'/g,"\\'")}')">📖 Read Now</button>
+        <div class="prog-track"><div class="prog-fill" style="width:${pct}%"></div></div>
+        <div class="prog-row"><span>${done} of ${chunks.length} chunks done</span><span>${pct}%</span></div>
+        <div class="book-btns">
+          <button class="btn btn-primary" onclick="App.startRead('${f.name}','${emoji}','${safeTitle}')">📖 Read Now</button>
         </div>
       `:`
-        <div class="dl-bar" id="dlbar-${i}"></div>
-        <div class="book-actions">
-          <button class="btn btn-primary" id="dlbtn-${i}" onclick="App.download('${f.name}','${emoji}','${title.replace(/'/g,"\\'")}','${f.download_url}',${i})">⬇️ Download</button>
+        <div class="dl-bar" id="dlbar${i}"></div>
+        <div class="book-btns">
+          <button class="btn btn-primary" id="dlbtn${i}" onclick="App.download('${f.name}','${emoji}','${safeTitle}','${f.download_url}',${i})">⬇️ Download Book</button>
         </div>
       `}`;
     el.appendChild(div);
   });
 }
 
-// ═══════════════════════════════════════════════
-//  APP OBJECT
-// ═══════════════════════════════════════════════
+// ── APP ──
 const App = {
-
-  go(view) {
+  go(view){
     document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
     document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
     document.getElementById('view-'+view).classList.add('active');
     document.getElementById('nav-'+view).classList.add('active');
-    if(view==='library') { renderLibrary(); fetchBooksFromGH(); }
-    if(view==='reader')  renderReader();
-    if(view==='stats')   renderStats();
+    if(view==='library'){this.renderLib();fetchFromGH();}
+    if(view==='reader') this.renderReader();
+    if(view==='stats')  this.renderStats();
+    // close any open panel when switching views
+    this.closePanel();
   },
 
-  fetchBooks() {
-    fetchBooksFromGH();
+  renderLib(){
+    document.getElementById('libStreak').textContent=S.stats.streak||0;
+    document.getElementById('xpPill').textContent=`⭐ ${S.stats.xp||0} XP`;
   },
 
-  async download(filename, emoji, title, url, idx) {
-    const btn=document.getElementById('dlbtn-'+idx);
-    const bar2=document.getElementById('dlbar-'+idx);
-    if(btn){ btn.disabled=true; btn.textContent='⏳ Downloading…'; }
-    if(bar2){ bar2.style.display='block'; bar2.style.width='20%'; }
-    bar(20);
-    try {
-      const res=await fetch(url); if(!res.ok) throw new Error('Download failed');
-      const buf=await res.arrayBuffer();
-      if(bar2) bar2.style.width='60%';
-      bar(60); toast('📖 Parsing EPUB…');
-      const text=await parseEpub(buf);
-      if(!text||text.length<50) throw new Error('No readable text found');
-      if(bar2) bar2.style.width='100%';
-      bar(90);
-      S.books[filename]={title,emoji,text};
-      if(!S.progress[filename]) S.progress[filename]={cur:0,done:[]};
-      if(!S.settings.active) S.settings.active=filename;
-      S.stats.booksStarted=Object.keys(S.books).length;
-      save(); bar(0); toast('✅ Ready to read!',3000);
-      fetchBooksFromGH();
-    } catch(e) {
-      if(btn){btn.disabled=false;btn.textContent='⬇️ Download';}
-      if(bar2) bar2.style.display='none';
-      bar(0); toast('❌ '+e.message);
+  renderReader(){
+    const ab=S.settings.active;
+    const book=ab?S.books[ab]:null;
+    const empty=document.getElementById('rEmpty');
+    const txt=document.getElementById('rText');
+    const doneBtn=document.getElementById('doneFloat');
+
+    if(!book){
+      empty.style.display='flex';txt.style.display='none';doneBtn.style.display='none';
+      document.getElementById('rTitle').textContent='No book selected';
+      document.getElementById('rChunk').textContent='';
+      document.getElementById('rProg').style.width='0%';
+      return;
     }
-  },
 
-  startRead(filename, emoji, title) {
-    S.settings.active=filename;
-    // Ensure emoji/title stored
-    if(S.books[filename]){ S.books[filename].emoji=emoji; S.books[filename].title=title; }
-    save(); this.go('reader');
-  },
+    empty.style.display='none';txt.style.display='block';doneBtn.style.display='flex';
 
-  // tap-to-toggle controls
-  toggleControls() {
-    const top=document.getElementById('readerTop');
-    const bot=document.getElementById('readerBottom');
-    const visible=top.classList.contains('visible');
-    if(visible){ top.classList.remove('visible'); bot.classList.remove('visible'); }
-    else { top.classList.add('visible'); bot.classList.add('visible'); }
-  },
+    const n=S.settings.sentences||5;
+    const chunks=getChunks(book.text,n);
+    const prog=S.progress[ab]||{cur:0,done:[]};
+    if(!S.progress[ab]) S.progress[ab]=prog;
+    const ci=Math.min(prog.cur||0,chunks.length-1);
+    const pct=chunks.length?Math.round(((ci+1)/chunks.length)*100):0;
 
-  onSlider(val) {
-    const n=parseInt(val);
-    S.settings.sentences=n;
-    document.getElementById('sliderVal').textContent=n;
+    document.getElementById('rTitle').textContent=`${book.emoji} ${book.title}`;
+    document.getElementById('rChunk').textContent=`${ci+1}/${chunks.length}`;
+    document.getElementById('rProg').style.width=pct+'%';
+
+    const c=chunks[ci]||'';
+    txt.innerHTML=c.split('\n\n').map(p=>`<p class="fade-up">${p.trim()}</p>`).filter(p=>p.length>7).join('')||`<p>${c}</p>`;
+    document.getElementById('readCanvas').scrollTop=0;
+
+    const isDone=(prog.done||[]).includes(ci);
+    doneBtn.textContent=isDone?'↩️ Already done — Next?':'✅ Done — Next Chunk';
+    doneBtn.className='done-float'+(isDone?' already':'');
+
+    document.getElementById('prevBtn').disabled=ci===0;
+    document.getElementById('nextBtn').disabled=ci>=chunks.length-1;
     document.getElementById('sentSlider').value=n;
-    save(); renderReader();
-    // keep controls visible after slider interaction
-    document.getElementById('readerTop').classList.add('visible');
-    document.getElementById('readerBottom').classList.add('visible');
+    document.getElementById('sliderVal').textContent=n;
   },
 
-  markDone() {
-    const ab=S.settings.active; if(!ab||!S.books[ab]) return;
-    const chunks=chunk(S.books[ab].text, S.settings.sentences||5);
-    const prog=S.progress[ab]; if(!prog) return;
+  openPanel(){
+    document.getElementById('ctrlPanel').classList.add('open');
+    document.getElementById('panelBackdrop').style.display='block';
+  },
+  closePanel(){
+    document.getElementById('ctrlPanel').classList.remove('open');
+    document.getElementById('panelBackdrop').style.display='none';
+  },
+
+  onSlider(val){
+    document.getElementById('sliderVal').textContent=val;
+  },
+  onSliderCommit(){
+    const val=parseInt(document.getElementById('sentSlider').value);
+    S.settings.sentences=val;
+    save(); this.renderReader();
+    document.getElementById('stChunkSz').textContent=val;
+  },
+
+  markDone(){
+    const ab=S.settings.active;if(!ab||!S.books[ab])return;
+    const n=S.settings.sentences||5;
+    const chunks=getChunks(S.books[ab].text,n);
+    const prog=S.progress[ab];if(!prog)return;
     const ci=prog.cur||0;
     if(!(prog.done||[]).includes(ci)){
       if(!prog.done) prog.done=[];
       prog.done.push(ci);
-      S.stats.xp+=10; S.stats.chunks++;
+      S.stats.xp+=10;S.stats.chunks++;
       S.stats.pages=Math.round((S.stats.pages||0)+(250/chunks.length));
       const t=today();
       if(!S.stats.dailyDone) S.stats.dailyDone={};
       S.stats.dailyDone[t]=(S.stats.dailyDone[t]||0)+1;
       if(S.stats.dailyDone[t]>=(S.stats.goal||3)) toast('🎉 Daily goal hit!',3000);
-      updateStreak(); checkBadges(); xpPop(); save();
+      updateStreak();checkBadges();xpPop();save();
     }
-    if(ci<chunks.length-1){ prog.cur=ci+1; save(); renderReader(); toast('✅ Next chunk!'); }
-    else { toast('🎉 Book complete!',3000); renderReader(); }
+    if(ci<chunks.length-1){prog.cur=ci+1;save();this.renderReader();toast('✅ Next chunk!');}
+    else{toast('🎉 Book complete! 🎊',3000);this.renderReader();}
   },
 
-  navigate(dir) {
-    const ab=S.settings.active; if(!ab||!S.books[ab]) return;
-    const chunks=chunk(S.books[ab].text,S.settings.sentences||5);
+  navigate(dir){
+    const ab=S.settings.active;if(!ab||!S.books[ab])return;
+    const chunks=getChunks(S.books[ab].text,S.settings.sentences||5);
     const prog=S.progress[ab]||{cur:0,done:[]};
     prog.cur=Math.max(0,Math.min(chunks.length-1,(prog.cur||0)+dir));
-    S.progress[ab]=prog; save(); renderReader();
+    S.progress[ab]=prog;save();this.renderReader();this.closePanel();
   },
 
-  changeGoal(d) {
+  async download(filename,emoji,title,url,idx){
+    const btn=document.getElementById('dlbtn'+idx);
+    const bar2=document.getElementById('dlbar'+idx);
+    if(btn){btn.disabled=true;btn.textContent='⏳ Downloading…';}
+    if(bar2){bar2.style.display='block';bar2.style.width='20%';}
+    setBar(20);
+    try{
+      const res=await fetch(url);if(!res.ok)throw new Error('Download failed');
+      const buf=await res.arrayBuffer();
+      if(bar2) bar2.style.width='65%';
+      setBar(65);toast('📖 Parsing EPUB…');
+      const text=await parseEpub(buf);
+      if(!text||text.length<50) throw new Error('No readable text in this EPUB');
+      if(bar2) bar2.style.width='100%';
+      setBar(90);
+      S.books[filename]={title,emoji,text};
+      if(!S.progress[filename]) S.progress[filename]={cur:0,done:[]};
+      if(!S.settings.active) S.settings.active=filename;
+      S.stats.booksStarted=Object.keys(S.books).length;
+      save();setBar(0);toast(`✅ "${title}" ready!`,3000);
+      fetchFromGH();
+    }catch(e){
+      if(btn){btn.disabled=false;btn.textContent='⬇️ Download Book';}
+      if(bar2) bar2.style.display='none';
+      setBar(0);toast('❌ '+e.message);
+    }
+  },
+
+  startRead(filename,emoji,title){
+    S.settings.active=filename;
+    if(S.books[filename]){S.books[filename].emoji=emoji;S.books[filename].title=title;}
+    save();this.go('reader');
+  },
+
+  fetchBooks(){ fetchFromGH(); },
+
+  renderStats(){
+    document.getElementById('stStreak').textContent=S.stats.streak||0;
+    document.getElementById('stLongest').textContent=S.stats.longest||0;
+    document.getElementById('stXp').textContent=S.stats.xp||0;
+    document.getElementById('stPages').textContent=S.stats.pages||0;
+    document.getElementById('stChunks').textContent=S.stats.chunks||0;
+    document.getElementById('stBooks').textContent=S.stats.booksStarted||0;
+    document.getElementById('goalVal').textContent=S.stats.goal||3;
+    document.getElementById('stChunkSz').textContent=(S.settings.sentences||5)+' sentences';
+
+    const grid=document.getElementById('calGrid');grid.innerHTML='';
+    const days=[],now=new Date();
+    for(let i=27;i>=0;i--){const d=new Date(now);d.setDate(d.getDate()-i);days.push(d.toISOString().slice(0,10));}
+    const rd=S.stats.days||[],t=today();
+    days.forEach(d=>{const el=document.createElement('div');el.className='cal-d'+(rd.includes(d)?' on':'')+(d===t?' now':'');grid.appendChild(el);});
+
+    document.getElementById('badgeGrid').innerHTML=BADGES.map(b=>{
+      const on=b.check(S.stats);
+      return `<div class="badge-tile ${on?'on':''}"><div class="badge-ico">${b.icon}</div><div class="badge-lbl">${b.name}</div></div>`;
+    }).join('');
+  },
+
+  changeGoal(d){
     S.stats.goal=Math.max(1,Math.min(20,(S.stats.goal||3)+d));
     document.getElementById('goalVal').textContent=S.stats.goal;
     save();
   },
 
-  toggleTheme() {
+  toggleTheme(){
     const next=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';
     document.documentElement.setAttribute('data-theme',next);
     S.settings.theme=next;
+    document.getElementById('themeColor').content=next==='dark'?'#111111':'#f2f2f7';
     const icon=next==='dark'?'🌙':'☀️';
     document.getElementById('themeBtn').textContent=icon;
     document.getElementById('themeBtnStats').textContent=icon;
     save();
   },
 
-  clearCache() {
-    if(!confirm('Clear all cached books? They will re-download from GitHub.')) return;
-    S.books={}; S.settings.active=null; save();
-    fetchBooksFromGH(); toast('🗑️ Cache cleared');
+  clearCache(){
+    if(!confirm('Clear all downloaded books? Stats are kept.'))return;
+    S.books={};S.settings.active=null;save();fetchFromGH();toast('🗑️ Cache cleared');
   },
-
-  exportData() {
+  exportData(){
     const blob=new Blob([JSON.stringify(S,null,2)],{type:'application/json'});
-    const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
-    a.download=`pagehabit_${today()}.json`; a.click(); toast('💾 Saved!');
+    const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+    a.download=`pagehabit_${today()}.json`;a.click();toast('💾 Saved!');
   },
-
-  importData(e) {
-    const f=e.target.files[0]; if(!f) return;
+  importData(e){
+    const f=e.target.files[0];if(!f)return;
     const r=new FileReader();
-    r.onload=ev=>{ try{ S={...S,...JSON.parse(ev.target.result)}; save(); renderLibrary(); renderStats(); toast('📂 Imported!'); }catch{ toast('❌ Bad file'); }};
+    r.onload=ev=>{try{S={...S,...JSON.parse(ev.target.result)};save();this.renderLib();this.renderStats();toast('📂 Imported!');}catch{toast('❌ Bad file');}};
     r.readAsText(f);
   },
-
-  resetAll() {
-    if(!confirm('Reset ALL data?')) return;
-    if(!confirm('Really? No undo.')) return;
-    localStorage.removeItem('ph4'); location.reload();
-  }
+  resetAll(){
+    if(!confirm('Reset ALL data? No undo.'))return;
+    if(!confirm('Really sure?'))return;
+    localStorage.removeItem('ph5');location.reload();
+  },
 };
 
-// ═══════════════════════════════════════════════
-//  INIT
-// ═══════════════════════════════════════════════
-(function init(){
+// ── BOOT ──
+(function(){
   load();
-  document.documentElement.setAttribute('data-theme', S.settings.theme||'dark');
+  document.documentElement.setAttribute('data-theme',S.settings.theme||'dark');
   const icon=(S.settings.theme||'dark')==='dark'?'🌙':'☀️';
   document.getElementById('themeBtn').textContent=icon;
   document.getElementById('themeBtnStats').textContent=icon;
+  document.getElementById('themeColor').content=(S.settings.theme||'dark')==='dark'?'#111111':'#f2f2f7';
   document.getElementById('themeBtn').addEventListener('click',()=>App.toggleTheme());
   document.getElementById('themeBtnStats').addEventListener('click',()=>App.toggleTheme());
-  document.getElementById('sentSlider').value=S.settings.sentences||5;
-  document.getElementById('sliderVal').textContent=S.settings.sentences||5;
   App.go('library');
 })();
 </script>
