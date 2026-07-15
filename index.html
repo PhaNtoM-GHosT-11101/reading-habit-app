@@ -1,0 +1,1071 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>PageHabit — Read More, Scroll Less</title>
+  <meta name="description" content="Break books into bite-sized chunks and build a daily reading habit. Track your streak, earn XP, and level up your reading." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Merriweather:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <style>
+    :root {
+      --bg: #0f0f13;
+      --bg2: #1a1a24;
+      --bg3: #22222f;
+      --card: #1e1e2a;
+      --border: rgba(255,255,255,0.08);
+      --text: #f0f0f5;
+      --text2: #9898b0;
+      --text3: #5a5a70;
+      --accent: #7c6aff;
+      --accent2: #a78bfa;
+      --accent-glow: rgba(124,106,255,0.25);
+      --green: #22c55e;
+      --green-bg: rgba(34,197,94,0.15);
+      --gold: #f59e0b;
+      --gold-bg: rgba(245,158,11,0.15);
+      --red: #ef4444;
+      --radius: 16px;
+      --radius-sm: 10px;
+      --shadow: 0 8px 32px rgba(0,0,0,0.4);
+    }
+    [data-theme="light"] {
+      --bg: #f5f4f0;
+      --bg2: #ebe9e2;
+      --bg3: #e0ddd5;
+      --card: #ffffff;
+      --border: rgba(0,0,0,0.08);
+      --text: #1a1a2e;
+      --text2: #5a5a70;
+      --text3: #9898b0;
+      --accent: #6c5ce7;
+      --accent2: #a78bfa;
+      --accent-glow: rgba(108,92,231,0.2);
+      --shadow: 0 8px 32px rgba(0,0,0,0.1);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100dvh;
+      overflow-x: hidden;
+      transition: background 0.3s, color 0.3s;
+    }
+
+    /* ── LAYOUT ── */
+    #app { display: flex; flex-direction: column; min-height: 100dvh; }
+    .view { display: none; flex: 1; flex-direction: column; padding: 0 0 80px; }
+    .view.active { display: flex; }
+
+    /* ── HEADER ── */
+    .header {
+      position: sticky; top: 0; z-index: 50;
+      background: var(--bg);
+      padding: 16px 20px 12px;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      backdrop-filter: blur(12px);
+    }
+    .header h1 { font-size: 22px; font-weight: 800; letter-spacing: -0.5px; }
+    .header h1 span { color: var(--accent); }
+    .theme-btn {
+      width: 38px; height: 38px; border-radius: 50%;
+      background: var(--bg3); border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; font-size: 18px; transition: all 0.2s;
+    }
+    .theme-btn:hover { background: var(--accent); }
+
+    /* ── BOTTOM NAV ── */
+    .nav {
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
+      background: var(--bg2);
+      border-top: 1px solid var(--border);
+      display: flex; padding: 8px 0 max(8px, env(safe-area-inset-bottom));
+    }
+    .nav-btn {
+      flex: 1; display: flex; flex-direction: column; align-items: center;
+      gap: 4px; padding: 6px 0; cursor: pointer; border: none;
+      background: none; color: var(--text3); transition: all 0.2s;
+      font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .nav-btn svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .nav-btn.active { color: var(--accent); }
+    .nav-btn.active svg { filter: drop-shadow(0 0 6px var(--accent)); }
+
+    /* ── SCROLL AREA ── */
+    .scroll { flex: 1; overflow-y: auto; padding: 16px 20px; }
+    .scroll::-webkit-scrollbar { width: 4px; }
+    .scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    /* ── CARDS ── */
+    .card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 18px; margin-bottom: 14px;
+      box-shadow: var(--shadow);
+    }
+
+    /* ── BUTTONS ── */
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      gap: 8px; padding: 13px 22px; border-radius: var(--radius-sm);
+      font-weight: 600; font-size: 15px; cursor: pointer;
+      border: none; transition: all 0.2s; width: 100%; font-family: 'Inter', sans-serif;
+    }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover { filter: brightness(1.15); transform: translateY(-1px); }
+    .btn-primary:active { transform: translateY(0); }
+    .btn-outline { background: transparent; color: var(--text); border: 1px solid var(--border); }
+    .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+    .btn-danger { background: var(--red); color: #fff; }
+    .btn-green { background: var(--green); color: #fff; font-size: 17px; padding: 16px 22px; }
+    .btn-green:hover { filter: brightness(1.1); transform: translateY(-1px); }
+
+    /* ── STREAK HERO ── */
+    .streak-hero {
+      background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #1e1b4b 100%);
+      border-radius: var(--radius); padding: 24px; margin-bottom: 14px;
+      text-align: center; position: relative; overflow: hidden;
+    }
+    [data-theme="light"] .streak-hero { background: linear-gradient(135deg, #ede9fe 0%, #ddd6fe 50%, #ede9fe 100%); }
+    .streak-hero::before {
+      content: ''; position: absolute; top: -50%; left: -50%;
+      width: 200%; height: 200%;
+      background: radial-gradient(ellipse at center, rgba(124,106,255,0.15) 0%, transparent 60%);
+      animation: pulse-bg 4s ease-in-out infinite;
+    }
+    @keyframes pulse-bg { 0%,100%{opacity:0.5} 50%{opacity:1} }
+    .streak-number { font-size: 64px; font-weight: 800; color: var(--accent2); line-height: 1; margin-bottom: 4px; position: relative; }
+    .streak-label { font-size: 13px; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: 1px; position: relative; }
+    .streak-fire { font-size: 28px; position: relative; }
+
+    /* ── STAT GRID ── */
+    .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
+    .stat-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; text-align: center; }
+    .stat-val { font-size: 28px; font-weight: 800; color: var(--accent); }
+    .stat-sub { font-size: 11px; color: var(--text2); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
+
+    /* ── PROGRESS BAR ── */
+    .progress-wrap { background: var(--bg3); border-radius: 100px; height: 8px; overflow: hidden; margin-top: 10px; }
+    .progress-bar { height: 100%; border-radius: 100px; background: linear-gradient(90deg, var(--accent), var(--accent2)); transition: width 0.5s cubic-bezier(0.4,0,0.2,1); }
+
+    /* ── BOOK CARD ── */
+    .book-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 16px;
+      margin-bottom: 12px; cursor: pointer; transition: all 0.2s;
+    }
+    .book-card:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 8px 24px var(--accent-glow); }
+    .book-card:active { transform: translateY(0); }
+    .book-title { font-size: 16px; font-weight: 700; margin-bottom: 4px; color: var(--text); }
+    .book-meta { font-size: 12px; color: var(--text2); margin-bottom: 12px; }
+    .book-pct { font-size: 12px; font-weight: 600; color: var(--accent); margin-top: 6px; display: flex; justify-content: space-between; }
+
+    /* ── UPLOAD AREA ── */
+    .upload-area {
+      border: 2px dashed var(--border); border-radius: var(--radius);
+      padding: 40px 20px; text-align: center; cursor: pointer;
+      transition: all 0.2s; margin-bottom: 14px; position: relative;
+    }
+    .upload-area:hover, .upload-area.drag-over { border-color: var(--accent); background: var(--accent-glow); }
+    .upload-area input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+    .upload-icon { font-size: 40px; margin-bottom: 10px; }
+    .upload-area h3 { font-size: 16px; font-weight: 700; margin-bottom: 6px; }
+    .upload-area p { font-size: 13px; color: var(--text2); }
+
+    /* ── READER VIEW ── */
+    .reader-header { padding: 16px 20px; border-bottom: 1px solid var(--border); }
+    .reader-book-title { font-size: 13px; color: var(--text2); font-weight: 600; }
+    .reader-chunk-info { font-size: 12px; color: var(--text3); margin-top: 2px; }
+    .reader-progress { margin-top: 10px; }
+    .reading-area {
+      flex: 1; padding: 24px 24px; overflow-y: auto;
+      line-height: 1.85; font-family: 'Merriweather', serif;
+      font-size: 17px; color: var(--text);
+    }
+    .reading-area::-webkit-scrollbar { display: none; }
+    .reader-controls {
+      padding: 16px 20px; border-top: 1px solid var(--border);
+      background: var(--bg);
+    }
+    .chunk-nav { display: flex; gap: 10px; margin-top: 10px; }
+    .chunk-nav .btn { flex: 1; }
+    .done-section { text-align: center; }
+    .xp-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: var(--gold-bg); color: var(--gold);
+      padding: 4px 12px; border-radius: 100px; font-size: 12px; font-weight: 700;
+      margin-bottom: 10px;
+    }
+    .no-book { text-align: center; padding: 60px 20px; color: var(--text2); }
+    .no-book .icon { font-size: 56px; margin-bottom: 16px; }
+    .no-book h3 { font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+
+    /* ── CHUNK SETTINGS ── */
+    .settings-row { display: flex; align-items: center; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid var(--border); }
+    .settings-row:last-child { border-bottom: none; }
+    .settings-label { font-size: 15px; font-weight: 500; }
+    .settings-sub { font-size: 12px; color: var(--text2); margin-top: 2px; }
+    .num-input {
+      display: flex; align-items: center; gap: 10px;
+    }
+    .num-input button {
+      width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--border);
+      background: var(--bg3); color: var(--text); font-size: 18px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; transition: all 0.2s;
+    }
+    .num-input button:hover { background: var(--accent); border-color: var(--accent); }
+    .num-input span { font-size: 18px; font-weight: 700; min-width: 32px; text-align: center; color: var(--accent); }
+    .toggle-row { display: flex; align-items: center; gap: 12px; }
+    .toggle { position: relative; width: 46px; height: 26px; }
+    .toggle input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider {
+      position: absolute; inset: 0; background: var(--bg3); border-radius: 100px;
+      cursor: pointer; transition: 0.3s;
+    }
+    .toggle-slider:before {
+      content: ''; position: absolute; left: 3px; top: 3px;
+      width: 20px; height: 20px; border-radius: 50%; background: var(--text2); transition: 0.3s;
+    }
+    .toggle input:checked + .toggle-slider { background: var(--accent); }
+    .toggle input:checked + .toggle-slider:before { transform: translateX(20px); background: #fff; }
+
+    /* ── BADGES ── */
+    .badge-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    .badge-item {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); padding: 14px 8px; text-align: center;
+      transition: all 0.2s;
+    }
+    .badge-item.unlocked { border-color: var(--gold); background: var(--gold-bg); }
+    .badge-item.unlocked .badge-icon { filter: none; }
+    .badge-icon { font-size: 28px; margin-bottom: 6px; filter: grayscale(1) opacity(0.4); }
+    .badge-name { font-size: 10px; font-weight: 700; color: var(--text2); text-transform: uppercase; letter-spacing: 0.3px; }
+
+    /* ── CALENDAR ── */
+    .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; margin-top: 12px; }
+    .cal-day {
+      aspect-ratio: 1; border-radius: 6px; background: var(--bg3);
+      transition: all 0.2s;
+    }
+    .cal-day.read { background: var(--accent); }
+    .cal-day.today { border: 2px solid var(--accent2); }
+    .cal-labels { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; margin-top: 8px; }
+    .cal-label { font-size: 9px; color: var(--text3); text-align: center; font-weight: 600; text-transform: uppercase; }
+
+    /* ── TOAST ── */
+    .toast {
+      position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%) translateY(20px);
+      background: var(--card); border: 1px solid var(--border); padding: 12px 20px;
+      border-radius: 100px; font-size: 14px; font-weight: 600; z-index: 999;
+      opacity: 0; transition: all 0.3s; white-space: nowrap; box-shadow: var(--shadow);
+      pointer-events: none;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* ── XP BURST ── */
+    .xp-burst {
+      position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0);
+      font-size: 48px; font-weight: 900; color: var(--gold);
+      z-index: 999; pointer-events: none; opacity: 0;
+      text-shadow: 0 0 30px rgba(245,158,11,0.6);
+      transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .xp-burst.show { transform: translate(-50%, -80%) scale(1); opacity: 1; }
+    .xp-burst.hide { transform: translate(-50%, -120%) scale(0.5); opacity: 0; }
+
+    /* ── LOADING ── */
+    .loading-bar { height: 3px; background: linear-gradient(90deg, var(--accent), var(--accent2)); position: fixed; top: 0; left: 0; z-index: 999; transition: width 0.3s; }
+
+    /* ── MISC ── */
+    .section-title { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text2); margin-bottom: 12px; margin-top: 4px; }
+    .empty-state { text-align: center; padding: 40px 0; color: var(--text2); font-size: 14px; }
+    .chip { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; background: var(--bg3); border-radius: 100px; font-size: 12px; font-weight: 600; color: var(--text2); }
+    .chip.green { background: var(--green-bg); color: var(--green); }
+    .chip.purple { background: var(--accent-glow); color: var(--accent2); }
+    .divider { height: 1px; background: var(--border); margin: 4px 0; }
+    select {
+      background: var(--bg3); color: var(--text); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); padding: 8px 12px; font-size: 14px; font-family: 'Inter', sans-serif;
+    }
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeInUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+    .fade-in { animation: fadeInUp 0.35s ease forwards; }
+    @keyframes shimmer { 0%{background-position:-200%} 100%{background-position:200%} }
+    .processing {
+      background: linear-gradient(90deg, var(--bg3) 25%, var(--bg2) 50%, var(--bg3) 75%);
+      background-size: 200% 100%; animation: shimmer 1.5s infinite;
+      border-radius: var(--radius); height: 80px; margin-bottom: 12px;
+    }
+
+    /* ── READER BOOK SELECT ── */
+    .book-select-sheet {
+      position: fixed; inset: 0; z-index: 200; background: rgba(0,0,0,0.5);
+      display: flex; align-items: flex-end; opacity: 0; pointer-events: none; transition: opacity 0.3s;
+    }
+    .book-select-sheet.open { opacity: 1; pointer-events: all; }
+    .book-select-inner {
+      background: var(--bg2); border-radius: var(--radius) var(--radius) 0 0;
+      padding: 20px; width: 100%; max-height: 70vh; overflow-y: auto;
+      transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
+    }
+    .book-select-sheet.open .book-select-inner { transform: translateY(0); }
+    .sheet-handle { width: 40px; height: 4px; background: var(--border); border-radius: 2px; margin: 0 auto 16px; }
+    .sheet-book-item {
+      display: flex; align-items: center; gap: 14px; padding: 14px;
+      border-radius: var(--radius-sm); cursor: pointer; transition: all 0.2s;
+      border: 1px solid transparent;
+    }
+    .sheet-book-item:hover { background: var(--bg3); }
+    .sheet-book-item.active { border-color: var(--accent); background: var(--accent-glow); }
+    .sheet-book-emoji { font-size: 28px; }
+    .sheet-book-info { flex: 1; }
+    .sheet-book-name { font-weight: 700; font-size: 15px; }
+    .sheet-book-pct { font-size: 12px; color: var(--text2); margin-top: 2px; }
+
+    /* ── CONFETTI-LIKE DONE ANIMATION ── */
+    @keyframes particle { 0%{transform:translateY(0) rotate(0)} 100%{transform:translateY(-200px) rotate(720deg); opacity:0} }
+  </style>
+</head>
+<body>
+<div id="app">
+
+  <!-- LOADING BAR -->
+  <div class="loading-bar" id="loadingBar" style="width:0"></div>
+
+  <!-- LIBRARY VIEW -->
+  <div class="view active" id="view-library">
+    <div class="header">
+      <h1>Page<span>Habit</span></h1>
+      <div style="display:flex;gap:8px;align-items:center">
+        <div class="chip purple" id="xp-chip">⭐ 0 XP</div>
+        <div class="theme-btn" id="themeBtn" title="Toggle theme">🌙</div>
+      </div>
+    </div>
+    <div class="scroll" id="library-scroll">
+      <!-- Streak mini -->
+      <div class="streak-hero">
+        <div class="streak-fire">🔥</div>
+        <div class="streak-number" id="lib-streak">0</div>
+        <div class="streak-label">Day Streak</div>
+      </div>
+
+      <div class="section-title">Your Library</div>
+      <div class="upload-area" id="uploadArea">
+        <input type="file" id="fileInput" accept=".pdf" multiple />
+        <div class="upload-icon">📚</div>
+        <h3>Add a Book</h3>
+        <p>Tap to upload PDF files</p>
+      </div>
+      <div id="bookList"></div>
+      <div id="processingIndicator" style="display:none">
+        <div class="processing"></div>
+        <div class="processing" style="height:60px"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- READER VIEW -->
+  <div class="view" id="view-reader">
+    <div class="reader-header">
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <div>
+          <div class="reader-book-title" id="reader-book-title">No book selected</div>
+          <div class="reader-chunk-info" id="reader-chunk-info"></div>
+        </div>
+        <button class="btn btn-outline" id="changeBookBtn" style="width:auto;padding:8px 14px;font-size:13px">📖 Switch</button>
+      </div>
+      <div class="reader-progress">
+        <div class="progress-wrap"><div class="progress-bar" id="reader-progress-bar" style="width:0%"></div></div>
+      </div>
+    </div>
+
+    <div class="reading-area" id="readingArea">
+      <div class="no-book" id="no-book-msg">
+        <div class="icon">📖</div>
+        <h3>Pick a book to start reading</h3>
+        <p>Add books in the Library tab, then come back here to read</p>
+      </div>
+    </div>
+
+    <div class="reader-controls" id="reader-controls" style="display:none">
+      <div class="done-section">
+        <div class="xp-badge">⭐ +10 XP per chunk</div>
+        <button class="btn btn-green" id="doneBtn">✅ Done Reading This Chunk</button>
+        <div class="chunk-nav">
+          <button class="btn btn-outline" id="prevChunkBtn">← Prev</button>
+          <button class="btn btn-outline" id="nextChunkBtn">Next →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STATS VIEW -->
+  <div class="view" id="view-stats">
+    <div class="header">
+      <h1>Your <span>Stats</span></h1>
+      <div class="theme-btn" id="themeBtnStats">☀️</div>
+    </div>
+    <div class="scroll">
+      <div class="streak-hero">
+        <div class="streak-fire">🔥</div>
+        <div class="streak-number" id="stats-streak">0</div>
+        <div class="streak-label">Day Streak · Longest: <span id="stats-longest">0</span> days</div>
+      </div>
+
+      <div class="stat-grid">
+        <div class="stat-card"><div class="stat-val" id="stats-xp">0</div><div class="stat-sub">Total XP</div></div>
+        <div class="stat-card"><div class="stat-val" id="stats-pages">0</div><div class="stat-sub">Pages Read</div></div>
+        <div class="stat-card"><div class="stat-val" id="stats-chunks">0</div><div class="stat-sub">Chunks Done</div></div>
+        <div class="stat-card"><div class="stat-val" id="stats-books">0</div><div class="stat-sub">Books Started</div></div>
+      </div>
+
+      <div class="section-title">Activity — Last 28 Days</div>
+      <div class="card" style="padding:16px">
+        <div class="cal-labels">
+          <div class="cal-label">S</div><div class="cal-label">M</div><div class="cal-label">T</div>
+          <div class="cal-label">W</div><div class="cal-label">T</div><div class="cal-label">F</div>
+          <div class="cal-label">S</div>
+        </div>
+        <div class="cal-grid" id="calGrid"></div>
+      </div>
+
+      <div class="section-title">Badges</div>
+      <div class="badge-grid" id="badgeGrid"></div>
+
+      <div class="section-title" style="margin-top:20px">Settings</div>
+      <div class="card">
+        <div class="settings-row">
+          <div><div class="settings-label">Chunk Size Mode</div><div class="settings-sub">How to split your reading</div></div>
+          <select id="chunkMode" onchange="app.saveSettings()">
+            <option value="sentences">Sentences</option>
+            <option value="words">Words</option>
+            <option value="chars">Characters</option>
+          </select>
+        </div>
+        <div class="settings-row">
+          <div><div class="settings-label">Chunk Amount</div><div class="settings-sub" id="chunkAmountSub">Sentences per chunk</div></div>
+          <div class="num-input">
+            <button onclick="app.changeChunk(-1)">−</button>
+            <span id="chunkAmountDisplay">10</span>
+            <button onclick="app.changeChunk(1)">+</button>
+          </div>
+        </div>
+        <div class="settings-row">
+          <div><div class="settings-label">Daily Goal</div><div class="settings-sub">Chunks per day</div></div>
+          <div class="num-input">
+            <button onclick="app.changeGoal(-1)">−</button>
+            <span id="goalDisplay">3</span>
+            <button onclick="app.changeGoal(1)">+</button>
+          </div>
+        </div>
+        <div class="divider"></div>
+        <div class="settings-row">
+          <div><div class="settings-label">Export Backup</div><div class="settings-sub">Download your progress</div></div>
+          <button class="btn btn-outline" onclick="app.exportData()" style="width:auto;padding:8px 14px;font-size:13px">💾 Export</button>
+        </div>
+        <div class="settings-row">
+          <div><div class="settings-label">Import Backup</div><div class="settings-sub">Restore saved data</div></div>
+          <label style="cursor:pointer">
+            <input type="file" accept=".json" id="importFile" style="display:none" onchange="app.importData(event)" />
+            <span class="btn btn-outline" style="width:auto;padding:8px 14px;font-size:13px;display:inline-flex">📂 Import</span>
+          </label>
+        </div>
+        <div class="settings-row">
+          <div><div class="settings-label">Reset All Data</div><div class="settings-sub">Cannot be undone</div></div>
+          <button class="btn btn-danger" onclick="app.resetAll()" style="width:auto;padding:8px 14px;font-size:13px">🗑️ Reset</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <nav class="nav">
+    <button class="nav-btn active" id="nav-library" onclick="app.showView('library')">
+      <svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+      Library
+    </button>
+    <button class="nav-btn" id="nav-reader" onclick="app.showView('reader')">
+      <svg viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+      Read
+    </button>
+    <button class="nav-btn" id="nav-stats" onclick="app.showView('stats')">
+      <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      Stats
+    </button>
+  </nav>
+
+  <!-- BOOK SELECT SHEET -->
+  <div class="book-select-sheet" id="bookSelectSheet" onclick="app.closeBookSheet(event)">
+    <div class="book-select-inner">
+      <div class="sheet-handle"></div>
+      <div class="section-title">Select a Book to Read</div>
+      <div id="sheetBookList"></div>
+    </div>
+  </div>
+
+  <!-- TOAST -->
+  <div class="toast" id="toast"></div>
+
+  <!-- XP BURST -->
+  <div class="xp-burst" id="xpBurst">+10 ⭐</div>
+</div>
+
+<script>
+  // PDF.js worker
+  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+  const BADGES = [
+    { id: 'first_chunk', icon: '📖', name: 'First Read', desc: 'Read your first chunk', check: s => s.totalChunks >= 1 },
+    { id: 'streak_3', icon: '🔥', name: '3-Day Fire', desc: '3 day streak', check: s => s.streak >= 3 },
+    { id: 'streak_7', icon: '🏆', name: 'Week Warrior', desc: '7 day streak', check: s => s.streak >= 7 },
+    { id: 'streak_30', icon: '💎', name: 'Diamond', desc: '30 day streak', check: s => s.streak >= 30 },
+    { id: 'pages_10', icon: '📄', name: '10 Pages', desc: 'Read 10 pages', check: s => s.totalPages >= 10 },
+    { id: 'pages_100', icon: '📚', name: 'Centurion', desc: 'Read 100 pages', check: s => s.totalPages >= 100 },
+    { id: 'chunks_50', icon: '⚡', name: 'Speedster', desc: '50 chunks done', check: s => s.totalChunks >= 50 },
+    { id: 'xp_500', icon: '⭐', name: 'Star Reader', desc: '500 XP earned', check: s => s.xp >= 500 },
+    { id: 'books_3', icon: '🌟', name: 'Collector', desc: '3 books started', check: s => s.booksStarted >= 3 },
+  ];
+
+  const BOOK_EMOJIS = ['📗','📘','📙','📕','📓','📔','📒','📃','🗒️'];
+
+  const app = (() => {
+    let state = {
+      books: [],          // { id, title, pages, chunks, emoji, color }
+      progress: {},       // { bookId: { currentChunk, doneChunks: Set } }
+      stats: {
+        xp: 0,
+        totalChunks: 0,
+        totalPages: 0,
+        streak: 0,
+        longestStreak: 0,
+        booksStarted: 0,
+        lastReadDate: null,
+        readDays: [],     // array of date strings 'YYYY-MM-DD'
+        dailyChunks: {},  // { 'YYYY-MM-DD': count }
+        dailyGoal: 3,
+      },
+      settings: {
+        chunkMode: 'sentences',
+        chunkAmount: 10,
+        theme: 'dark',
+        activeBookId: null,
+      },
+      unlockedBadges: [],
+    };
+
+    function load() {
+      try {
+        const saved = localStorage.getItem('pagehabit_v2');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          state = { ...state, ...parsed };
+          // Restore Set for doneChunks
+          for (const bid in state.progress) {
+            if (Array.isArray(state.progress[bid].doneChunks)) {
+              state.progress[bid].doneChunks = new Set(state.progress[bid].doneChunks);
+            }
+          }
+        }
+      } catch(e) { console.warn('Load error', e); }
+    }
+
+    function save() {
+      try {
+        const toSave = JSON.parse(JSON.stringify(state));
+        // Convert Sets to arrays
+        for (const bid in toSave.progress) {
+          if (toSave.progress[bid].doneChunks instanceof Set || typeof toSave.progress[bid].doneChunks === 'object') {
+            toSave.progress[bid].doneChunks = [...(state.progress[bid].doneChunks || [])];
+          }
+        }
+        localStorage.setItem('pagehabit_v2', JSON.stringify(toSave));
+      } catch(e) { console.warn('Save error', e); }
+    }
+
+    function today() { return new Date().toISOString().split('T')[0]; }
+
+    function updateStreak(force = false) {
+      const t = today();
+      if (state.stats.lastReadDate === t && !force) return;
+
+      const rd = state.stats.readDays || [];
+      if (!rd.includes(t)) rd.push(t);
+      state.stats.readDays = rd;
+      state.stats.lastReadDate = t;
+
+      // Compute streak
+      let streak = 0;
+      let d = new Date();
+      while (true) {
+        const ds = d.toISOString().split('T')[0];
+        if (rd.includes(ds)) { streak++; d.setDate(d.getDate() - 1); }
+        else break;
+      }
+      state.stats.streak = streak;
+      if (streak > state.stats.longestStreak) state.stats.longestStreak = streak;
+      save();
+    }
+
+    function getChunks(book) {
+      if (!book || !book.text) return [];
+      const mode = state.settings.chunkMode;
+      const amount = state.settings.chunkAmount;
+      let parts = [];
+      if (mode === 'sentences') {
+        parts = book.text.match(/[^.!?]+[.!?]+[\s]*/g) || [book.text];
+        if (parts.length === 0) parts = [book.text];
+      } else if (mode === 'words') {
+        const words = book.text.split(/\s+/);
+        for (let i = 0; i < words.length; i += amount) {
+          parts.push(words.slice(i, i + amount).join(' '));
+        }
+      } else {
+        for (let i = 0; i < book.text.length; i += amount) {
+          parts.push(book.text.slice(i, i + amount));
+        }
+      }
+      // Group into chunks
+      const chunks = [];
+      for (let i = 0; i < parts.length; i += (mode === 'sentences' ? amount : 1)) {
+        if (mode === 'sentences') {
+          chunks.push(parts.slice(i, i + amount).join('').trim());
+        } else {
+          chunks.push(parts[i]);
+        }
+      }
+      return chunks.filter(c => c.trim().length > 0);
+    }
+
+    function renderLibrary() {
+      document.getElementById('lib-streak').textContent = state.stats.streak;
+      document.getElementById('xp-chip').textContent = `⭐ ${state.stats.xp} XP`;
+
+      const list = document.getElementById('bookList');
+      if (state.books.length === 0) {
+        list.innerHTML = `<div class="empty-state">No books yet — upload a PDF above! 📚</div>`;
+        return;
+      }
+      list.innerHTML = state.books.map(b => {
+        const chunks = getChunks(b);
+        const prog = state.progress[b.id] || { currentChunk: 0, doneChunks: new Set() };
+        const done = prog.doneChunks ? prog.doneChunks.size : 0;
+        const pct = chunks.length > 0 ? Math.round((done / chunks.length) * 100) : 0;
+        const active = state.settings.activeBookId === b.id;
+        return `<div class="book-card ${active ? 'active' : ''}" onclick="app.setActiveBook('${b.id}')" style="${active ? 'border-color:var(--accent)' : ''}">
+          <div style="display:flex;align-items:flex-start;gap:12px">
+            <div style="font-size:32px">${b.emoji}</div>
+            <div style="flex:1">
+              <div class="book-title">${b.title}</div>
+              <div class="book-meta">${chunks.length} chunks · ${b.pageCount || '?'} pages</div>
+              <div class="progress-wrap"><div class="progress-bar" style="width:${pct}%"></div></div>
+              <div class="book-pct"><span>${pct}% complete</span><span>${done}/${chunks.length} chunks</span></div>
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:12px">
+            <button class="btn btn-primary" onclick="event.stopPropagation();app.readBook('${b.id}')" style="flex:1;padding:10px">📖 Read Now</button>
+            <button class="btn btn-outline" onclick="event.stopPropagation();app.deleteBook('${b.id}')" style="width:auto;padding:10px 14px">🗑️</button>
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    function renderReader() {
+      const bid = state.settings.activeBookId;
+      const book = state.books.find(b => b.id === bid);
+      const noBookMsg = document.getElementById('no-book-msg');
+      const controls = document.getElementById('reader-controls');
+      const readingArea = document.getElementById('readingArea');
+
+      if (!book) {
+        noBookMsg.style.display = 'flex';
+        noBookMsg.style.flexDirection = 'column';
+        noBookMsg.style.alignItems = 'center';
+        controls.style.display = 'none';
+        document.getElementById('reader-book-title').textContent = 'No book selected';
+        document.getElementById('reader-chunk-info').textContent = '';
+        document.getElementById('reader-progress-bar').style.width = '0%';
+        return;
+      }
+
+      noBookMsg.style.display = 'none';
+      controls.style.display = 'block';
+
+      const chunks = getChunks(book);
+      const prog = state.progress[bid] || { currentChunk: 0, doneChunks: new Set() };
+      if (!state.progress[bid]) state.progress[bid] = prog;
+      if (!(prog.doneChunks instanceof Set)) prog.doneChunks = new Set(prog.doneChunks || []);
+
+      const ci = Math.min(prog.currentChunk || 0, chunks.length - 1);
+      const chunk = chunks[ci] || '';
+      const pct = chunks.length > 0 ? Math.round(((ci + 1) / chunks.length) * 100) : 0;
+
+      document.getElementById('reader-book-title').textContent = `${book.emoji} ${book.title}`;
+      document.getElementById('reader-chunk-info').textContent = `Chunk ${ci + 1} of ${chunks.length}`;
+      document.getElementById('reader-progress-bar').style.width = pct + '%';
+
+      readingArea.innerHTML = `<div class="fade-in" style="max-width:680px;margin:0 auto">${chunk.replace(/\n\n/g,'</p><p style="margin-top:1.2em">').replace(/\n/g,'<br/>')}</div>`;
+
+      document.getElementById('prevChunkBtn').disabled = ci === 0;
+      document.getElementById('nextChunkBtn').disabled = ci >= chunks.length - 1;
+
+      const isDone = prog.doneChunks.has(ci);
+      const doneBtn = document.getElementById('doneBtn');
+      doneBtn.textContent = isDone ? '✅ Already Read — Reread?' : '✅ Done Reading This Chunk';
+      doneBtn.style.background = isDone ? 'var(--text3)' : 'var(--green)';
+    }
+
+    function renderStats() {
+      document.getElementById('stats-streak').textContent = state.stats.streak;
+      document.getElementById('stats-longest').textContent = state.stats.longestStreak;
+      document.getElementById('stats-xp').textContent = state.stats.xp;
+      document.getElementById('stats-pages').textContent = state.stats.totalPages;
+      document.getElementById('stats-chunks').textContent = state.stats.totalChunks;
+      document.getElementById('stats-books').textContent = state.stats.booksStarted;
+      document.getElementById('chunkAmountDisplay').textContent = state.settings.chunkAmount;
+      document.getElementById('goalDisplay').textContent = state.stats.dailyGoal;
+      document.getElementById('chunkMode').value = state.settings.chunkMode;
+      updateChunkSub();
+
+      // Calendar
+      const grid = document.getElementById('calGrid');
+      const days = [];
+      const now = new Date();
+      // Start from Sunday of the week 4 weeks ago
+      for (let i = 27; i >= 0; i--) {
+        const d = new Date(now);
+        d.setDate(d.getDate() - i);
+        days.push(d.toISOString().split('T')[0]);
+      }
+      const rd = state.stats.readDays || [];
+      const t = today();
+      grid.innerHTML = days.map(d => `<div class="cal-day ${rd.includes(d) ? 'read' : ''} ${d === t ? 'today' : ''}" title="${d}"></div>`).join('');
+
+      // Badges
+      const bg = document.getElementById('badgeGrid');
+      bg.innerHTML = BADGES.map(b => {
+        const unlocked = b.check(state.stats);
+        return `<div class="badge-item ${unlocked ? 'unlocked' : ''}" title="${b.desc}">
+          <div class="badge-icon">${b.icon}</div>
+          <div class="badge-name">${b.name}</div>
+        </div>`;
+      }).join('');
+    }
+
+    function showView(name) {
+      document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById('view-' + name).classList.add('active');
+      document.getElementById('nav-' + name).classList.add('active');
+      if (name === 'library') renderLibrary();
+      if (name === 'reader') renderReader();
+      if (name === 'stats') renderStats();
+    }
+
+    function toast(msg, dur = 2500) {
+      const el = document.getElementById('toast');
+      el.textContent = msg;
+      el.classList.add('show');
+      setTimeout(() => el.classList.remove('show'), dur);
+    }
+
+    function xpBurst(amount = 10) {
+      const el = document.getElementById('xpBurst');
+      el.textContent = `+${amount} ⭐`;
+      el.classList.remove('hide');
+      el.classList.add('show');
+      setTimeout(() => { el.classList.remove('show'); el.classList.add('hide'); }, 1200);
+    }
+
+    function checkBadges() {
+      const newBadges = [];
+      for (const b of BADGES) {
+        if (!state.unlockedBadges.includes(b.id) && b.check(state.stats)) {
+          state.unlockedBadges.push(b.id);
+          newBadges.push(b);
+        }
+      }
+      newBadges.forEach(b => setTimeout(() => toast(`🏆 Badge Unlocked: ${b.name}!`), 500));
+    }
+
+    async function processFile(file) {
+      const arrayBuffer = await file.arrayBuffer();
+      const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+      let text = '';
+      const bar = document.getElementById('loadingBar');
+      for (let i = 1; i <= pdf.numPages; i++) {
+        bar.style.width = Math.round((i / pdf.numPages) * 80) + '%';
+        const page = await pdf.getPage(i);
+        const content = await page.getTextContent();
+        text += content.items.map(item => item.str).join(' ') + '\n\n';
+      }
+      bar.style.width = '100%';
+      setTimeout(() => { bar.style.width = '0'; }, 500);
+
+      const title = file.name.replace(/\.pdf$/i, '').slice(0, 60);
+      const id = 'book_' + Date.now() + '_' + Math.random().toString(36).slice(2);
+      const emoji = BOOK_EMOJIS[state.books.length % BOOK_EMOJIS.length];
+      const book = { id, title, text, emoji, pageCount: pdf.numPages };
+      state.books.push(book);
+      state.progress[id] = { currentChunk: 0, doneChunks: new Set() };
+      if (!state.settings.activeBookId) state.settings.activeBookId = id;
+      save();
+      return book;
+    }
+
+    function setActiveBook(id) {
+      state.settings.activeBookId = id;
+      save();
+      renderLibrary();
+      toast('📖 Book selected!');
+    }
+
+    function readBook(id) {
+      state.settings.activeBookId = id;
+      save();
+      showView('reader');
+    }
+
+    function deleteBook(id) {
+      if (!confirm('Delete this book? Your progress for it will be lost.')) return;
+      state.books = state.books.filter(b => b.id !== id);
+      delete state.progress[id];
+      if (state.settings.activeBookId === id) {
+        state.settings.activeBookId = state.books[0]?.id || null;
+      }
+      save();
+      renderLibrary();
+      toast('🗑️ Book removed');
+    }
+
+    function markDone() {
+      const bid = state.settings.activeBookId;
+      const book = state.books.find(b => b.id === bid);
+      if (!book) return;
+      const chunks = getChunks(book);
+      const prog = state.progress[bid];
+      if (!(prog.doneChunks instanceof Set)) prog.doneChunks = new Set(prog.doneChunks || []);
+      const ci = prog.currentChunk || 0;
+
+      const alreadyDone = prog.doneChunks.has(ci);
+      if (!alreadyDone) {
+        prog.doneChunks.add(ci);
+        state.stats.xp += 10;
+        state.stats.totalChunks++;
+        // Estimate pages (rough: chunk / total chunks * total pages)
+        const pagesPerChunk = book.pageCount / chunks.length;
+        state.stats.totalPages = Math.round(state.stats.totalPages + pagesPerChunk);
+
+        // Daily goal tracking
+        const t = today();
+        state.stats.dailyChunks = state.stats.dailyChunks || {};
+        state.stats.dailyChunks[t] = (state.stats.dailyChunks[t] || 0) + 1;
+        if (state.stats.dailyChunks[t] >= state.stats.dailyGoal) {
+          toast('🎉 Daily goal reached!', 3000);
+        }
+
+        updateStreak();
+        checkBadges();
+        save();
+        xpBurst(10);
+      }
+
+      // Auto-advance to next chunk
+      if (ci < chunks.length - 1) {
+        prog.currentChunk = ci + 1;
+        save();
+        renderReader();
+        toast('✅ Great job! Next chunk loaded.');
+      } else {
+        toast('🎉 You finished this book!', 3000);
+        renderReader();
+      }
+    }
+
+    function navigate(dir) {
+      const bid = state.settings.activeBookId;
+      const book = state.books.find(b => b.id === bid);
+      if (!book) return;
+      const chunks = getChunks(book);
+      const prog = state.progress[bid];
+      const ci = prog.currentChunk || 0;
+      const next = Math.max(0, Math.min(chunks.length - 1, ci + dir));
+      prog.currentChunk = next;
+      save();
+      renderReader();
+    }
+
+    function openBookSheet() {
+      const sheet = document.getElementById('bookSelectSheet');
+      const list = document.getElementById('sheetBookList');
+      list.innerHTML = state.books.map(b => {
+        const chunks = getChunks(b);
+        const prog = state.progress[b.id] || { doneChunks: new Set() };
+        const done = prog.doneChunks ? prog.doneChunks.size : 0;
+        const pct = chunks.length > 0 ? Math.round((done / chunks.length) * 100) : 0;
+        const active = state.settings.activeBookId === b.id;
+        return `<div class="sheet-book-item ${active ? 'active' : ''}" onclick="app.readBook('${b.id}');app.closeBookSheet()">
+          <div class="sheet-book-emoji">${b.emoji}</div>
+          <div class="sheet-book-info">
+            <div class="sheet-book-name">${b.title}</div>
+            <div class="sheet-book-pct">${pct}% complete · ${chunks.length} chunks</div>
+          </div>
+          ${active ? '<span style="color:var(--accent);font-size:18px">✓</span>' : ''}
+        </div>`;
+      }).join('') || '<div class="empty-state">No books yet. Add one in Library!</div>';
+      sheet.classList.add('open');
+    }
+
+    function closeBookSheet(e) {
+      if (!e || e.target.id === 'bookSelectSheet') {
+        document.getElementById('bookSelectSheet').classList.remove('open');
+      }
+    }
+
+    function updateChunkSub() {
+      const mode = state.settings.chunkMode;
+      const subs = { sentences: 'Sentences per chunk', words: 'Words per chunk', chars: 'Characters per chunk' };
+      document.getElementById('chunkAmountSub').textContent = subs[mode] || 'Per chunk';
+    }
+
+    function changeChunk(d) {
+      const limits = { sentences: [3, 50], words: [50, 500], chars: [200, 2000] };
+      const [min, max] = limits[state.settings.chunkMode] || [1, 100];
+      state.settings.chunkAmount = Math.max(min, Math.min(max, (state.settings.chunkAmount || 10) + d));
+      document.getElementById('chunkAmountDisplay').textContent = state.settings.chunkAmount;
+      save();
+    }
+
+    function changeGoal(d) {
+      state.stats.dailyGoal = Math.max(1, Math.min(20, (state.stats.dailyGoal || 3) + d));
+      document.getElementById('goalDisplay').textContent = state.stats.dailyGoal;
+      save();
+    }
+
+    function saveSettings() {
+      state.settings.chunkMode = document.getElementById('chunkMode').value;
+      const defaults = { sentences: 10, words: 150, chars: 600 };
+      state.settings.chunkAmount = defaults[state.settings.chunkMode];
+      document.getElementById('chunkAmountDisplay').textContent = state.settings.chunkAmount;
+      updateChunkSub();
+      save();
+    }
+
+    function exportData() {
+      const toSave = JSON.parse(JSON.stringify(state));
+      for (const bid in toSave.progress) {
+        if (toSave.progress[bid].doneChunks) {
+          toSave.progress[bid].doneChunks = [...(state.progress[bid].doneChunks || [])];
+        }
+      }
+      const blob = new Blob([JSON.stringify(toSave, null, 2)], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `pagehabit_backup_${today()}.json`;
+      a.click();
+      toast('💾 Backup downloaded!');
+    }
+
+    function importData(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = ev => {
+        try {
+          const parsed = JSON.parse(ev.target.result);
+          state = { ...state, ...parsed };
+          for (const bid in state.progress) {
+            if (Array.isArray(state.progress[bid].doneChunks)) {
+              state.progress[bid].doneChunks = new Set(state.progress[bid].doneChunks);
+            }
+          }
+          save();
+          renderLibrary();
+          renderStats();
+          toast('📂 Data imported successfully!');
+        } catch { toast('❌ Invalid backup file'); }
+      };
+      reader.readAsText(file);
+    }
+
+    function resetAll() {
+      if (!confirm('Reset ALL data? This cannot be undone!')) return;
+      if (!confirm('Are you sure? Everything will be deleted.')) return;
+      localStorage.removeItem('pagehabit_v2');
+      location.reload();
+    }
+
+    function toggleTheme() {
+      const current = document.documentElement.getAttribute('data-theme');
+      const next = current === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      state.settings.theme = next;
+      document.getElementById('themeBtn').textContent = next === 'dark' ? '🌙' : '☀️';
+      document.getElementById('themeBtnStats').textContent = next === 'dark' ? '🌙' : '☀️';
+      save();
+    }
+
+    function init() {
+      load();
+      document.documentElement.setAttribute('data-theme', state.settings.theme || 'dark');
+      const isDark = state.settings.theme === 'dark';
+      document.getElementById('themeBtn').textContent = isDark ? '🌙' : '☀️';
+      document.getElementById('themeBtnStats').textContent = isDark ? '🌙' : '☀️';
+      document.getElementById('chunkMode').value = state.settings.chunkMode || 'sentences';
+      updateChunkSub();
+
+      // File upload
+      document.getElementById('fileInput').addEventListener('change', async e => {
+        const files = Array.from(e.target.files);
+        if (!files.length) return;
+        document.getElementById('processingIndicator').style.display = 'block';
+        document.getElementById('uploadArea').style.opacity = '0.5';
+        for (const file of files) {
+          try { await processFile(file); } catch(err) { toast('❌ Error reading: ' + file.name); }
+        }
+        document.getElementById('processingIndicator').style.display = 'none';
+        document.getElementById('uploadArea').style.opacity = '1';
+        e.target.value = '';
+        renderLibrary();
+        toast(`📚 ${files.length === 1 ? files[0].name : files.length + ' books'} added!`);
+      });
+
+      // Drag & drop
+      const ua = document.getElementById('uploadArea');
+      ua.addEventListener('dragover', e => { e.preventDefault(); ua.classList.add('drag-over'); });
+      ua.addEventListener('dragleave', () => ua.classList.remove('drag-over'));
+      ua.addEventListener('drop', async e => {
+        e.preventDefault(); ua.classList.remove('drag-over');
+        const files = Array.from(e.dataTransfer.files).filter(f => f.name.endsWith('.pdf'));
+        if (!files.length) { toast('Please drop PDF files'); return; }
+        document.getElementById('processingIndicator').style.display = 'block';
+        for (const file of files) { try { await processFile(file); } catch(err) { toast('Error: ' + file.name); } }
+        document.getElementById('processingIndicator').style.display = 'none';
+        renderLibrary();
+      });
+
+      // Buttons
+      document.getElementById('themeBtn').addEventListener('click', toggleTheme);
+      document.getElementById('themeBtnStats').addEventListener('click', toggleTheme);
+      document.getElementById('doneBtn').addEventListener('click', markDone);
+      document.getElementById('prevChunkBtn').addEventListener('click', () => navigate(-1));
+      document.getElementById('nextChunkBtn').addEventListener('click', () => navigate(1));
+      document.getElementById('changeBookBtn').addEventListener('click', openBookSheet);
+
+      // Check streak on init
+      updateStreak(false);
+      renderLibrary();
+    }
+
+    return { showView, readBook, setActiveBook, deleteBook, changeChunk, changeGoal, saveSettings, exportData, importData, resetAll, closeBookSheet };
+  })();
+
+  app.showView('library');
+</script>
+</body>
+</html>
