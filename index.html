@@ -58,7 +58,7 @@ body{
 button{font-family:var(--font-ui);background:none;border:none;color:var(--text);cursor:pointer;}
 
 /* ═══ APP SHELL ═══ */
-#app{height:100dvh;display:flex;flex-direction:column;overflow:hidden;position:relative;}
+#app{height:100vh;height:100dvh;display:flex;flex-direction:column;overflow:hidden;position:relative;}
 .view{display:none;flex:1;flex-direction:column;overflow:hidden;min-height:0;opacity:0;transition:opacity 0.3s ease;}
 .view.active{display:flex;opacity:1;}
 .scroller{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;}
@@ -110,14 +110,14 @@ button{font-family:var(--font-ui);background:none;border:none;color:var(--text);
 
 .rdr-wrapper{
   flex:1;width:100vw;overflow:hidden;position:relative;
-  display:flex;justify-content:center;
 }
 .rdr-content{
-  width:100%; max-width:1400px;
+  width:100vw;
+  height:calc(100vh - var(--safe-t) - var(--safe-b) - 120px);
   height:calc(100dvh - var(--safe-t) - var(--safe-b) - 120px);
-  column-width: calc(100% - 64px);
+  column-width: calc(100vw - 64px);
   column-gap:64px;
-  padding:0 32px;
+  padding:0 max(32px, calc((100vw - 1400px) / 2));
   font-family:var(--font-read);
   font-size:22px;line-height:1.7;
   color:var(--text);
@@ -607,13 +607,15 @@ const App={
     
     requestAnimationFrame(()=>{
       setTimeout(()=>{
-        const cw = content.clientWidth || window.innerWidth;
-        totalPages = Math.max(1, Math.ceil(content.scrollWidth / cw));
+        const ww = window.innerWidth;
+        const pad = Math.max(32, (ww - 1400) / 2);
+        const shiftDist = (ww - (pad * 2)) + 64;
+        totalPages = Math.max(1, Math.round((content.scrollWidth - (pad * 2) + 64) / shiftDist));
         let cur = Math.min(S.progress[fn]||0, totalPages-1);
         S.progress[fn] = cur; saveState();
         this.updatePageUI();
         pageStartTime = Date.now();
-      }, 50); 
+      }, 150); 
     });
   },
 
@@ -648,7 +650,11 @@ const App={
     const fn=S.settings.active;
     const cur=S.progress[fn]||0;
     const content=document.getElementById('rdrContent');
-    content.style.transform = `translateX(calc(-100% * ${cur}))`;
+    
+    const ww = window.innerWidth;
+    const pad = Math.max(32, (ww - 1400) / 2);
+    const shiftDist = (ww - (pad * 2)) + 64;
+    content.style.transform = `translateX(-${shiftDist * cur}px)`;
     
     document.getElementById('rPageLbl').textContent=`${cur+1} / ${totalPages}`;
     const pct = Math.round(((cur+1)/totalPages)*100);
