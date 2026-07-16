@@ -24,26 +24,20 @@
   --font-ui: 'Inter', sans-serif;
   --font-read: 'Lora', Georgia, serif;
 }
-[data-theme="light"] {
-  --bg: #ffffff;
-  --text: #111111;
-  --text-muted: #888888;
-  --text-faint: #cccccc;
-  --accent: #000000;
+[data-theme="light"] { --bg:#ffffff; --text:#111111; --ui:#f5f5f5; --accent:#000000; }
+[data-theme="sepia"] { --bg:#f4ecd8; --text:#433422; --ui:#e6dec5; --accent:#5c472e; }
+[data-theme="dark"]  { --bg:#121212; --text:#e0e0e0; --ui:#1e1e1e; --accent:#ffffff; }
+[data-theme="eink"]  { --bg:#ffffff; --text:#000000; --ui:#eeeeee; --accent:#000000; }
+
+[data-theme="sepia"] .view { position:relative; }
+[data-theme="sepia"] .view::after {
+  content:''; position:absolute; inset:0; pointer-events:none; z-index:1000; opacity:0.04;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
 }
-[data-theme="sepia"] {
-  --bg: #f4ecd8;
-  --text: #5b4636;
-  --text-muted: #9e8e7a;
-  --text-faint: #d5ccba;
-  --accent: #d35400;
-}
-[data-theme="eink"] {
-  --bg: #e0e0e0;
-  --text: #1a1a1a;
-  --text-muted: #6a6a6a;
-  --text-faint: #a0a0a0;
-  --accent: #000000;
+[data-theme="dark"] .view { position:relative; }
+[data-theme="dark"] .view::after {
+  content:''; position:absolute; inset:0; pointer-events:none; z-index:1000; opacity:0.02;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
 }
 
 /* ═══ RESET ═══ */
@@ -108,8 +102,12 @@ button{font-family:var(--font-ui);background:none;border:none;color:var(--text);
 .rdr-back{cursor:pointer;padding:10px 10px 10px 0;margin-left:-10px;}
 .rdr-tools{display:flex;align-items:center;gap:16px;}
 
-.rdr-wrapper{
-  flex:1;width:100vw;overflow:hidden;position:relative;
+.rdr-wrapper {
+  flex:1; position:relative; overflow:hidden;
+}
+.rdr-wrapper::after {
+  content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 5;
+  box-shadow: inset 16px 0 24px -16px rgba(0,0,0,0.1), inset -16px 0 24px -16px rgba(0,0,0,0.1);
 }
 .rdr-content{
   width:100vw;
@@ -171,8 +169,50 @@ button{font-family:var(--font-ui);background:none;border:none;color:var(--text);
 .btn-group button{padding:10px 20px;font-size:14px;font-weight:500;border-right:1px solid var(--text-faint);}
 .btn-group button:last-child{border-right:none;}
 .btn-group button.active{background:var(--text);color:var(--bg);}
-.toggle-btn{padding:8px 16px;border-radius:100px;border:1px solid var(--text-faint);font-size:14px;font-weight:500;}
-.toggle-btn.active{background:var(--text);color:var(--bg);border-color:var(--text);}
+.sheet-row button{flex:1;padding:12px;background:var(--ui);border:none;border-radius:8px;color:var(--text);font-weight:600;}
+.sheet-row button.active{background:var(--text);color:var(--bg);}
+
+/* DICTIONARY SHEET */
+.dict-sheet {
+  position:fixed; bottom:0; left:0; width:100%; background:var(--bg); color:var(--text);
+  border-radius:24px 24px 0 0; padding:24px; box-shadow:0 -10px 40px rgba(0,0,0,0.2);
+  transform:translateY(100%); transition:transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+  z-index:3000; font-family:var(--font-ui); max-height: 60vh; overflow-y:auto;
+}
+.dict-sheet.active { transform:translateY(0); }
+.dict-word { font-size: 24px; font-weight:bold; margin-bottom: 8px; font-family:var(--font-read); }
+.dict-ph { color:var(--text-muted); margin-bottom: 16px; font-style:italic; }
+.dict-def { margin-bottom: 12px; line-height: 1.5; }
+
+/* TOC SIDEBAR */
+.toc-sidebar {
+  position:fixed; top:0; left:0; bottom:0; width:300px; background:var(--ui); color:var(--text);
+  box-shadow: 10px 0 40px rgba(0,0,0,0.1); z-index:4000;
+  transform:translateX(-100%); transition:transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+  display:flex; flex-direction:column;
+}
+.toc-sidebar.active { transform:translateX(0); }
+.toc-hdr { padding:24px; font-family:var(--font-ui); font-size:20px; font-weight:bold; border-bottom:1px solid var(--text-faint); display:flex; justify-content:space-between; align-items:center;}
+.toc-close { cursor:pointer; font-size:24px; color:var(--text-muted); }
+.toc-list { flex:1; overflow-y:auto; padding:16px 0; }
+.toc-item { padding:12px 24px; cursor:pointer; font-family:var(--font-read); font-size:16px; transition:background 0.2s;}
+.toc-item:hover { background:var(--bg); }
+
+/* HIGHLIGHT PILL */
+.hl-pill {
+  position:fixed; background:var(--text); border-radius:30px; padding:8px 16px;
+  display:none; gap:12px; box-shadow:0 8px 24px rgba(0,0,0,0.2); z-index:2000;
+  transform:translate(-50%, -100%); margin-top:-10px;
+}
+.hl-pill::after {
+  content:''; position:absolute; bottom:-6px; left:50%; transform:translateX(-50%);
+  border-width:6px 6px 0; border-style:solid; border-color:var(--text) transparent transparent transparent;
+}
+.hl-btn { width:24px; height:24px; border-radius:12px; border:none; cursor:pointer; }
+.hl-yellow { background:#f1c40f; }
+.hl-green { background:#2ecc71; }
+.hl-pink { background:#e74c3c; }
+
 
 /* ═══ STATS ═══ */
 .stats-wrap{padding:24px;display:flex;flex-direction:column;gap:40px;}
@@ -262,6 +302,7 @@ button{font-family:var(--font-ui);background:none;border:none;color:var(--text);
       <div class="rdr-back" onclick="App.go('library')">← Back</div>
       <div id="rTimeEst">~ min</div>
       <div class="rdr-tools">
+        <button class="hdr-btn" onclick="App.toggleTOC()">☰</button>
         <button class="hdr-btn" onclick="App.toggleSettings()">Aa</button>
       </div>
     </div>
@@ -276,6 +317,24 @@ button{font-family:var(--font-ui);background:none;border:none;color:var(--text);
       <div id="rPageLbl">1 / 1</div>
       <div class="rdr-progress-bar"><div class="rdr-progress-fill" id="rProgFill" style="width:0%"></div></div>
       <div id="rPctLbl">0%</div>
+    </div>
+      
+    <div id="hlPill" class="hl-pill">
+      <button class="hl-btn hl-yellow" onclick="App.applyHighlight('yellow')"></button>
+      <button class="hl-btn hl-green" onclick="App.applyHighlight('green')"></button>
+      <button class="hl-btn hl-pink" onclick="App.applyHighlight('pink')"></button>
+    </div>
+      
+    <div class="sheet-backdrop" id="dictBd" onclick="App.closeDict()"></div>
+    <div class="dict-sheet" id="dictSheet">
+      <div class="dict-word" id="dictWord">Loading...</div>
+      <div class="dict-ph" id="dictPh"></div>
+      <div id="dictDefs"></div>
+    </div>
+    
+    <div class="toc-sidebar" id="tocSidebar">
+      <div class="toc-hdr">Chapters <span class="toc-close" onclick="App.toggleTOC()">×</span></div>
+      <div class="toc-list" id="tocList"></div>
     </div>
   </div>
 
@@ -435,6 +494,45 @@ let libTab='curated';
 let totalPages=1;
 let pageStartTime=0;
 let currentSelection='';
+let currentSelectionRange=null;
+let interactionsSetup=false;
+
+/* ── INDEXEDDB ── */
+const DB_NAME='zhDB', DB_VERSION=1, STORE_NAME='books';
+let idb;
+function initDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(DB_NAME, DB_VERSION);
+    req.onerror = e => reject(e);
+    req.onsuccess = e => { idb = e.target.result; resolve(); };
+    req.onupgradeneeded = e => {
+      idb = e.target.result;
+      if (!idb.objectStoreNames.contains(STORE_NAME)) idb.createObjectStore(STORE_NAME);
+    };
+  });
+}
+function idbPut(key, val) {
+  return new Promise(resolve => {
+    const tx = idb.transaction(STORE_NAME, 'readwrite');
+    tx.objectStore(STORE_NAME).put(val, key);
+    tx.oncomplete = resolve;
+  });
+}
+function idbGet(key) {
+  return new Promise(resolve => {
+    const tx = idb.transaction(STORE_NAME, 'readonly');
+    const req = tx.objectStore(STORE_NAME).get(key);
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => resolve(null);
+  });
+}
+function idbKeys() {
+  return new Promise(resolve => {
+    const tx = idb.transaction(STORE_NAME, 'readonly');
+    const req = tx.objectStore(STORE_NAME).getAllKeys();
+    req.onsuccess = () => resolve(req.result);
+  });
+}
 
 function saveState(){
   try{localStorage.setItem('zh2',JSON.stringify(S));}catch(e){}
@@ -455,9 +553,14 @@ function loadState(){
       const p=JSON.parse(raw);
       if(p.settings)S.settings={...S.settings,...p.settings};
       if(p.stats)S.stats={...S.stats,...p.stats};
-      if(p.books)S.books=p.books;
       if(p.progress)S.progress=p.progress;
       if(p.quotes)S.quotes=p.quotes;
+      // Migrate old books to IDB
+      if(p.books) {
+        for(let key in p.books) idbPut(key, p.books[key]);
+        delete p.books;
+        localStorage.setItem('zh2', JSON.stringify(p));
+      }
     }
   }catch(e){}
 }
@@ -495,9 +598,15 @@ async function parseEpub(buf){
   }
   if(!spine.length)spine=Object.keys(zip.files).filter(f=>/\.(html|xhtml|htm)$/i.test(f)).sort();
   let out='';
+  let chapters=[];
   for(const fp of spine){
     const f=zip.file(fp)||zip.file(fp.replace(/^\//,''));if(!f)continue;
     const html=await f.async('string');
+    const hm = html.match(/<h[123][^>]*>(.*?)<\/h[123]>/i);
+    if(hm) {
+      let chTitle = hm[1].replace(/<[^>]+>/g,'').trim();
+      if(chTitle.length > 0 && chTitle.length < 50) chapters.push({title: chTitle, index: out.length});
+    }
     const clean=html
       .replace(/<style[^>]*>[\s\S]*?<\/style>/gi,'').replace(/<script[^>]*>[\s\S]*?<\/script>/gi,'')
       .replace(/<br\s*\/?>/gi,'\n').replace(/<\/p>/gi,'\n\n').replace(/<[^>]+>/g,' ')
@@ -505,7 +614,7 @@ async function parseEpub(buf){
       .replace(/[ \t]+/g,' ').replace(/\n{3,}/g,'\n\n').trim();
     if(clean.length>50)out+=clean+'\n\n';
   }
-  return out.trim();
+  return { text: out.trim(), chapters };
 }
 
 function cleanTitle(fn){return fn.replace(/\.epub$/i,'').replace(/[-_]/g,' ').trim();}
@@ -630,7 +739,7 @@ const App={
     reader.readAsDataURL(file);
   },
 
-  renderLib(){
+  async renderLib(){
     const list=document.getElementById('libList');
     const files = libTab === 'curated' ? ghFiles : communityFiles;
     
@@ -639,9 +748,11 @@ const App={
       return;
     }
     list.innerHTML='';
+    const cachedKeys = await idbKeys();
     files.forEach(f=>{
       const title = f.title || cleanTitle(f.name);
-      const cached = !!S.books[f.name];
+      const cached = cachedKeys.includes(f.name);
+      const prog = S.progress[f.name]||0;
       let metaStr = cached ? 'Stored Locally' : 'Tap to Download';
       if(libTab === 'community' && f.uploader) metaStr = 'Uploaded by ' + f.uploader + ' • ' + metaStr;
       
@@ -662,8 +773,9 @@ const App={
 
   async bookTap(fn,title,url){
     S.settings.active=fn;
-    if(S.books[fn]){
-      saveState();this.openReader();
+    const cachedBook = await idbGet(fn);
+    if(cachedBook){
+      saveState();this.openReader(cachedBook);
       return;
     }
     const list=document.getElementById('libList');
@@ -687,23 +799,44 @@ const App={
         buf=await res.arrayBuffer();
       }
       
-      const text=await parseEpub(buf);
-      S.books[fn]={title,text};
+      const parsed=await parseEpub(buf);
+      const newBook = {title,text: parsed.text, chapters: parsed.chapters};
+      await idbPut(fn, newBook);
       saveState();
-      this.openReader();
+      this.openReader(newBook);
     }catch(e){toast('Failed: ' + e.message); App.renderLib();}
   },
 
-  openReader(){
+  async openReader(bookObj){
     this.go('reader');
     this.applySettingsUI();
     const fn=S.settings.active;
-    const book=S.books[fn];
+    const book = bookObj || await idbGet(fn);
+    if(!book)return;
     const content=document.getElementById('rdrContent');
+    
+    const tocList = document.getElementById('tocList');
+    tocList.innerHTML = '';
+    if (book.chapters && book.chapters.length > 0) {
+      book.chapters.forEach(ch => {
+        const el = document.createElement('div');
+        el.className = 'toc-item';
+        el.textContent = ch.title;
+        el.onclick = () => this.jumpToChapter(ch.index);
+        tocList.appendChild(el);
+      });
+    } else {
+      tocList.innerHTML = '<div style="padding:24px; color:var(--text-muted); font-size:14px;">No chapters found.</div>';
+    }
     
     const paragraphs = book.text.split('\n\n').filter(p=>p.trim().length>0);
     content.innerHTML = paragraphs.map(p => `<p>${applyBionic(p)}</p>`).join('');
     content.style.transform='translateX(0)';
+    
+    if(!interactionsSetup) {
+      this.setupInteractions();
+      interactionsSetup = true;
+    }
     
     requestAnimationFrame(()=>{
       setTimeout(()=>{
@@ -719,34 +852,35 @@ const App={
     });
   },
 
-  turnPage(dir){
+  async turnPage(dir){
     const fn=S.settings.active;
-    let cur=S.progress[fn]||0;
-    const next=cur+dir;
-    
-    if (dir > 0 && pageStartTime > 0) {
-      const elapsedSec = (Date.now() - pageStartTime) / 1000;
-      const bookWords = S.books[fn].text.split(/\s+/).length;
-      const wordsOnPage = bookWords / totalPages;
-      if (elapsedSec > 5) {
-        const pageWpm = (wordsOnPage / elapsedSec) * 60;
-        S.stats.wpm = Math.round((S.stats.wpm * 0.8) + (pageWpm * 0.2));
-        S.stats.wpm = Math.max(50, Math.min(800, S.stats.wpm));
+    const cur = S.progress[fn] || 0;
+    const next = cur + dir;
+    if(next >= 0 && next < totalPages) {
+      if (dir > 0 && pageStartTime > 0) {
+        const elapsedSec = (Date.now() - pageStartTime) / 1000;
+        const book = await idbGet(fn);
+        const bookWords = book ? book.text.split(/\s+/).length : 2000; 
+        const wordsOnPage = bookWords / totalPages;
+        if (elapsedSec > 5) {
+          const pageWpm = (wordsOnPage / elapsedSec) * 60;
+          if (pageWpm > 50 && pageWpm < 1000) {
+            S.stats.wpm = Math.round((S.stats.wpm * 0.9) + (pageWpm * 0.1));
+            S.stats.pages = (S.stats.pages || 0) + 1;
+            updateStreak();
+          }
+        }
       }
-    }
-    
-    if(next>=0 && next<totalPages){
-      S.progress[fn]=next;
-      if(dir>0){ S.stats.pages++; updateStreak(); }
+      S.progress[fn] = next;
       saveState();
       this.updatePageUI();
       pageStartTime = Date.now();
-    }else if(next>=totalPages){
+    } else if (next >= totalPages) {
       toast('Book Completed!');
     }
   },
 
-  updatePageUI(){
+  async updatePageUI(){
     const fn=S.settings.active;
     const cur=S.progress[fn]||0;
     const content=document.getElementById('rdrContent');
@@ -761,9 +895,14 @@ const App={
     document.getElementById('rProgFill').style.width=pct+'%';
     document.getElementById('rPctLbl').textContent=pct+'%';
     
-    const wordsLeft = (totalPages - cur) * (S.books[fn].text.split(/\s+/).length / totalPages);
-    const minsLeft = Math.max(1, Math.ceil(wordsLeft / (S.stats.wpm||200)));
-    document.getElementById('rTimeEst').textContent=`~${minsLeft} min left`;
+    const book = await idbGet(fn);
+    if(book) {
+      const totalWords = book.text.split(/\s+/).length;
+      const wordsPerCol = totalWords / totalPages;
+      const wordsLeft = Math.max(0, totalWords - (wordsPerCol * cur));
+      const minsLeft = Math.max(1, Math.ceil(wordsLeft / (S.stats.wpm || 200)));
+      document.getElementById('rTimeEst').textContent = `~${minsLeft} min left in book`;
+    }
   },
 
   toggleSettings(){
@@ -776,6 +915,22 @@ const App={
     }
   },
   
+  toggleTOC() {
+    document.getElementById('tocSidebar').classList.toggle('active');
+  },
+  
+  async jumpToChapter(charIndex) {
+    const fn = S.settings.active;
+    const book = await idbGet(fn);
+    if(!book) return;
+    const totalChars = book.text.length;
+    let targetPage = Math.floor((charIndex / totalChars) * totalPages);
+    S.progress[fn] = Math.max(0, Math.min(targetPage, totalPages - 1));
+    saveState();
+    this.updatePageUI();
+    this.toggleTOC();
+  },
+
   applySettingsUI(){
     let fFam = "'Lora', Georgia, serif";
     if(S.settings.font==='sans') fFam = "'Inter', sans-serif";
@@ -805,6 +960,92 @@ const App={
     saveState(); this.applySettingsUI(); this.openReader(); 
   },
   toggleBionic(){ S.settings.bionic = !S.settings.bionic; saveState(); this.applySettingsUI(); this.openReader(); },
+
+  setupInteractions() {
+    const content = document.getElementById('rdrContent');
+    content.addEventListener('dblclick', async (e) => {
+      const sel = window.getSelection();
+      const word = sel.toString().trim();
+      if(!word || word.includes(' ')) return;
+      this.openDict(word);
+    });
+    document.addEventListener('selectionchange', () => {
+      if(document.getElementById('view-reader').classList.contains('active')) {
+        const sel = window.getSelection();
+        const pill = document.getElementById('hlPill');
+        if(!sel.rangeCount || sel.isCollapsed) {
+          pill.style.display = 'none';
+          return;
+        }
+        const text = sel.toString().trim();
+        if(!text) { pill.style.display = 'none'; return; }
+        
+        const range = sel.getRangeAt(0);
+        const rect = range.getBoundingClientRect();
+        
+        pill.style.display = 'flex';
+        pill.style.left = (rect.left + rect.width / 2) + 'px';
+        pill.style.top = rect.top + 'px';
+        currentSelectionRange = range;
+      }
+    });
+  },
+
+  async applyHighlight(color) {
+    if(!currentSelectionRange) return;
+    try {
+      const span = document.createElement('span');
+      span.style.backgroundColor = color === 'yellow' ? '#f1c40f66' : color === 'green' ? '#2ecc7166' : '#e74c3c66';
+      span.style.borderRadius = '4px';
+      currentSelectionRange.surroundContents(span);
+      
+      const fn = S.settings.active;
+      const book = await idbGet(fn);
+      const bookTitle = book?.title || 'Unknown';
+      if(!S.quotes) S.quotes = [];
+      S.quotes.push({ text: span.innerText, src: bookTitle });
+      saveState();
+      
+      window.getSelection().removeAllRanges();
+      document.getElementById('hlPill').style.display = 'none';
+      toast('Highlight Saved!');
+    } catch(e) {
+      toast('Cannot highlight across paragraphs.');
+    }
+  },
+
+  async openDict(word) {
+    document.getElementById('dictBd').classList.add('active');
+    document.getElementById('dictSheet').classList.add('active');
+    document.getElementById('dictWord').textContent = word;
+    document.getElementById('dictPh').textContent = 'Searching...';
+    document.getElementById('dictDefs').innerHTML = '';
+    
+    try {
+      const res = await fetch('https://api.dictionaryapi.dev/api/v2/entries/en/' + word);
+      if(!res.ok) throw new Error('Not found');
+      const data = await res.json();
+      const entry = data[0];
+      
+      document.getElementById('dictPh').textContent = entry.phonetic || '';
+      let defHtml = '';
+      entry.meanings.forEach(m => {
+        defHtml += `<div style="color:var(--accent); font-size:12px; font-weight:bold; text-transform:uppercase; margin-top:12px;">${m.partOfSpeech}</div>`;
+        m.definitions.slice(0,2).forEach(d => {
+          defHtml += `<div class="dict-def">• ${d.definition}</div>`;
+        });
+      });
+      document.getElementById('dictDefs').innerHTML = defHtml;
+    } catch(e) {
+      document.getElementById('dictPh').textContent = '';
+      document.getElementById('dictDefs').innerHTML = '<div class="dict-def">Definition not found.</div>';
+    }
+  },
+
+  closeDict() {
+    document.getElementById('dictBd').classList.remove('active');
+    document.getElementById('dictSheet').classList.remove('active');
+  },
 
   saveQuote(){
     if(!currentSelection) return;
@@ -858,10 +1099,12 @@ document.addEventListener('selectionchange', () => {
 });
 
 /* ── BOOT ── */
-window.onload=()=>{
+window.onload = async () => {
+  await initDB();
   loadState();
   if(!S.quotes) S.quotes=[];
   App.applySettingsUI();
+  App.renderStats();
   App.fetchBooks();
   App.go('library');
   
