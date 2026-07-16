@@ -361,7 +361,6 @@ button{font-family:var(--font-ui);background:none;border:none;color:var(--text);
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { getFirestore, doc, setDoc, getDoc, collection, getDocs, addDoc, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
 /* ── FIREBASE ── */
 const firebaseConfig = {
@@ -377,7 +376,6 @@ const firebaseConfig = {
 const fbApp = initializeApp(firebaseConfig);
 const auth = getAuth(fbApp);
 const db = getFirestore(fbApp);
-const storage = getStorage(fbApp);
 const provider = new GoogleAuthProvider();
 
 let currentUser = null;
@@ -576,7 +574,7 @@ const App={
       const snap = await getDocs(q);
       communityFiles = snap.docs.map(d => {
         const data = d.data();
-        return { name: data.title + '.epub', title: data.title, download_url: data.url, uploader: data.uploaderName };
+        return { name: d.id, title: data.title, download_url: 'firestore://' + d.id, uploader: data.uploaderName };
       });
       this.renderLib();
     } catch(e) {
@@ -596,23 +594,40 @@ const App={
   async handleUpload(e) {
     const file = e.target.files[0];
     if(!file || !currentUser) return;
+    if(file.size > 10 * 1024 * 1024) { toast('File too large (max 10MB)'); return; }
+    
     document.getElementById('uploadToast').style.display = 'block';
-    const storageRef = ref(storage, 'books/' + Date.now() + '_' + file.name);
-    const task = uploadBytesResumable(storageRef, file);
-    task.on('state_changed', (snap) => {
-      document.getElementById('uploadPct').textContent = Math.round((snap.bytesTransferred / snap.totalBytes) * 100) + '%';
-    }, null, async () => {
-      const url = await getDownloadURL(task.snapshot.ref);
-      await addDoc(collection(db, "community_books"), {
-        title: file.name.replace('.epub',''),
-        url,
-        uploaderName: currentUser.displayName,
-        timestamp: serverTimestamp()
-      });
-      document.getElementById('uploadToast').style.display = 'none';
-      toast('Upload complete!');
-      this.fetchCommunityBooks();
-    });
+    document.getElementById('uploadPct').textContent = 'Reading...';
+    
+    const reader = new FileReader();
+    reader.onload = async () => {
+      try {
+        const b64 = reader.result.split(',')[1];
+        const chunkSize = 800000;
+        const chunks = Math.ceil(b64.length / chunkSize);
+        
+        const docRef = await addDoc(collection(db, "community_books"), {
+          title: file.name.replace('.epub',''),
+          uploaderName: currentUser.displayName,
+          timestamp: serverTimestamp(),
+          chunks: chunks
+        });
+        
+        for(let i=0; i<chunks; i++) {
+          document.getElementById('uploadPct').textContent = `Chunk ${i+1}/${chunks}`;
+          const chunkData = b64.slice(i * chunkSize, (i + 1) * chunkSize);
+          await setDoc(doc(db, "community_books_chunks", docRef.id + "_" + i), { data: chunkData });
+        }
+        
+        document.getElementById('uploadToast').style.display = 'none';
+        toast('Upload complete!');
+        this.fetchCommunityBooks();
+      } catch (err) {
+        document.getElementById('uploadToast').style.display = 'none';
+        toast('Upload failed: ' + err.message);
+      }
+    };
+    reader.readAsDataURL(file);
   },
 
   renderLib(){
@@ -649,17 +664,34 @@ const App={
     S.settings.active=fn;
     if(S.books[fn]){
       saveState();this.openReader();
-    }else{
-      toast('Downloading...');
-      try{
-        const res=await fetch(url);
-        const text=await parseEpub(await res.arrayBuffer());
-        if(!text)throw new Error('Empty');
-        S.books[fn]={title,text};
-        S.progress[fn]=0;
-        saveState();toast('Ready');this.renderLib();this.openReader();
-      }catch(e){toast('Failed: ' + e.message);}
+      return;
     }
+    const list=document.getElementById('libList');
+    list.innerHTML='<div class="loader">Downloading '+title+'...</div>';
+    try{
+      let buf;
+      if (url && url.startsWith('firestore://')) {
+        const bookId = url.split('://')[1];
+        const metaSnap = await getDoc(doc(db, "community_books", bookId));
+        const meta = metaSnap.data();
+        let b64 = "";
+        for(let i=0; i<meta.chunks; i++) {
+          const chunkSnap = await getDoc(doc(db, "community_books_chunks", bookId + "_" + i));
+          b64 += chunkSnap.data().data;
+        }
+        const res = await fetch('data:application/epub+zip;base64,' + b64);
+        buf = await res.arrayBuffer();
+      } else {
+        const res=await fetch(url);
+        if(!res.ok) throw new Error('HTTP ' + res.status);
+        buf=await res.arrayBuffer();
+      }
+      
+      const text=await parseEpub(buf);
+      S.books[fn]={title,text};
+      saveState();
+      this.openReader();
+    }catch(e){toast('Failed: ' + e.message); App.renderLib();}
   },
 
   openReader(){
