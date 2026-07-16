@@ -76,7 +76,7 @@ button{font-family:var(--font-ui);background:none;border:none;color:var(--text);
 .hdr-btn:active{color:var(--text);}
 .hdr-btn.active{color:var(--text);font-weight:600;}
 
-/* ═══ LIBRARY (Editorial List) ═══ */
+/* ═══ LIBRARY ═══ */
 .lib-list{padding:24px 24px 100px;display:flex;flex-direction:column;gap:48px;}
 .lib-item{
   cursor:pointer;
@@ -96,7 +96,7 @@ button{font-family:var(--font-ui);background:none;border:none;color:var(--text);
 .lib-prog{margin-top:12px;height:1px;background:var(--text-faint);width:100px;position:relative;}
 .lib-prog-fill{position:absolute;left:0;top:0;bottom:0;background:var(--accent);transition:width 0.4s;}
 
-/* ═══ READER (Strict Pagination) ═══ */
+/* ═══ READER ═══ */
 #view-reader{background:var(--bg);}
 .rdr-top{
   padding:calc(var(--safe-t) + 16px) 24px 16px;
@@ -112,19 +112,16 @@ button{font-family:var(--font-ui);background:none;border:none;color:var(--text);
 }
 .rdr-content{
   height:calc(100dvh - var(--safe-t) - var(--safe-b) - 120px);
-  /* 32px padding each side = 64px gap */
   column-width: calc(100vw - 64px);
   column-gap:64px;
   padding:0 32px;
-  /* Typography */
   font-family:var(--font-read);
   font-size:22px;line-height:1.7;
   color:var(--text);
-  /* Animation */
   transition:transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
 }
 .rdr-content p{margin-bottom:1.5em;text-align:justify;}
-.rdr-content b{font-weight:700;} /* For Bionic Reading */
+.rdr-content b{font-weight:700;}
 
 /* Tap Zones */
 .tap-zone{position:absolute;top:0;bottom:0;z-index:20;}
@@ -168,7 +165,7 @@ button{font-family:var(--font-ui);background:none;border:none;color:var(--text);
 .toggle-btn{padding:8px 16px;border-radius:100px;border:1px solid var(--text-faint);font-size:14px;font-weight:500;}
 .toggle-btn.active{background:var(--text);color:var(--bg);border-color:var(--text);}
 
-/* ═══ STATS (Minimal) ═══ */
+/* ═══ STATS ═══ */
 .stats-wrap{padding:24px;display:flex;flex-direction:column;gap:40px;}
 .stat-huge{font-size:72px;font-weight:300;letter-spacing:-3px;line-height:1;margin-bottom:8px;}
 .stat-lbl{font-size:12px;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);font-weight:500;}
@@ -191,9 +188,28 @@ button{font-family:var(--font-ui);background:none;border:none;color:var(--text);
   font-weight:600;font-size:14px;box-shadow:0 10px 30px rgba(0,0,0,0.3);
   z-index:150;display:none;
 }
+
+/* ═══ AUTH OVERLAY ═══ */
+#authOverlay {
+  position: fixed; inset: 0; background: var(--bg); z-index: 9999;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 24px;
+  transition: opacity 0.4s;
+}
+.auth-btn {
+  background: var(--text); color: var(--bg); padding: 14px 28px; border-radius: 100px;
+  font-size: 16px; font-weight: 600; cursor: pointer; border: none; font-family: var(--font-ui);
+}
   </style>
 </head>
 <body>
+
+<div id="authOverlay">
+  <div class="logo" style="font-size: 48px; margin-bottom: 8px;">PageHabit</div>
+  <p style="color: var(--text-muted); text-align: center; max-width: 300px; margin-bottom: 20px;">Sign in to sync your library, progress, and highlights across all devices.</p>
+  <button class="auth-btn" onclick="App.signIn()">Sign in with Google</button>
+  <button class="hdr-btn" style="font-size: 13px; margin-top: 10px;" onclick="App.skipAuth()">Continue Offline (No Sync)</button>
+</div>
+
 <div id="app">
   <div class="toast" id="toast"></div>
   <button class="quote-btn" id="saveQuoteBtn" onclick="App.saveQuote()">Save Quote</button>
@@ -303,13 +319,71 @@ button{font-family:var(--font-ui);background:none;border:none;color:var(--text);
             <div class="stat-lbl">Clear Cache</div>
             <button class="hdr-btn" onclick="App.clearCache()">Reset Books</button>
           </div>
+          <div class="set-row">
+            <div class="stat-lbl" id="authStatusLbl">Account</div>
+            <button class="hdr-btn" onclick="App.authAction()" id="authActionBtn">Sign In</button>
+          </div>
         </div>
       </div>
     </div>
   </div>
 </div>
 
-<script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+/* ── FIREBASE ── */
+const firebaseConfig = {
+  apiKey: "AIzaSyDPQxGMh5KbXmwAk2f0Xmh8E6QWcNib110",
+  authDomain: "pagehabit-6c7df.firebaseapp.com",
+  projectId: "pagehabit-6c7df",
+  storageBucket: "pagehabit-6c7df.firebasestorage.app",
+  messagingSenderId: "318714685612",
+  appId: "1:318714685612:web:09a8c1cc0cae8abc1fd709",
+  measurementId: "G-HQ4TQKQZGZ"
+};
+
+const fbApp = initializeApp(firebaseConfig);
+const auth = getAuth(fbApp);
+const db = getFirestore(fbApp);
+const provider = new GoogleAuthProvider();
+
+let currentUser = null;
+
+onAuthStateChanged(auth, async (user) => {
+  if (user) {
+    currentUser = user;
+    document.getElementById('authOverlay').style.display = 'none';
+    document.getElementById('authStatusLbl').textContent = `Logged in as ${user.displayName.split(' ')[0]}`;
+    document.getElementById('authActionBtn').textContent = 'Sign Out';
+    toast('Logged in successfully!');
+    
+    // Pull Cloud State
+    try {
+      const docSnap = await getDoc(doc(db, "users", user.uid));
+      if(docSnap.exists()) {
+        const data = docSnap.data();
+        if(data.settings) S.settings = {...S.settings, ...data.settings};
+        if(data.stats) S.stats = {...S.stats, ...data.stats};
+        if(data.progress) S.progress = {...S.progress, ...data.progress};
+        if(data.quotes) S.quotes = data.quotes;
+        App.applySettingsUI();
+        App.renderStats();
+        App.renderLib();
+        saveState(); // Update local storage with fresh cloud data
+      }
+    } catch(e) {
+      console.log('Error pulling cloud data', e);
+    }
+  } else {
+    currentUser = null;
+    document.getElementById('authStatusLbl').textContent = 'Account';
+    document.getElementById('authActionBtn').textContent = 'Sign In';
+  }
+});
+
 /* ── PWA REGISTRATION ── */
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW setup failed', err));
@@ -321,9 +395,9 @@ const GH_API=`https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${GH_
 
 /* ── STATE ── */
 let S={
-  books:{},          // filename → {title,text}
-  progress:{},       // filename → curPage
-  quotes:[],         // {text, src}
+  books:{},          
+  progress:{},       
+  quotes:[],         
   stats:{streak:0,pages:0,lastDay:null,days:[],wpm:200},
   settings:{theme:'dark',active:null,font:'serif',fontSize:22,bionic:false}
 };
@@ -332,8 +406,33 @@ let totalPages=1;
 let pageStartTime=0;
 let currentSelection='';
 
-function saveState(){try{localStorage.setItem('zh2',JSON.stringify(S));}catch(e){}}
-function loadState(){try{const raw=localStorage.getItem('zh2');if(raw){const p=JSON.parse(raw);if(p.settings)S.settings={...S.settings,...p.settings};if(p.stats)S.stats={...S.stats,...p.stats};if(p.books)S.books=p.books;if(p.progress)S.progress=p.progress;if(p.quotes)S.quotes=p.quotes;}}catch(e){}}
+// Modifed saveState to sync to Firestore
+function saveState(){
+  try{localStorage.setItem('zh2',JSON.stringify(S));}catch(e){}
+  if(currentUser) {
+    // Fire and forget cloud sync
+    setDoc(doc(db, "users", currentUser.uid), {
+      progress: S.progress,
+      stats: S.stats,
+      settings: S.settings,
+      quotes: S.quotes
+    }, {merge: true}).catch(e => console.log('Sync err', e));
+  }
+}
+
+function loadState(){
+  try{
+    const raw=localStorage.getItem('zh2');
+    if(raw){
+      const p=JSON.parse(raw);
+      if(p.settings)S.settings={...S.settings,...p.settings};
+      if(p.stats)S.stats={...S.stats,...p.stats};
+      if(p.books)S.books=p.books;
+      if(p.progress)S.progress=p.progress;
+      if(p.quotes)S.quotes=p.quotes;
+    }
+  }catch(e){}
+}
 const today=()=>new Date().toISOString().slice(0,10);
 function toast(msg,ms=2500){
   const el=document.getElementById('toast');
@@ -383,7 +482,6 @@ async function parseEpub(buf){
 
 function cleanTitle(fn){return fn.replace(/\.epub$/i,'').replace(/[-_]/g,' ').trim();}
 
-/* ── BIONIC READING ENGINE ── */
 function applyBionic(text) {
   if(!S.settings.bionic) return text;
   return text.split(/(\s+)/).map(word => {
@@ -397,6 +495,22 @@ function applyBionic(text) {
 
 /* ── APP LOGIC ── */
 const App={
+  // Auth Functions
+  signIn() {
+    signInWithPopup(auth, provider).catch(e => toast('Sign in failed: ' + e.message));
+  },
+  skipAuth() {
+    document.getElementById('authOverlay').style.display = 'none';
+    toast('Running in offline mode');
+  },
+  authAction() {
+    if(currentUser) {
+      signOut(auth).then(()=>{ toast('Signed out'); });
+    } else {
+      this.signIn();
+    }
+  },
+
   go(view){
     if(view==='reader') document.getElementById('mainHdr').style.display='none';
     else document.getElementById('mainHdr').style.display='flex';
@@ -474,14 +588,10 @@ const App={
     const book=S.books[fn];
     const content=document.getElementById('rdrContent');
     
-    // Parse and apply Bionic if needed
     const paragraphs = book.text.split('\n\n').filter(p=>p.trim().length>0);
     content.innerHTML = paragraphs.map(p => `<p>${applyBionic(p)}</p>`).join('');
-    
-    // Reset transform to measure
     content.style.transform='translateX(0)';
     
-    // Wait for DOM to render the new text size/font
     requestAnimationFrame(()=>{
       setTimeout(()=>{
         totalPages = Math.max(1, Math.ceil(content.scrollWidth / window.innerWidth));
@@ -489,7 +599,7 @@ const App={
         S.progress[fn] = cur; saveState();
         this.updatePageUI();
         pageStartTime = Date.now();
-      }, 50); // slight delay ensures layout is complete
+      }, 50); 
     });
   },
 
@@ -498,29 +608,20 @@ const App={
     let cur=S.progress[fn]||0;
     const next=cur+dir;
     
-    // WPM Tracking logic
     if (dir > 0 && pageStartTime > 0) {
       const elapsedSec = (Date.now() - pageStartTime) / 1000;
-      // Rough estimate of words on a page based on total length / total pages
       const bookWords = S.books[fn].text.split(/\s+/).length;
       const wordsOnPage = bookWords / totalPages;
-      
-      // If they spent at least 5 seconds reading (not just spam clicking)
       if (elapsedSec > 5) {
         const pageWpm = (wordsOnPage / elapsedSec) * 60;
-        // Exponential moving average to smooth it out
         S.stats.wpm = Math.round((S.stats.wpm * 0.8) + (pageWpm * 0.2));
-        // clamp to sane values
         S.stats.wpm = Math.max(50, Math.min(800, S.stats.wpm));
       }
     }
     
     if(next>=0 && next<totalPages){
       S.progress[fn]=next;
-      if(dir>0){
-        S.stats.pages++;
-        updateStreak();
-      }
+      if(dir>0){ S.stats.pages++; updateStreak(); }
       saveState();
       this.updatePageUI();
       pageStartTime = Date.now();
@@ -540,13 +641,11 @@ const App={
     document.getElementById('rProgFill').style.width=pct+'%';
     document.getElementById('rPctLbl').textContent=pct+'%';
     
-    // Update Time Est
     const wordsLeft = (totalPages - cur) * (S.books[fn].text.split(/\s+/).length / totalPages);
     const minsLeft = Math.max(1, Math.ceil(wordsLeft / (S.stats.wpm||200)));
     document.getElementById('rTimeEst').textContent=`~${minsLeft} min left`;
   },
 
-  /* ── SETTINGS (Aa) ── */
   toggleSettings(){
     const s=document.getElementById('settingsSheet');
     const b=document.getElementById('sheetBd');
@@ -558,21 +657,18 @@ const App={
   },
   
   applySettingsUI(){
-    // Fonts
     let fFam = "'Lora', Georgia, serif";
     if(S.settings.font==='sans') fFam = "'Inter', sans-serif";
     if(S.settings.font==='mono') fFam = "'JetBrains Mono', monospace";
     document.documentElement.style.setProperty('--font-read', fFam);
     document.getElementById('rdrContent').style.fontSize = (S.settings.fontSize || 22) + 'px';
     
-    // Theme colors
     let tc = '#000000';
     if(S.settings.theme==='light' || S.settings.theme==='eink') tc='#ffffff';
     if(S.settings.theme==='sepia') tc='#f4ecd8';
     document.documentElement.setAttribute('data-theme',S.settings.theme);
     document.getElementById('themeColor').content = tc;
     
-    // UI active states
     document.querySelectorAll('#settingsSheet .active').forEach(e=>e.classList.remove('active'));
     document.getElementById('tm-'+S.settings.theme)?.classList.add('active');
     document.getElementById('ft-'+S.settings.font)?.classList.add('active');
@@ -583,14 +679,13 @@ const App={
   },
 
   setTheme(t){ S.settings.theme=t; saveState(); this.applySettingsUI(); },
-  setFont(f){ S.settings.font=f; saveState(); this.applySettingsUI(); this.openReader(); /* recalc pages */ },
+  setFont(f){ S.settings.font=f; saveState(); this.applySettingsUI(); this.openReader(); },
   setSize(d){ 
-    S.settings.fontSize = Math.max(14, Math.min(48, S.settings.fontSize + d)); 
+    S.settings.fontSize = Math.max(14, Math.min(48, (S.settings.fontSize||22) + d)); 
     saveState(); this.applySettingsUI(); this.openReader(); 
   },
   toggleBionic(){ S.settings.bionic = !S.settings.bionic; saveState(); this.applySettingsUI(); this.openReader(); },
 
-  /* ── QUOTES ── */
   saveQuote(){
     if(!currentSelection) return;
     const fn = S.settings.active;
@@ -627,6 +722,9 @@ const App={
   }
 };
 
+// Expose App to global window for inline event handlers
+window.App = App;
+
 /* ── SELECTION LISTENER ── */
 document.addEventListener('selectionchange', () => {
   const btn = document.getElementById('saveQuoteBtn');
@@ -647,13 +745,12 @@ window.onload=()=>{
   App.fetchBooks();
   App.go('library');
   
-  // Handle resize for reader recalibration
   let resizeTimer;
   window.addEventListener('resize',()=>{
     clearTimeout(resizeTimer);
     resizeTimer=setTimeout(()=>{
       if(document.getElementById('view-reader').classList.contains('active')){
-        App.openReader(); // recalc totalPages
+        App.openReader(); 
       }
     },300);
   });
