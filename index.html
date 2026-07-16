@@ -138,15 +138,20 @@ button{font-family:var(--font-ui);background:none;border:none;color:var(--text);
 .rdr-bot{
   padding:16px 24px calc(var(--safe-b) + 16px);
   display:flex;align-items:center;justify-content:space-between;
-  font-size:12px;color:var(--text-muted);
-  width:100%; max-width:1400px; margin:0 auto;
+  font-family:var(--font-ui);font-size:12px;font-weight:600;color:var(--text-muted);
+  width:100%; max-width:800px; margin:0 auto; z-index:100;
 }
-.rdr-progress-bar{
-  flex:1;margin:0 24px;height:1px;background:var(--text-faint);position:relative;
+.rdr-slider {
+  flex:1; -webkit-appearance:none; background:transparent; margin:0 16px; height:24px; outline:none; cursor:pointer;
 }
-.rdr-progress-fill{
-  position:absolute;left:0;top:-1px;bottom:-1px;background:var(--accent);transition:width 0.3s;
+.rdr-slider::-webkit-slider-runnable-track {
+  width:100%; height:4px; background:var(--text-faint); border-radius:2px;
 }
+.rdr-slider::-webkit-slider-thumb {
+  -webkit-appearance:none; height:16px; width:16px; border-radius:8px; background:var(--text); margin-top:-6px;
+  box-shadow:0 2px 8px rgba(0,0,0,0.3); transition:transform 0.1s;
+}
+.rdr-slider::-webkit-slider-thumb:active { transform:scale(1.3); }
 
 /* ═══ Aa SETTINGS SHEET ═══ */
 .sheet-backdrop{
@@ -313,11 +318,11 @@ button{font-family:var(--font-ui);background:none;border:none;color:var(--text);
       <div class="rdr-content" id="rdrContent"></div>
     </div>
 
-    <div class="rdr-bot">
-      <div id="rPageLbl">1 / 1</div>
-      <div class="rdr-progress-bar"><div class="rdr-progress-fill" id="rProgFill" style="width:0%"></div></div>
-      <div id="rPctLbl">0%</div>
-    </div>
+      <div class="rdr-bot">
+        <div id="rPageLbl">1 / 1</div>
+        <input type="range" class="rdr-slider" id="rSlider" min="0" max="100" value="0" oninput="App.slidePage(this.value)" onchange="App.slidePageEnd(this.value)">
+        <div id="rPctLbl">0%</div>
+      </div>
       
     <div id="hlPill" class="hl-pill">
       <button class="hl-btn hl-yellow" onclick="App.applyHighlight('yellow')"></button>
@@ -891,9 +896,13 @@ const App={
     content.style.transform = `translateX(-${shiftDist * cur}px)`;
     
     document.getElementById('rPageLbl').textContent=`${cur+1} / ${totalPages}`;
-    const pct = Math.round(((cur+1)/totalPages)*100);
-    document.getElementById('rProgFill').style.width=pct+'%';
-    document.getElementById('rPctLbl').textContent=pct+'%';
+    
+    const sliderPct = Math.round((cur / Math.max(1, totalPages - 1)) * 100);
+    const slider = document.getElementById('rSlider');
+    if (slider) slider.value = sliderPct;
+    
+    const readPct = Math.round(((cur+1)/totalPages)*100);
+    document.getElementById('rPctLbl').textContent = readPct + '%';
     
     const book = await idbGet(fn);
     if(book) {
@@ -913,6 +922,31 @@ const App={
     }else{
       s.classList.add('open');b.classList.add('show');
     }
+  },
+  
+  slidePage(val) {
+    const content = document.getElementById('rdrContent');
+    let target = Math.floor((val / 100) * (totalPages - 1));
+    target = Math.max(0, Math.min(target, totalPages - 1));
+    
+    const ww = window.innerWidth;
+    const pad = Math.max(32, (ww - 1400) / 2);
+    const shiftDist = (ww - (pad * 2)) + 64;
+    content.style.transform = `translateX(-${shiftDist * target}px)`;
+    
+    document.getElementById('rPageLbl').textContent=`${target+1} / ${totalPages}`;
+    const readPct = Math.round(((target+1)/totalPages)*100);
+    document.getElementById('rPctLbl').textContent = readPct + '%';
+  },
+  
+  slidePageEnd(val) {
+    const fn=S.settings.active;
+    let target = Math.floor((val / 100) * (totalPages - 1));
+    target = Math.max(0, Math.min(target, totalPages - 1));
+    S.progress[fn] = target;
+    saveState();
+    this.updatePageUI();
+    pageStartTime = Date.now();
   },
   
   toggleTOC() {
