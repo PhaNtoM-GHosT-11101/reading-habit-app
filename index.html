@@ -215,8 +215,12 @@ button{font-family:var(--font-ui);background:none;border:none;color:var(--text);
 <div id="authOverlay">
   <div class="logo" style="font-size: 48px; margin-bottom: 8px;">PageHabit</div>
   <p style="color: var(--text-muted); text-align: center; max-width: 300px; margin-bottom: 20px;">Sign in to sync your library, progress, and highlights across all devices.</p>
-  <button class="auth-btn" onclick="App.signIn()">Sign in with Google</button>
-  <button class="hdr-btn" style="font-size: 13px; margin-top: 10px;" onclick="App.skipAuth()">Continue Offline (No Sync)</button>
+  <button class="hdr-btn" onclick="App.signIn()" style="width:100%;padding:14px;background:var(--text);color:var(--bg);margin-bottom:16px;">Sign in with Google</button>
+  <button class="hdr-btn" onclick="App.skipAuth()" style="width:100%;padding:14px;opacity:0.8;">Continue Offline</button>
+    
+  <div style="margin-top:40px; text-align:center; font-family:var(--font-read); font-style:italic; font-size:14px; color:var(--text-muted); opacity:0.6;">
+    Crafted by Aditya Priyadarshi
+  </div>
 </div>
 
 <div id="app">
