@@ -1,4 +1,4 @@
-const CACHE_NAME = 'zenhabit-v11';
+const CACHE_NAME = 'pagehabit-v1';
 const ASSETS = [
   './',
   './index.html',
@@ -9,44 +9,44 @@ const ASSETS = [
 
 self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => {
-      return cache.addAll(ASSETS);
-    })
+    caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS))
   );
   self.skipWaiting();
 });
 
 self.addEventListener('activate', event => {
   event.waitUntil(
-    caches.keys().then(keys => {
-      return Promise.all(
-        keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key))
-      );
-    })
+    caches.keys().then(keys =>
+      Promise.all(keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key)))
+    )
   );
   self.clients.claim();
 });
 
 self.addEventListener('fetch', event => {
-  // Only cache GET requests
   if (event.request.method !== 'GET') return;
-  
-  // Don't cache GitHub API calls so we can always check for new books if online
-  if (event.request.url.includes('api.github.com')) {
+
+  // Never cache API calls — always go to network
+  if (event.request.url.includes('api.github.com') ||
+      event.request.url.includes('firestore.googleapis.com') ||
+      event.request.url.includes('dictionaryapi.dev') ||
+      event.request.url.includes('identitytoolkit.googleapis.com')) {
     event.respondWith(
       fetch(event.request).catch(() => new Response(JSON.stringify([]), {
-        headers: {'Content-Type': 'application/json'}
+        headers: { 'Content-Type': 'application/json' }
       }))
     );
     return;
   }
 
-  // Network first, fallback to cache
+  // Network first, fallback to cache for everything else
   event.respondWith(
     fetch(event.request)
       .then(response => {
-        const resClone = response.clone();
-        caches.open(CACHE_NAME).then(cache => cache.put(event.request, resClone));
+        if (response && response.status === 200) {
+          const resClone = response.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(event.request, resClone));
+        }
         return response;
       })
       .catch(() => caches.match(event.request))
