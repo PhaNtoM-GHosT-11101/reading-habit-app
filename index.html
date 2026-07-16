@@ -286,6 +286,7 @@ button{font-family:var(--font-ui);background:none;border:none;color:var(--text);
     <div class="hdr" style="padding:24px 24px 0 24px; display:flex; justify-content:space-between; align-items:center;">
       <div style="font-size:24px;font-family:var(--font-ui);font-weight:700;display:flex;gap:16px;">
         <span id="tabCurated" onclick="App.setLibTab('curated')" style="cursor:pointer; transition:opacity 0.2s;">Curated</span>
+        <span id="tabToRead" onclick="App.setLibTab('toread')" style="cursor:pointer; opacity:0.4; transition:opacity 0.2s;">To Read</span>
         <span id="tabCommunity" onclick="App.setLibTab('community')" style="cursor:pointer; opacity:0.4; transition:opacity 0.2s;">Community</span>
       </div>
     </div>
@@ -552,34 +553,24 @@ function idbKeys() {
 }
 
 function saveState(){
-  try{localStorage.setItem('zh2',JSON.stringify(S));}catch(e){}
+  try{localStorage.setItem('zhState',JSON.stringify(S));}catch(e){}
   if(currentUser) {
     setDoc(doc(db, "users", currentUser.uid), {
       progress: S.progress,
       stats: S.stats,
       settings: S.settings,
-      quotes: S.quotes
+      quotes: S.quotes,
+      bookmarks: S.bookmarks
     }, {merge: true}).catch(e => console.log('Sync err', e));
   }
 }
 
 function loadState(){
-  try{
-    const raw=localStorage.getItem('zh2');
-    if(raw){
-      const p=JSON.parse(raw);
-      if(p.settings)S.settings={...S.settings,...p.settings};
-      if(p.stats)S.stats={...S.stats,...p.stats};
-      if(p.progress)S.progress=p.progress;
-      if(p.quotes)S.quotes=p.quotes;
-      // Migrate old books to IDB
-      if(p.books) {
-        for(let key in p.books) idbPut(key, p.books[key]);
-        delete p.books;
-        localStorage.setItem('zh2', JSON.stringify(p));
-      }
-    }
-  }catch(e){}
+  try{const saved=localStorage.getItem('zhState');
+  if(saved){
+    S=JSON.parse(saved);
+    if(!S.bookmarks) S.bookmarks=[];
+  }}catch(e){}
 }
 const today=()=>new Date().toISOString().slice(0,10);
 function toast(msg,ms=2500){
@@ -708,9 +699,9 @@ const App={
       const snap = await getDocs(q);
       communityFiles = snap.docs.map(d => {
         const data = d.data();
-        return { name: d.id, title: data.title, download_url: 'firestore://' + d.id, uploader: data.uploaderName };
+        return { name: d.id, title: data.title, download_url: 'firestore://' + d.id, uploader: data.uploaderName, votes: data.votes || 0 };
       });
-      this.renderLib();
+      if(libTab === 'community' || libTab === 'toread') this.renderLib();
     } catch(e) {
       list.innerHTML=`<div class="loader">Failed to load community books.</div>`;
     }
@@ -719,10 +710,11 @@ const App={
   setLibTab(tab) {
     libTab = tab;
     document.getElementById('tabCurated').style.opacity = tab==='curated' ? '1' : '0.4';
+    document.getElementById('tabToRead').style.opacity = tab==='toread' ? '1' : '0.4';
     document.getElementById('tabCommunity').style.opacity = tab==='community' ? '1' : '0.4';
     document.getElementById('fabUpload').style.display = (tab==='community' && currentUser) ? 'flex' : 'none';
     this.renderLib();
-    if(tab==='community' && communityFiles.length===0) this.fetchCommunityBooks();
+    if((tab==='community' || tab==='toread') && communityFiles.length===0) this.fetchCommunityBooks();
   },
 
   async handleUpload(e) {
@@ -766,10 +758,13 @@ const App={
 
   async renderLib(){
     const list=document.getElementById('libList');
-    const files = libTab === 'curated' ? ghFiles : communityFiles;
+    let files = [];
+    if(libTab === 'curated') files = ghFiles;
+    else if(libTab === 'community') files = communityFiles;
+    else files = [...ghFiles, ...communityFiles].filter(f => S.bookmarks.includes(f.name));
     
     if(!files.length){
-      list.innerHTML=`<div class="loader">${libTab==='curated' ? 'No books found in /books/' : 'No community books yet.'}</div>`;
+      list.innerHTML=`<div class="loader">${libTab==='curated' ? 'No books found in /books/' : (libTab==='toread' ? 'No saved books.' : 'No community books yet.')}</div>`;
       return;
     }
     list.innerHTML='';
@@ -782,15 +777,31 @@ const App={
       const cached = cachedKeys.includes(f.name);
       const prog = S.progress[f.name]||0;
       let metaStr = cached ? 'Stored Locally' : 'Tap to Download';
-      if(libTab === 'community' && f.uploader) metaStr = 'Uploaded by ' + f.uploader + ' • ' + metaStr;
+      
+      const isBookmarked = S.bookmarks.includes(f.name);
+      const bkmkIcon = isBookmarked ? '♥' : '♡';
+      
+      let extraStr = '';
+      if(f.uploader) {
+        extraStr = `<div style="display:flex; align-items:center; gap:8px;">
+          <span>Uploaded by ${f.uploader}</span>
+          <button style="background:var(--ui); color:var(--text); border:none; padding:4px 8px; border-radius:12px; cursor:pointer;" onclick="event.stopPropagation(); App.upvoteBook('${f.name}')">▲ ${f.votes || 0}</button>
+        </div>`;
+      }
       
       const el=document.createElement('div');
       el.className='lib-item';
       el.onclick=()=>this.bookTap(f.name, tObj.title, f.download_url);
       el.innerHTML=`
-        <div class="lib-title" style="font-weight:700;">${tObj.title}</div>
+        <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+          <div class="lib-title" style="font-weight:700;">${tObj.title}</div>
+          <button onclick="event.stopPropagation(); App.toggleBookmark('${f.name}')" style="background:none; border:none; font-size:24px; cursor:pointer; color:var(--text); padding:0; line-height:1;">${bkmkIcon}</button>
+        </div>
         ${tObj.author ? `<div class="lib-meta" style="color:var(--text-muted); font-size:14px; margin-bottom:8px; text-transform:none;">${tObj.author}</div>` : ''}
-        <div class="lib-meta">${metaStr}</div>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+          <div class="lib-meta">${metaStr}</div>
+          ${extraStr}
+        </div>
         <div class="lib-prog"><div class="lib-prog-fill" style="width:${prog>0 ? '100' : '0'}%"></div></div>
       `;
       list.appendChild(el);
@@ -1087,14 +1098,10 @@ const App={
 
   setupInteractions() {
     const content = document.getElementById('rdrContent');
-    content.addEventListener('dblclick', async (e) => {
-      const sel = window.getSelection();
-      const word = sel.toString().trim();
-      if(!word || word.includes(' ')) return;
-      this.openDict(word);
-    });
-    document.addEventListener('selectionchange', () => {
-      if(document.getElementById('view-reader').classList.contains('active')) {
+    
+    const handleSelection = () => {
+      setTimeout(() => {
+        if(!document.getElementById('view-reader').classList.contains('active')) return;
         const sel = window.getSelection();
         const pill = document.getElementById('hlPill');
         if(!sel.rangeCount || sel.isCollapsed) {
@@ -1111,8 +1118,40 @@ const App={
         pill.style.left = (rect.left + rect.width / 2) + 'px';
         pill.style.top = rect.top + 'px';
         currentSelectionRange = range;
+      }, 50);
+    };
+
+    document.addEventListener('selectionchange', handleSelection);
+    document.addEventListener('mouseup', handleSelection);
+    document.addEventListener('touchend', handleSelection);
+  },
+  
+  toggleBookmark(name) {
+    if(!S.bookmarks) S.bookmarks = [];
+    if(S.bookmarks.includes(name)) {
+      S.bookmarks = S.bookmarks.filter(b => b !== name);
+    } else {
+      S.bookmarks.push(name);
+    }
+    saveState();
+    this.renderLib();
+  },
+  
+  async upvoteBook(bookId) {
+    if(!currentUser) { toast('Please sign in to upvote!'); return; }
+    try {
+      const docRef = doc(db, "community_books", bookId);
+      const snap = await getDoc(docRef);
+      if(snap.exists()) {
+        const v = (snap.data().votes || 0) + 1;
+        await updateDoc(docRef, { votes: v });
+        communityFiles.find(f => f.name === bookId).votes = v;
+        this.renderLib();
+        toast('Upvoted!');
       }
-    });
+    } catch(e) {
+      toast('Failed to upvote');
+    }
   },
 
   async applyHighlight(color) {
@@ -1186,7 +1225,7 @@ const App={
   saveQuote(){
     if(!currentSelection) return;
     const fn = S.settings.active;
-    const bookTitle = S.books[fn]?.title || 'Unknown';
+    const bookTitle = 'Unknown';
     if(!S.quotes) S.quotes = [];
     S.quotes.push({ text: currentSelection, src: bookTitle });
     saveState();
@@ -1196,9 +1235,9 @@ const App={
   },
 
   renderStats(){
-    document.getElementById('stStreak').textContent=S.stats.streak||0;
-    document.getElementById('stPages').textContent=S.stats.pages||0;
-    document.getElementById('stWpm').textContent=S.stats.wpm||200;
+    document.getElementById('stStreak').textContent=S.stats.currentStreak||0;
+    document.getElementById('stPages').textContent=S.stats.booksRead||0;
+    document.getElementById('stWpm').textContent=S.stats.wordsRead||200;
     
     const qList = document.getElementById('quotesList');
     if(!S.quotes || S.quotes.length===0){
@@ -1219,20 +1258,9 @@ const App={
   }
 };
 
-// Expose App to global window for inline event handlers
 window.App = App;
 
-/* ── SELECTION LISTENER ── */
-document.addEventListener('selectionchange', () => {
-  const btn = document.getElementById('saveQuoteBtn');
-  const sel = window.getSelection().toString().trim();
-  if(sel.length > 5 && document.getElementById('view-reader').classList.contains('active')){
-    currentSelection = sel;
-    btn.style.display = 'block';
-  } else {
-    btn.style.display = 'none';
-  }
-});
+/* DELETED REDUNDANT LISTENER */
 
 /* ── BOOT ── */
 window.onload = async () => {
