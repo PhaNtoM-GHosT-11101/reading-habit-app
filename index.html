@@ -207,13 +207,13 @@ button{font-family:var(--font-ui);background:none;border:none;color:var(--text);
 .hl-pill {
   position:fixed; background:var(--text); border-radius:30px; padding:8px 16px;
   display:none; gap:12px; box-shadow:0 8px 24px rgba(0,0,0,0.2); z-index:2000;
-  transform:translate(-50%, -100%); margin-top:-10px;
+  transform:translate(-50%, -100%); margin-top:-10px; align-items:center;
 }
 .hl-pill::after {
   content:''; position:absolute; bottom:-6px; left:50%; transform:translateX(-50%);
   border-width:6px 6px 0; border-style:solid; border-color:var(--text) transparent transparent transparent;
 }
-.hl-btn { width:24px; height:24px; border-radius:12px; border:none; cursor:pointer; }
+.hl-btn { width:24px; height:24px; border-radius:12px; border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; }
 .hl-yellow { background:#f1c40f; }
 .hl-green { background:#2ecc71; }
 .hl-pink { background:#e74c3c; }
@@ -307,6 +307,7 @@ button{font-family:var(--font-ui);background:none;border:none;color:var(--text);
       <div class="rdr-back" onclick="App.go('library')">← Back</div>
       <div id="rTimeEst">~ min</div>
       <div class="rdr-tools">
+        <button class="hdr-btn" title="Search" onclick="App.toggleSearch()">🔍</button>
         <button class="hdr-btn" title="Fullscreen" onclick="App.toggleFullscreen()">⛶</button>
         <button class="hdr-btn" title="Chapters" onclick="App.toggleTOC()">☰</button>
         <button class="hdr-btn" title="Appearance" onclick="App.toggleSettings()">Aa</button>
@@ -329,6 +330,8 @@ button{font-family:var(--font-ui);background:none;border:none;color:var(--text);
       <button class="hl-btn hl-yellow" onclick="App.applyHighlight('yellow')"></button>
       <button class="hl-btn hl-green" onclick="App.applyHighlight('green')"></button>
       <button class="hl-btn hl-pink" onclick="App.applyHighlight('pink')"></button>
+      <div style="width:1px; height:16px; background:var(--bg); opacity:0.3; margin:0 4px;"></div>
+      <button class="hl-btn hl-dict" style="background:var(--ui); color:var(--text); font-size:12px;" onclick="App.triggerDictFromPill()">📖</button>
     </div>
       
     <div class="sheet-backdrop" id="dictBd" onclick="App.closeDict()"></div>
@@ -336,6 +339,14 @@ button{font-family:var(--font-ui);background:none;border:none;color:var(--text);
       <div class="dict-word" id="dictWord">Loading...</div>
       <div class="dict-ph" id="dictPh"></div>
       <div id="dictDefs"></div>
+    </div>
+    
+    <div class="toc-sidebar" id="searchSidebar">
+      <div class="toc-hdr">Search <span class="toc-close" onclick="App.toggleSearch()">×</span></div>
+      <div style="padding:16px;">
+        <input type="text" id="searchInput" placeholder="Search book..." style="width:100%; padding:12px; border-radius:8px; border:1px solid var(--text-faint); background:var(--bg); color:var(--text); font-family:var(--font-ui); font-size:16px;" onkeydown="if(event.key==='Enter') App.doSearch()">
+      </div>
+      <div class="toc-list" id="searchList"></div>
     </div>
     
     <div class="toc-sidebar" id="tocSidebar">
@@ -954,6 +965,66 @@ const App={
     document.getElementById('tocSidebar').classList.toggle('active');
   },
   
+  toggleSearch() {
+    const sb = document.getElementById('searchSidebar');
+    sb.classList.toggle('active');
+    if (sb.classList.contains('active')) {
+      setTimeout(() => document.getElementById('searchInput').focus(), 300);
+    }
+  },
+  
+  async doSearch() {
+    const q = document.getElementById('searchInput').value.trim().toLowerCase();
+    const list = document.getElementById('searchList');
+    if(q.length < 3) {
+      list.innerHTML = '<div style="padding:16px; color:var(--text-muted); font-size:14px;">Enter at least 3 characters.</div>';
+      return;
+    }
+    list.innerHTML = '<div class="loader">Searching...</div>';
+    
+    const fn = S.settings.active;
+    const book = await idbGet(fn);
+    if(!book) return;
+    
+    const text = book.text;
+    const lowerText = text.toLowerCase();
+    let results = [];
+    let idx = lowerText.indexOf(q);
+    
+    while (idx !== -1 && results.length < 50) {
+      const start = Math.max(0, idx - 40);
+      const end = Math.min(text.length, idx + q.length + 40);
+      let snippet = text.slice(start, end).replace(/\n/g, ' ');
+      
+      const snipLower = snippet.toLowerCase();
+      const snipIdx = snipLower.indexOf(q);
+      if (snipIdx !== -1) {
+        snippet = snippet.slice(0, snipIdx) + `<b style="background:var(--accent); color:var(--bg); padding:0 2px;">` + snippet.slice(snipIdx, snipIdx + q.length) + `</b>` + snippet.slice(snipIdx + q.length);
+      }
+      
+      results.push({ index: idx, snippet: '... ' + snippet + ' ...' });
+      idx = lowerText.indexOf(q, idx + 1);
+    }
+    
+    list.innerHTML = '';
+    if (results.length === 0) {
+      list.innerHTML = '<div style="padding:16px; color:var(--text-muted); font-size:14px;">No results found.</div>';
+    } else {
+      results.forEach(res => {
+        const el = document.createElement('div');
+        el.className = 'toc-item';
+        el.style.fontSize = '14px';
+        el.style.lineHeight = '1.5';
+        el.innerHTML = res.snippet;
+        el.onclick = () => {
+          this.jumpToChapter(res.index);
+          this.toggleSearch();
+        };
+        list.appendChild(el);
+      });
+    }
+  },
+  
   toggleFullscreen() {
     if (!document.fullscreenElement) {
       document.documentElement.requestFullscreen().catch(err => toast('Fullscreen not supported'));
@@ -1055,6 +1126,18 @@ const App={
     } catch(e) {
       toast('Cannot highlight across paragraphs.');
     }
+  },
+
+  triggerDictFromPill() {
+    if(!currentSelectionRange) return;
+    const word = currentSelectionRange.toString().trim();
+    if (word.includes(' ')) {
+      toast('Select a single word to define.');
+      return;
+    }
+    document.getElementById('hlPill').style.display = 'none';
+    window.getSelection().removeAllRanges();
+    this.openDict(word);
   },
 
   async openDict(word) {
