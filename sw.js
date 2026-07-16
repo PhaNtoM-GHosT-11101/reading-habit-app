@@ -1,4 +1,4 @@
-const CACHE_NAME = 'zenhabit-v2';
+const CACHE_NAME = 'zenhabit-v3';
 const ASSETS = [
   './',
   './index.html',
