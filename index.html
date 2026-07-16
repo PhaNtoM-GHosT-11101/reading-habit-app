@@ -238,10 +238,21 @@ button{font-family:var(--font-ui);background:none;border:none;color:var(--text);
 
   <!-- LIBRARY -->
   <div class="view active" id="view-library">
+    <div class="hdr" style="padding:24px 24px 0 24px; display:flex; justify-content:space-between; align-items:center;">
+      <div style="font-size:24px;font-family:var(--font-ui);font-weight:700;display:flex;gap:16px;">
+        <span id="tabCurated" onclick="App.setLibTab('curated')" style="cursor:pointer; transition:opacity 0.2s;">Curated</span>
+        <span id="tabCommunity" onclick="App.setLibTab('community')" style="cursor:pointer; opacity:0.4; transition:opacity 0.2s;">Community</span>
+      </div>
+    </div>
     <div class="scroller">
       <div class="lib-list" id="libList">
         <div class="loader">Loading classic library...</div>
       </div>
+    </div>
+    <button id="fabUpload" class="hdr-btn" onclick="document.getElementById('uploadInput').click()" style="display:none; position:fixed; bottom:32px; right:32px; width:64px; height:64px; border-radius:32px; background:var(--text); color:var(--bg); font-size:32px; box-shadow:0 8px 24px rgba(0,0,0,0.2); justify-content:center; align-items:center; z-index:100; border:none; cursor:pointer;">+</button>
+    <input type="file" id="uploadInput" accept=".epub" style="display:none;" onchange="App.handleUpload(event)">
+    <div id="uploadToast" style="display:none; position:fixed; bottom:32px; left:50%; transform:translateX(-50%); background:var(--text); color:var(--bg); padding:16px 24px; border-radius:32px; font-family:var(--font-ui); z-index:200; box-shadow:0 8px 24px rgba(0,0,0,0.2);">
+      Uploading: <span id="uploadPct">0%</span>
     </div>
   </div>
 
@@ -349,7 +360,8 @@ button{font-family:var(--font-ui);background:none;border:none;color:var(--text);
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { getFirestore, doc, setDoc, getDoc, collection, getDocs, addDoc, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
 /* ── FIREBASE ── */
 const firebaseConfig = {
@@ -365,6 +377,7 @@ const firebaseConfig = {
 const fbApp = initializeApp(firebaseConfig);
 const auth = getAuth(fbApp);
 const db = getFirestore(fbApp);
+const storage = getStorage(fbApp);
 const provider = new GoogleAuthProvider();
 
 let currentUser = null;
@@ -408,7 +421,7 @@ if ('serviceWorker' in navigator) {
 
 /* ── CONFIG ── */
 const GH_OWNER='PhaNtoM-GHosT-11101', GH_REPO='reading-habit-app', GH_PATH='books';
-const GH_API=`https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${GH_PATH}`;
+const GH_API='https://api.github.com/repos/PhaNtoM-GHosT-11101/reading-habit-app/contents/books';
 
 /* ── STATE ── */
 let S={
@@ -419,15 +432,15 @@ let S={
   settings:{theme:'dark',active:null,font:'serif',fontSize:22,bionic:false}
 };
 let ghFiles=[];
+let communityFiles=[];
+let libTab='curated';
 let totalPages=1;
 let pageStartTime=0;
 let currentSelection='';
 
-// Modifed saveState to sync to Firestore
 function saveState(){
   try{localStorage.setItem('zh2',JSON.stringify(S));}catch(e){}
   if(currentUser) {
-    // Fire and forget cloud sync
     setDoc(doc(db, "users", currentUser.uid), {
       progress: S.progress,
       stats: S.stats,
@@ -512,13 +525,8 @@ function applyBionic(text) {
 
 /* ── APP LOGIC ── */
 const App={
-  // Auth Functions
   signIn() {
     signInWithPopup(auth, provider).catch(e => toast('Sign in failed: ' + e.message));
-  },
-  skipAuth() {
-    document.getElementById('authOverlay').style.display = 'none';
-    toast('Running in offline mode');
   },
   authAction() {
     if(currentUser) {
@@ -545,37 +553,93 @@ const App={
 
   async fetchBooks(){
     const list=document.getElementById('libList');
-    list.innerHTML='<div class="loader">Syncing library...</div>';
-    try{
-      const res=await fetch(GH_API,{headers:{'Accept':'application/vnd.github.v3+json'}});
-      if(!res.ok)throw new Error('API Error');
-      ghFiles=(await res.json()).filter(f=>f.name.toLowerCase().endsWith('.epub'));
-      this.renderLib();
-    }catch(e){
-      list.innerHTML=`<div class="loader">Failed to load. <button onclick="App.fetchBooks()" style="text-decoration:underline">Retry</button></div>`;
+    if(libTab==='curated') {
+      list.innerHTML='<div class="loader">Syncing library...</div>';
+      try{
+        const res=await fetch(GH_API,{headers:{'Accept':'application/vnd.github.v3+json'}});
+        if(!res.ok)throw new Error('API Error');
+        ghFiles=(await res.json()).filter(f=>f.name.toLowerCase().endsWith('.epub'));
+        this.renderLib();
+      }catch(e){
+        list.innerHTML=`<div class="loader">Failed to load. <button onclick="App.fetchBooks()" style="text-decoration:underline">Retry</button></div>`;
+      }
+    } else {
+      this.fetchCommunityBooks();
     }
+  },
+  
+  async fetchCommunityBooks(){
+    const list=document.getElementById('libList');
+    list.innerHTML='<div class="loader">Loading community books...</div>';
+    try {
+      const q = query(collection(db, "community_books"), orderBy("timestamp", "desc"));
+      const snap = await getDocs(q);
+      communityFiles = snap.docs.map(d => {
+        const data = d.data();
+        return { name: data.title + '.epub', title: data.title, download_url: data.url, uploader: data.uploaderName };
+      });
+      this.renderLib();
+    } catch(e) {
+      list.innerHTML=`<div class="loader">Failed to load community books.</div>`;
+    }
+  },
+  
+  setLibTab(tab) {
+    libTab = tab;
+    document.getElementById('tabCurated').style.opacity = tab==='curated' ? '1' : '0.4';
+    document.getElementById('tabCommunity').style.opacity = tab==='community' ? '1' : '0.4';
+    document.getElementById('fabUpload').style.display = (tab==='community' && currentUser) ? 'flex' : 'none';
+    this.renderLib();
+    if(tab==='community' && communityFiles.length===0) this.fetchCommunityBooks();
+  },
+
+  async handleUpload(e) {
+    const file = e.target.files[0];
+    if(!file || !currentUser) return;
+    document.getElementById('uploadToast').style.display = 'block';
+    const storageRef = ref(storage, 'books/' + Date.now() + '_' + file.name);
+    const task = uploadBytesResumable(storageRef, file);
+    task.on('state_changed', (snap) => {
+      document.getElementById('uploadPct').textContent = Math.round((snap.bytesTransferred / snap.totalBytes) * 100) + '%';
+    }, null, async () => {
+      const url = await getDownloadURL(task.snapshot.ref);
+      await addDoc(collection(db, "community_books"), {
+        title: file.name.replace('.epub',''),
+        url,
+        uploaderName: currentUser.displayName,
+        timestamp: serverTimestamp()
+      });
+      document.getElementById('uploadToast').style.display = 'none';
+      toast('Upload complete!');
+      this.fetchCommunityBooks();
+    });
   },
 
   renderLib(){
     const list=document.getElementById('libList');
-    if(!ghFiles.length){
-      list.innerHTML='<div class="loader">No books found in /books/</div>';
+    const files = libTab === 'curated' ? ghFiles : communityFiles;
+    
+    if(!files.length){
+      list.innerHTML=`<div class="loader">${libTab==='curated' ? 'No books found in /books/' : 'No community books yet.'}</div>`;
       return;
     }
     list.innerHTML='';
-    ghFiles.forEach(f=>{
-      const title=cleanTitle(f.name);
-      const cached=!!S.books[f.name];
-      const prog=S.progress[f.name]||0;
-      const metaStr = cached ? 'Stored Locally' : 'Tap to Download';
+    files.forEach(f=>{
+      const title = f.title || cleanTitle(f.name);
+      const cached = !!S.books[f.name];
+      let metaStr = cached ? 'Stored Locally' : 'Tap to Download';
+      if(libTab === 'community' && f.uploader) metaStr = 'Uploaded by ' + f.uploader + ' • ' + metaStr;
       
       const el=document.createElement('div');
       el.className='lib-item';
       el.onclick=()=>this.bookTap(f.name,title,f.download_url);
       el.innerHTML=`
-        <div class="lib-title">${title}</div>
-        <div class="lib-meta">${metaStr}</div>
-        ${cached && prog>0 ? `<div class="lib-prog"><div class="lib-prog-fill" style="width:100%"></div></div>` : ''}
+        <div class="lib-icon">${title.charAt(0).toUpperCase()}</div>
+        <div class="lib-info">
+          <div class="lib-title">${title}</div>
+          <div class="lib-meta">${metaStr}</div>
+          ${cached && prog>0 ? `<div class="lib-prog"><div class="lib-prog-fill" style="width:100%"></div></div>` : ''}
+        </div>
       `;
       list.appendChild(el);
     });
