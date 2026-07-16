@@ -2,11 +2,15 @@
 <html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
   <meta name="apple-mobile-web-app-capable" content="yes"/>
   <meta name="mobile-web-app-capable" content="yes"/>
   <meta name="theme-color" content="#000000" id="themeColor"/>
-  <title>PageHabit</title>
+  <meta name="description" content="PageHabit — A premium EPUB reader with cloud sync, community sharing, dictionary lookup, and immersive reading. Built by Aditya Priyadarshi."/>
+  <meta property="og:title" content="PageHabit — Premium EPUB Reader"/>
+  <meta property="og:description" content="Read classics, share books, track your habits. A beautiful, distraction-free reading experience."/>
+  <meta property="og:type" content="website"/>
+  <title>PageHabit — Premium EPUB Reader</title>
   <link rel="manifest" href="manifest.json"/>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,500;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
@@ -62,18 +66,19 @@ button{font-family:var(--font-ui);background:none;border:none;color:var(--text);
 .lib-info{flex:1;min-width:0;}
 .lib-title{font-family:var(--font-read);font-size:18px;line-height:1.3;font-weight:500;margin-bottom:4px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
 .lib-author{font-size:13px;color:var(--text-muted);margin-bottom:6px;}
-.lib-meta{font-size:11px;font-weight:500;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.8px;display:flex;align-items:center;gap:8px;}
+.lib-meta{font-size:11px;font-weight:500;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
 .lib-prog{height:2px;background:var(--text-faint);width:60px;border-radius:1px;overflow:hidden;display:inline-block;vertical-align:middle;}
 .lib-prog-fill{height:100%;background:var(--accent);transition:width 0.4s;}
 .lib-bkmk{font-size:20px;padding:4px 0 4px 8px;flex-shrink:0;color:var(--text-muted);transition:color 0.2s;background:none;border:none;cursor:pointer;line-height:1;}
 .lib-bkmk.saved{color:var(--accent);}
 .lib-votes{display:inline-flex;align-items:center;gap:4px;background:var(--ui);border:1px solid var(--text-faint);padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;cursor:pointer;color:var(--text-muted);transition:all 0.2s;}
 .lib-votes:hover{border-color:var(--text-muted);color:var(--text);}
+.lib-votes.voted{color:var(--accent);border-color:var(--accent);}
 
 /* ═══ READER ═══ */
 #view-reader{background:var(--bg);}
 .rdr-top{padding:calc(var(--safe-t) + 12px) 24px 12px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;font-size:12px;font-weight:500;color:var(--text-muted);width:100%;max-width:1400px;margin:0 auto;transition:opacity 0.3s,transform 0.3s;}
-.rdr-back{cursor:pointer;padding:8px 8px 8px 0;display:flex;align-items:center;gap:6px;font-size:13px;font-weight:500;color:var(--text-muted);transition:color 0.2s;}
+.rdr-back{cursor:pointer;padding:8px 8px 8px 0;display:flex;align-items:center;gap:6px;font-size:13px;font-weight:500;color:var(--text-muted);transition:color 0.2s;background:none;border:none;}
 .rdr-back:hover{color:var(--text);}
 .rdr-back svg{width:16px;height:16px;}
 .rdr-tools{display:flex;align-items:center;gap:4px;}
@@ -87,13 +92,11 @@ button{font-family:var(--font-ui);background:none;border:none;color:var(--text);
 .rdr-content p{margin-bottom:1.5em;text-align:justify;}
 .rdr-content b{font-weight:700;}
 
-/* Tap Zones - only edges, center is free for text selection */
 .tap-zone{position:absolute;top:0;bottom:0;z-index:20;cursor:pointer;}
 .tap-prev{left:0;width:15%;}
 .tap-next{right:0;width:15%;}
 @media(max-width:768px){.tap-prev{width:25%;}.tap-next{width:25%;}}
 
-/* Bottom Progress */
 .rdr-bot{padding:12px 24px calc(var(--safe-b) + 12px);display:flex;align-items:center;justify-content:space-between;font-family:var(--font-ui);font-size:12px;font-weight:600;color:var(--text-muted);width:100%;max-width:800px;margin:0 auto;z-index:100;transition:opacity 0.3s,transform 0.3s;}
 .rdr-slider{flex:1;-webkit-appearance:none;background:transparent;margin:0 16px;height:24px;outline:none;cursor:pointer;}
 .rdr-slider::-webkit-slider-runnable-track{width:100%;height:3px;background:var(--text-faint);border-radius:2px;}
@@ -104,7 +107,12 @@ button{font-family:var(--font-ui);background:none;border:none;color:var(--text);
 .immersive .rdr-top,.immersive .rdr-bot{opacity:0;pointer-events:none;transform:translateY(-10px);}
 .immersive .rdr-bot{transform:translateY(10px);}
 .immersive .rdr-content{height:calc(100vh - 20px);height:calc(100dvh - 20px);}
-.immersive .tap-prev,.immersive .tap-next{display:block;}
+
+/* ═══ LOADING OVERLAY ═══ */
+.book-loader{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:var(--bg);z-index:50;transition:opacity 0.3s;}
+.book-loader.hidden{opacity:0;pointer-events:none;}
+.spinner{width:24px;height:24px;border:2px solid var(--text-faint);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
 
 /* ═══ SETTINGS SHEET ═══ */
 .sheet-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:100;opacity:0;pointer-events:none;transition:opacity 0.3s;}
@@ -185,7 +193,6 @@ button{font-family:var(--font-ui);background:none;border:none;color:var(--text);
   <div class="toast" id="toast"></div>
   <button class="quote-btn" id="saveQuoteBtn" onclick="App.saveQuote()">Save Quote</button>
 
-  <!-- HEADER -->
   <div class="hdr" id="mainHdr">
     <div class="logo">PageHabit</div>
     <div class="hdr-r">
@@ -202,53 +209,39 @@ button{font-family:var(--font-ui);background:none;border:none;color:var(--text);
       <button class="tab-btn" id="tabCommunity" onclick="App.setLibTab('community')">Community</button>
     </div>
     <div class="scroller">
-      <div class="lib-list" id="libList">
-        <div class="loader">Loading library...</div>
-      </div>
+      <div class="lib-list" id="libList"><div class="loader">Loading library...</div></div>
     </div>
     <button id="fabUpload" onclick="document.getElementById('uploadInput').click()" style="display:none;position:fixed;bottom:32px;right:32px;width:56px;height:56px;border-radius:28px;background:var(--text);color:var(--bg);font-size:28px;box-shadow:0 6px 20px rgba(0,0,0,0.25);justify-content:center;align-items:center;z-index:100;border:none;cursor:pointer;">+</button>
     <input type="file" id="uploadInput" accept=".epub" style="display:none;" onchange="App.handleUpload(event)">
-    <div id="uploadToast" style="display:none;position:fixed;bottom:32px;left:50%;transform:translateX(-50%);background:var(--text);color:var(--bg);padding:14px 24px;border-radius:100px;font-family:var(--font-ui);z-index:200;box-shadow:0 8px 24px rgba(0,0,0,0.2);font-size:14px;font-weight:600;">
-      Uploading: <span id="uploadPct">0%</span>
-    </div>
+    <div id="uploadToast" style="display:none;position:fixed;bottom:32px;left:50%;transform:translateX(-50%);background:var(--text);color:var(--bg);padding:14px 24px;border-radius:100px;font-family:var(--font-ui);z-index:200;box-shadow:0 8px 24px rgba(0,0,0,0.2);font-size:14px;font-weight:600;">Uploading: <span id="uploadPct">0%</span></div>
   </div>
 
   <!-- READER -->
   <div class="view" id="view-reader">
     <div class="rdr-top" id="rdrTop">
-      <div class="rdr-back" onclick="App.go('library')">
+      <button class="rdr-back" onclick="App.go('library')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
         Back
-      </div>
+      </button>
       <div id="rTimeEst" style="font-size:12px;color:var(--text-muted);">~ min</div>
       <div class="rdr-tools">
-        <button class="rdr-tool" title="Search" onclick="App.toggleSearch()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-        </button>
-        <button class="rdr-tool" id="btnFullscreen" title="Fullscreen" onclick="App.toggleImmersive()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 00-2 2v3m18 0V5a2 2 0 00-2-2h-3m0 18h3a2 2 0 002-2v-3M3 16v3a2 2 0 002 2h3"/></svg>
-        </button>
-        <button class="rdr-tool" title="Chapters" onclick="App.toggleTOC()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
-        </button>
-        <button class="rdr-tool" title="Appearance" onclick="App.toggleSettings()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7V4h16v3M9 20h6M12 4v16"/></svg>
-        </button>
+        <button class="rdr-tool" title="Search" onclick="App.toggleSearch()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg></button>
+        <button class="rdr-tool" id="btnFullscreen" title="Fullscreen" onclick="App.toggleImmersive()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 00-2 2v3m18 0V5a2 2 0 00-2-2h-3m0 18h3a2 2 0 002-2v-3M3 16v3a2 2 0 002 2h3"/></svg></button>
+        <button class="rdr-tool" title="Chapters" onclick="App.toggleTOC()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg></button>
+        <button class="rdr-tool" title="Appearance" onclick="App.toggleSettings()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7V4h16v3M9 20h6M12 4v16"/></svg></button>
       </div>
     </div>
-    
     <div class="rdr-wrapper" id="rdrWrapper">
+      <div class="book-loader hidden" id="bookLoader"><div class="spinner"></div></div>
       <div class="tap-zone tap-prev" onclick="App.turnPage(-1)"></div>
       <div class="tap-zone tap-next" onclick="App.turnPage(1)"></div>
       <div class="rdr-content" id="rdrContent"></div>
     </div>
-
     <div class="rdr-bot" id="rdrBot">
       <div id="rPageLbl" style="min-width:60px;">1 / 1</div>
       <input type="range" class="rdr-slider" id="rSlider" min="0" max="100" value="0" oninput="App.slidePage(this.value)" onchange="App.slidePageEnd(this.value)">
       <div id="rPctLbl" style="min-width:36px;text-align:right;">0%</div>
     </div>
-      
     <div id="hlPill" class="hl-pill">
       <button class="hl-btn hl-yellow" onclick="App.applyHighlight('yellow')"></button>
       <button class="hl-btn hl-green" onclick="App.applyHighlight('green')"></button>
@@ -256,14 +249,12 @@ button{font-family:var(--font-ui);background:none;border:none;color:var(--text);
       <div style="width:1px;height:14px;background:var(--bg);opacity:0.2;margin:0 2px;"></div>
       <button class="hl-btn hl-dict" onclick="App.triggerDictFromPill()">Aa</button>
     </div>
-      
     <div class="sheet-backdrop" id="dictBd" onclick="App.closeDict()"></div>
     <div class="dict-sheet" id="dictSheet">
-      <div class="dict-word" id="dictWord">Loading...</div>
+      <div class="dict-word" id="dictWord"></div>
       <div class="dict-ph" id="dictPh"></div>
       <div id="dictDefs"></div>
     </div>
-    
     <div class="toc-sidebar" id="searchSidebar">
       <div class="toc-hdr">Search <button class="toc-close" onclick="App.toggleSearch()">×</button></div>
       <div style="padding:16px;">
@@ -271,86 +262,35 @@ button{font-family:var(--font-ui);background:none;border:none;color:var(--text);
       </div>
       <div class="toc-list" id="searchList"></div>
     </div>
-    
     <div class="toc-sidebar" id="tocSidebar">
       <div class="toc-hdr">Chapters <button class="toc-close" onclick="App.toggleTOC()">×</button></div>
       <div class="toc-list" id="tocList"></div>
     </div>
   </div>
 
-  <!-- SETTINGS SHEET -->
+  <!-- SETTINGS -->
   <div class="sheet-backdrop" id="sheetBd" onclick="App.toggleSettings()"></div>
   <div class="sheet" id="settingsSheet">
-    <div class="sheet-row">
-      <div class="sheet-lbl">Theme</div>
-      <div class="btn-group">
-        <button id="tm-light" onclick="App.setTheme('light')">Light</button>
-        <button id="tm-sepia" onclick="App.setTheme('sepia')">Sepia</button>
-        <button id="tm-dark" onclick="App.setTheme('dark')">Dark</button>
-        <button id="tm-eink" onclick="App.setTheme('eink')">E-Ink</button>
-      </div>
-    </div>
-    <div class="sheet-row">
-      <div class="sheet-lbl">Font</div>
-      <div class="btn-group">
-        <button id="ft-serif" onclick="App.setFont('serif')">Serif</button>
-        <button id="ft-sans" onclick="App.setFont('sans')">Sans</button>
-        <button id="ft-mono" onclick="App.setFont('mono')">Mono</button>
-      </div>
-    </div>
-    <div class="sheet-row">
-      <div class="sheet-lbl">Size</div>
-      <div class="btn-group">
-        <button onclick="App.setSize(-2)">A-</button>
-        <button onclick="App.setSize(2)">A+</button>
-      </div>
-    </div>
-    <div class="sheet-row">
-      <div class="sheet-lbl">Bionic Reading</div>
-      <button class="toggle-btn" id="btn-bionic" onclick="App.toggleBionic()">Off</button>
-    </div>
+    <div class="sheet-row"><div class="sheet-lbl">Theme</div><div class="btn-group"><button id="tm-light" onclick="App.setTheme('light')">Light</button><button id="tm-sepia" onclick="App.setTheme('sepia')">Sepia</button><button id="tm-dark" onclick="App.setTheme('dark')">Dark</button><button id="tm-eink" onclick="App.setTheme('eink')">E-Ink</button></div></div>
+    <div class="sheet-row"><div class="sheet-lbl">Font</div><div class="btn-group"><button id="ft-serif" onclick="App.setFont('serif')">Serif</button><button id="ft-sans" onclick="App.setFont('sans')">Sans</button><button id="ft-mono" onclick="App.setFont('mono')">Mono</button></div></div>
+    <div class="sheet-row"><div class="sheet-lbl">Size</div><div class="btn-group"><button onclick="App.setSize(-2)">A-</button><button onclick="App.setSize(2)">A+</button></div></div>
+    <div class="sheet-row"><div class="sheet-lbl">Bionic Reading</div><button class="toggle-btn" id="btn-bionic" onclick="App.toggleBionic()">Off</button></div>
   </div>
 
   <!-- STATS -->
   <div class="view" id="view-stats">
     <div class="scroller">
       <div class="stats-wrap">
-        <div>
-          <div class="stat-huge" id="stStreak">0</div>
-          <div class="stat-lbl">Day Streak</div>
-        </div>
-        <div>
-          <div class="stat-huge" id="stPages">0</div>
-          <div class="stat-lbl">Pages Read</div>
-        </div>
-        <div>
-          <div class="stat-huge" id="stWpm">200</div>
-          <div class="stat-lbl">Avg Words Per Minute</div>
-        </div>
-        
-        <div class="quotes-sec">
-          <div class="stat-lbl" style="margin-bottom:16px;">Saved Quotes</div>
-          <div id="quotesList"></div>
-        </div>
-
+        <div><div class="stat-huge" id="stStreak">0</div><div class="stat-lbl">Day Streak</div></div>
+        <div><div class="stat-huge" id="stPages">0</div><div class="stat-lbl">Pages Read</div></div>
+        <div><div class="stat-huge" id="stWpm">200</div><div class="stat-lbl">Avg Words Per Minute</div></div>
+        <div class="quotes-sec"><div class="stat-lbl" style="margin-bottom:16px;">Saved Quotes</div><div id="quotesList"></div></div>
         <div style="margin-top:20px;">
-          <div class="set-row">
-            <div class="stat-lbl">Refresh Library</div>
-            <button class="hdr-btn" onclick="App.fetchBooks()">Sync</button>
-          </div>
-          <div class="set-row">
-            <div class="stat-lbl">Clear Cache</div>
-            <button class="hdr-btn" onclick="App.clearCache()">Reset</button>
-          </div>
-          <div class="set-row">
-            <div class="stat-lbl" id="authStatusLbl">Account</div>
-            <button class="hdr-btn" onclick="App.authAction()" id="authActionBtn">Sign In</button>
-          </div>
+          <div class="set-row"><div class="stat-lbl">Refresh Library</div><button class="hdr-btn" onclick="App.fetchBooks()">Sync</button></div>
+          <div class="set-row"><div class="stat-lbl">Clear Cache</div><button class="hdr-btn" onclick="App.clearCache()">Reset</button></div>
+          <div class="set-row"><div class="stat-lbl" id="authStatusLbl">Account</div><button class="hdr-btn" onclick="App.authAction()" id="authActionBtn">Sign In</button></div>
         </div>
-
-        <div style="margin-top:40px;text-align:center;font-family:var(--font-read);font-style:italic;font-size:13px;color:var(--text-muted);opacity:0.5;">
-          Crafted by Aditya Priyadarshi
-        </div>
+        <div style="margin-top:40px;text-align:center;font-family:var(--font-read);font-style:italic;font-size:13px;color:var(--text-muted);opacity:0.5;">Crafted by Aditya Priyadarshi</div>
       </div>
     </div>
   </div>
@@ -361,104 +301,107 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebas
 import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, getDocs, addDoc, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-/* ── FIREBASE ── */
-const firebaseConfig = {
-  apiKey: "AIzaSyDPQxGMh5KbXmwAk2f0Xmh8E6QWcNib110",
-  authDomain: "pagehabit-6c7df.firebaseapp.com",
-  projectId: "pagehabit-6c7df",
-  storageBucket: "pagehabit-6c7df.firebasestorage.app",
-  messagingSenderId: "318714685612",
-  appId: "1:318714685612:web:09a8c1cc0cae8abc1fd709",
-  measurementId: "G-HQ4TQKQZGZ"
-};
-const fbApp = initializeApp(firebaseConfig);
-const auth = getAuth(fbApp);
-const db = getFirestore(fbApp);
-const provider = new GoogleAuthProvider();
-let currentUser = null;
+/* ══════════════════════════════
+   SECURITY: HTML Escaper (FIX #1)
+   ══════════════════════════════ */
+const _esc=document.createElement('div');
+function esc(s){_esc.textContent=s;return _esc.innerHTML;}
 
-onAuthStateChanged(auth, async (user) => {
-  if (user) {
-    currentUser = user;
-    document.getElementById('authOverlay').style.display = 'none';
-    document.getElementById('authStatusLbl').textContent = `Signed in as ${user.displayName.split(' ')[0]}`;
-    document.getElementById('authActionBtn').textContent = 'Sign Out';
-    try {
-      const docSnap = await getDoc(doc(db, "users", user.uid));
-      if(docSnap.exists()) {
-        const data = docSnap.data();
-        if(data.settings) S.settings = {...S.settings, ...data.settings};
-        if(data.stats) S.stats = {...S.stats, ...data.stats};
-        if(data.progress) S.progress = {...S.progress, ...data.progress};
-        if(data.quotes) S.quotes = data.quotes;
-        if(data.bookmarks) S.bookmarks = data.bookmarks;
-        App.applySettingsUI();
-        App.renderStats();
-        App.renderLib();
-        saveState();
+/* ── FIREBASE ── */
+const firebaseConfig={apiKey:"AIzaSyDPQxGMh5KbXmwAk2f0Xmh8E6QWcNib110",authDomain:"pagehabit-6c7df.firebaseapp.com",projectId:"pagehabit-6c7df",storageBucket:"pagehabit-6c7df.firebasestorage.app",messagingSenderId:"318714685612",appId:"1:318714685612:web:09a8c1cc0cae8abc1fd709",measurementId:"G-HQ4TQKQZGZ"};
+const fbApp=initializeApp(firebaseConfig);
+const auth=getAuth(fbApp);
+const db=getFirestore(fbApp);
+const provider=new GoogleAuthProvider();
+let currentUser=null;
+
+onAuthStateChanged(auth,async(user)=>{
+  if(user){
+    currentUser=user;
+    document.getElementById('authOverlay').style.display='none';
+    document.getElementById('authStatusLbl').textContent=`Signed in as ${esc(user.displayName?.split(' ')[0]||'User')}`;
+    document.getElementById('authActionBtn').textContent='Sign Out';
+    try{
+      const docSnap=await getDoc(doc(db,"users",user.uid));
+      if(docSnap.exists()){
+        const data=docSnap.data();
+        if(data.settings)S.settings={...S.settings,...data.settings};
+        if(data.stats)S.stats={...S.stats,...data.stats};
+        if(data.progress)S.progress={...S.progress,...data.progress};
+        if(data.quotes)S.quotes=data.quotes;
+        if(data.bookmarks)S.bookmarks=data.bookmarks;
+        App.applySettingsUI();App.renderStats();App.renderLib();saveState();
       }
-    } catch(e) { console.log('Cloud sync error', e); }
-  } else {
-    currentUser = null;
-    document.getElementById('authStatusLbl').textContent = 'Account';
-    document.getElementById('authActionBtn').textContent = 'Sign In';
+    }catch(e){console.log('Cloud sync error',e);}
+  }else{
+    currentUser=null;
+    document.getElementById('authStatusLbl').textContent='Account';
+    document.getElementById('authActionBtn').textContent='Sign In';
   }
 });
 
-/* ── PWA ── */
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('./sw.js').catch(e => console.log('SW err', e));
-}
+if('serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js').catch(e=>console.log('SW err',e));}
 
-/* ── CONFIG ── */
-const GH_OWNER='PhaNtoM-GHosT-11101', GH_REPO='reading-habit-app', GH_PATH='books';
 const GH_API='https://api.github.com/repos/PhaNtoM-GHosT-11101/reading-habit-app/contents/books';
 
 /* ── STATE ── */
-let S = {
-  settings: { theme:'dark', font:'serif', fontSize:22, bionic:false, active:null },
-  stats: { streak:0, pages:0, lastDay:null, days:[], wpm:200 },
-  progress: {},
-  bookmarks: [],
-  quotes: []
+let S={
+  settings:{theme:'auto',font:'serif',fontSize:22,bionic:false,active:null},
+  stats:{streak:0,pages:0,lastDay:null,days:[],wpm:200},
+  progress:{},bookmarks:[],quotes:[],votedBooks:[]
 };
-let ghFiles=[], communityFiles=[], libTab='curated', totalPages=1, pageStartTime=0;
-let currentSelection='', currentSelectionRange=null, interactionsSetup=false, isImmersive=false;
+let ghFiles=[],communityFiles=[],libTab='curated',totalPages=1,pageStartTime=0;
+let currentSelection='',currentSelectionRange=null,interactionsSetup=false,isImmersive=false;
+let cachedWordCount=0,cachedBookTitle='';
 
 /* ── INDEXEDDB ── */
-const DB_NAME='zhDB', DB_VERSION=1, STORE_NAME='books';
+const DB_NAME='zhDB',DB_VERSION=1,STORE_NAME='books';
 let idb;
-function initDB(){
-  return new Promise((resolve,reject)=>{
-    const req=indexedDB.open(DB_NAME,DB_VERSION);
-    req.onerror=e=>reject(e);
-    req.onsuccess=e=>{idb=e.target.result;resolve();};
-    req.onupgradeneeded=e=>{idb=e.target.result;if(!idb.objectStoreNames.contains(STORE_NAME))idb.createObjectStore(STORE_NAME);};
-  });
-}
+function initDB(){return new Promise((resolve,reject)=>{const req=indexedDB.open(DB_NAME,DB_VERSION);req.onerror=e=>reject(e);req.onsuccess=e=>{idb=e.target.result;resolve();};req.onupgradeneeded=e=>{idb=e.target.result;if(!idb.objectStoreNames.contains(STORE_NAME))idb.createObjectStore(STORE_NAME);};});}
 function idbPut(k,v){return new Promise(r=>{const tx=idb.transaction(STORE_NAME,'readwrite');tx.objectStore(STORE_NAME).put(v,k);tx.oncomplete=r;});}
 function idbGet(k){return new Promise(r=>{const tx=idb.transaction(STORE_NAME,'readonly');const req=tx.objectStore(STORE_NAME).get(k);req.onsuccess=()=>r(req.result);req.onerror=()=>r(null);});}
 function idbKeys(){return new Promise(r=>{const tx=idb.transaction(STORE_NAME,'readonly');const req=tx.objectStore(STORE_NAME).getAllKeys();req.onsuccess=()=>r(req.result);});}
+function idbClear(){return new Promise(r=>{const tx=idb.transaction(STORE_NAME,'readwrite');tx.objectStore(STORE_NAME).clear();tx.oncomplete=r;});}
 
+/* ══════════════════════════════
+   PERF: Debounced Firestore Sync (FIX #6)
+   ══════════════════════════════ */
+let _syncTimer=null;
 function saveState(){
   try{localStorage.setItem('zhState',JSON.stringify(S));}catch(e){}
   if(currentUser){
+    clearTimeout(_syncTimer);
+    _syncTimer=setTimeout(()=>{
+      setDoc(doc(db,"users",currentUser.uid),{
+        progress:S.progress,stats:S.stats,settings:S.settings,quotes:S.quotes,bookmarks:S.bookmarks
+      },{merge:true}).catch(e=>console.log('Sync err',e));
+    },15000);
+  }
+}
+function syncNow(){
+  if(currentUser){
+    clearTimeout(_syncTimer);
     setDoc(doc(db,"users",currentUser.uid),{
-      progress:S.progress, stats:S.stats, settings:S.settings, quotes:S.quotes, bookmarks:S.bookmarks
+      progress:S.progress,stats:S.stats,settings:S.settings,quotes:S.quotes,bookmarks:S.bookmarks
     },{merge:true}).catch(e=>console.log('Sync err',e));
   }
 }
+
 function loadState(){
   try{
     const raw=localStorage.getItem('zhState');
-    if(raw){
-      const p=JSON.parse(raw);
-      S={...S,...p};
-      if(!S.bookmarks) S.bookmarks=[];
-      if(!S.quotes) S.quotes=[];
-      if(!S.stats.days) S.stats.days=[];
-    }
+    if(raw){const p=JSON.parse(raw);S={...S,...p};}
   }catch(e){}
+  if(!S.bookmarks)S.bookmarks=[];
+  if(!S.quotes)S.quotes=[];
+  if(!S.votedBooks)S.votedBooks=[];
+  if(!S.stats.days)S.stats.days=[];
+  // FIX #12: Trim days array to last 90 entries
+  if(S.stats.days.length>90)S.stats.days=S.stats.days.slice(-90);
+  // FIX #18: Auto-detect system theme on first visit
+  if(S.settings.theme==='auto'){
+    S.settings.theme=window.matchMedia('(prefers-color-scheme:light)').matches?'light':'dark';
+  }
 }
 
 const today=()=>new Date().toISOString().slice(0,10);
@@ -466,42 +409,51 @@ function toast(msg,ms=2500){const el=document.getElementById('toast');el.textCon
 function updateStreak(){
   const t=today(),days=S.stats.days||[];
   if(!days.includes(t))days.push(t);
+  if(days.length>90)days.splice(0,days.length-90);
   S.stats.days=days;S.stats.lastDay=t;
   let str=0,d=new Date();
   while(true){const ds=d.toISOString().slice(0,10);if(days.includes(ds)){str++;d.setDate(d.getDate()-1);}else break;}
   S.stats.streak=str;saveState();
 }
 
-/* ── EPUB PARSER ── */
+/* ══════════════════════════════
+   EPUB PARSER (FIX #14: error boundary)
+   ══════════════════════════════ */
 async function parseEpub(buf){
-  const zip=await JSZip.loadAsync(buf);
-  let opfPath='';
-  const cont=await zip.file('META-INF/container.xml')?.async('string');
-  if(cont){const m=cont.match(/full-path="([^"]+\.opf)"/i);if(m)opfPath=m[1];}
-  if(!opfPath)opfPath=Object.keys(zip.files).find(f=>f.endsWith('.opf'))||'';
-  const opfDir=opfPath.includes('/')?opfPath.slice(0,opfPath.lastIndexOf('/')+1):'';
-  let spine=[];
-  if(opfPath){
-    const opf=await zip.file(opfPath)?.async('string')||'';
-    const items={};let m,mr=/<item[^>]+id="([^"]+)"[^>]+href="([^"]+)"[^>]*>/gi;
-    while((m=mr.exec(opf))!==null)items[m[1]]=m[2];
-    const sr=/<itemref[^>]+idref="([^"]+)"/gi;
-    while((m=sr.exec(opf))!==null){const h=items[m[1]];if(h)spine.push(opfDir+h);}
+  try{
+    const zip=await JSZip.loadAsync(buf);
+    let opfPath='';
+    const cont=await zip.file('META-INF/container.xml')?.async('string');
+    if(cont){const m=cont.match(/full-path="([^"]+\.opf)"/i);if(m)opfPath=m[1];}
+    if(!opfPath)opfPath=Object.keys(zip.files).find(f=>f.endsWith('.opf'))||'';
+    const opfDir=opfPath.includes('/')?opfPath.slice(0,opfPath.lastIndexOf('/')+1):'';
+    let spine=[];
+    if(opfPath){
+      const opf=await zip.file(opfPath)?.async('string')||'';
+      const items={};let m,mr=/<item[^>]+id="([^"]+)"[^>]+href="([^"]+)"[^>]*>/gi;
+      while((m=mr.exec(opf))!==null)items[m[1]]=m[2];
+      const sr=/<itemref[^>]+idref="([^"]+)"/gi;
+      while((m=sr.exec(opf))!==null){const h=items[m[1]];if(h)spine.push(opfDir+h);}
+    }
+    if(!spine.length)spine=Object.keys(zip.files).filter(f=>/\.(html|xhtml|htm)$/i.test(f)).sort();
+    if(!spine.length)throw new Error('No readable content found');
+    let out='',chapters=[];
+    for(const fp of spine){
+      const f=zip.file(fp)||zip.file(fp.replace(/^\//,''));if(!f)continue;
+      const html=await f.async('string');
+      const hm=html.match(/<h[123][^>]*>(.*?)<\/h[123]>/i);
+      if(hm){let ct=hm[1].replace(/<[^>]+>/g,'').trim();if(ct.length>0&&ct.length<80)chapters.push({title:ct,index:out.length});}
+      const clean=html.replace(/<style[^>]*>[\s\S]*?<\/style>/gi,'').replace(/<script[^>]*>[\s\S]*?<\/script>/gi,'')
+        .replace(/<br\s*\/?>/gi,'\n').replace(/<\/p>/gi,'\n\n').replace(/<[^>]+>/g,' ')
+        .replace(/&nbsp;/g,' ').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&#39;/g,"'")
+        .replace(/[ \t]+/g,' ').replace(/\n{3,}/g,'\n\n').trim();
+      if(clean.length>50)out+=clean+'\n\n';
+    }
+    if(out.trim().length<100)throw new Error('Book appears to be empty');
+    return{text:out.trim(),chapters};
+  }catch(e){
+    throw new Error('Invalid EPUB: '+(e.message||'Could not parse this file'));
   }
-  if(!spine.length)spine=Object.keys(zip.files).filter(f=>/\.(html|xhtml|htm)$/i.test(f)).sort();
-  let out='',chapters=[];
-  for(const fp of spine){
-    const f=zip.file(fp)||zip.file(fp.replace(/^\//,''));if(!f)continue;
-    const html=await f.async('string');
-    const hm=html.match(/<h[123][^>]*>(.*?)<\/h[123]>/i);
-    if(hm){let ct=hm[1].replace(/<[^>]+>/g,'').trim();if(ct.length>0&&ct.length<80)chapters.push({title:ct,index:out.length});}
-    const clean=html.replace(/<style[^>]*>[\s\S]*?<\/style>/gi,'').replace(/<script[^>]*>[\s\S]*?<\/script>/gi,'')
-      .replace(/<br\s*\/?>/gi,'\n').replace(/<\/p>/gi,'\n\n').replace(/<[^>]+>/g,' ')
-      .replace(/&nbsp;/g,' ').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&#39;/g,"'")
-      .replace(/[ \t]+/g,' ').replace(/\n{3,}/g,'\n\n').trim();
-    if(clean.length>50)out+=clean+'\n\n';
-  }
-  return{text:out.trim(),chapters};
 }
 
 function cleanTitle(fn){
@@ -515,9 +467,9 @@ function applyBionic(text){
   return text.split(/(\s+)/).map(w=>{if(!w.trim())return w;const l=w.length;if(l===1)return`<b>${w}</b>`;const m=Math.ceil(l/2);return`<b>${w.slice(0,m)}</b>${w.slice(m)}`;}).join('');
 }
 
-/* ══════════════════════════════════════════════════
+/* ══════════════════════════════════════
    ═══ APP ═══
-   ══════════════════════════════════════════════════ */
+   ══════════════════════════════════════ */
 const App={
   signIn(){signInWithPopup(auth,provider).catch(e=>toast('Sign in failed'));},
   skipAuth(){document.getElementById('authOverlay').style.display='none';},
@@ -534,27 +486,40 @@ const App={
     if(view==='stats')this.renderStats();
   },
 
-  /* ── LIBRARY TABS ── */
   setLibTab(tab){
     libTab=tab;
     document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
-    const id=tab==='curated'?'tabLibrary':tab==='toread'?'tabToRead':'tabCommunity';
-    document.getElementById(id).classList.add('active');
+    document.getElementById(tab==='curated'?'tabLibrary':tab==='toread'?'tabToRead':'tabCommunity').classList.add('active');
     document.getElementById('fabUpload').style.display=(tab==='community'&&currentUser)?'flex':'none';
     this.renderLib();
     if(tab==='community'&&communityFiles.length===0)this.fetchCommunityBooks();
   },
 
+  /* ══════════════════════════════
+     PERF: GitHub API Caching (FIX #5)
+     ══════════════════════════════ */
   async fetchBooks(){
     const list=document.getElementById('libList');
     if(libTab==='curated'||libTab==='toread'){
+      // Check cache first
+      try{
+        const cached=JSON.parse(localStorage.getItem('ghFilesCache')||'null');
+        if(cached&&Date.now()-cached.ts<3600000){
+          ghFiles=cached.data;
+          this.renderLib();
+          return;
+        }
+      }catch(e){}
       list.innerHTML='<div class="loader">Syncing library...</div>';
       try{
         const res=await fetch(GH_API,{headers:{'Accept':'application/vnd.github.v3+json'}});
         if(!res.ok)throw new Error('API Error');
         ghFiles=(await res.json()).filter(f=>f.name.toLowerCase().endsWith('.epub'));
+        try{localStorage.setItem('ghFilesCache',JSON.stringify({ts:Date.now(),data:ghFiles}));}catch(e){}
         this.renderLib();
       }catch(e){
+        // Fallback to stale cache
+        try{const stale=JSON.parse(localStorage.getItem('ghFilesCache')||'null');if(stale){ghFiles=stale.data;this.renderLib();toast('Using cached library');return;}}catch(ex){}
         list.innerHTML=`<div class="loader">Failed to load. <button onclick="App.fetchBooks()" style="text-decoration:underline;color:var(--text);">Retry</button></div>`;
       }
     }else{
@@ -575,11 +540,24 @@ const App={
     }
   },
 
+  /* ══════════════════════════════
+     FIX #16: Validate EPUB before upload
+     ══════════════════════════════ */
   async handleUpload(e){
     const file=e.target.files[0];
     if(!file||!currentUser)return;
     if(file.size>10*1024*1024){toast('File too large (max 10MB)');return;}
     document.getElementById('uploadToast').style.display='block';
+    document.getElementById('uploadPct').textContent='Validating...';
+    // Validate first
+    try{
+      const vBuf=await file.arrayBuffer();
+      await parseEpub(vBuf);
+    }catch(err){
+      document.getElementById('uploadToast').style.display='none';
+      toast('Invalid EPUB file: '+err.message);
+      return;
+    }
     document.getElementById('uploadPct').textContent='Reading...';
     const reader=new FileReader();
     reader.onload=async()=>{
@@ -590,9 +568,7 @@ const App={
         const docRef=await addDoc(collection(db,"community_books"),{
           title:file.name.replace('.epub',''),
           uploaderName:currentUser.displayName,
-          timestamp:serverTimestamp(),
-          chunks:chunks,
-          votes:0
+          timestamp:serverTimestamp(),chunks,votes:0
         });
         for(let i=0;i<chunks;i++){
           document.getElementById('uploadPct').textContent=`${i+1}/${chunks}`;
@@ -609,7 +585,10 @@ const App={
     reader.readAsDataURL(file);
   },
 
-  /* ── RENDER LIBRARY ── */
+  /* ══════════════════════════════
+     FIX #1: All innerHTML uses esc()
+     FIX #7: Per-user upvote tracking
+     ══════════════════════════════ */
   async renderLib(){
     const list=document.getElementById('libList');
     let files=[];
@@ -619,7 +598,7 @@ const App={
 
     if(!files.length){
       const msg=libTab==='curated'?'No books found.':libTab==='toread'?'No saved books yet. Tap ♡ on any book to save it here.':'No community books yet.';
-      list.innerHTML=`<div class="loader">${msg}</div>`;
+      list.innerHTML=`<div class="loader">${esc(msg)}</div>`;
       return;
     }
     list.innerHTML='';
@@ -629,28 +608,48 @@ const App={
       const cached=cachedKeys.includes(f.name);
       const prog=S.progress[f.name]||0;
       const bkmk=S.bookmarks.includes(f.name);
+      const voted=S.votedBooks.includes(f.name);
 
       const el=document.createElement('div');
       el.className='lib-item';
       el.onclick=()=>this.bookTap(f.name,t.title,f.download_url);
 
-      let metaHtml=`<span>${cached?'Downloaded':'Tap to download'}</span>`;
-      if(prog>0)metaHtml+=`<div class="lib-prog"><div class="lib-prog-fill" style="width:100%"></div></div>`;
-      if(f.uploader)metaHtml=`<span>by ${f.uploader}</span>`+metaHtml;
-
-      let voteHtml='';
+      // Build meta safely
+      const metaDiv=document.createElement('div');
+      metaDiv.className='lib-meta';
+      if(f.uploader){const sp=document.createElement('span');sp.textContent='by '+f.uploader;metaDiv.appendChild(sp);}
+      const statusSpan=document.createElement('span');
+      statusSpan.textContent=cached?'Downloaded':'Tap to download';
+      metaDiv.appendChild(statusSpan);
+      if(prog>0){
+        const progDiv=document.createElement('div');progDiv.className='lib-prog';
+        const fill=document.createElement('div');fill.className='lib-prog-fill';fill.style.width='100%';
+        progDiv.appendChild(fill);metaDiv.appendChild(progDiv);
+      }
       if(f.votes!==undefined&&(libTab==='community'||f.uploader)){
-        voteHtml=`<button class="lib-votes" onclick="event.stopPropagation();App.upvoteBook('${f.name}')">▲ ${f.votes}</button>`;
+        const vBtn=document.createElement('button');
+        vBtn.className='lib-votes'+(voted?' voted':'');
+        vBtn.textContent='▲ '+f.votes;
+        vBtn.onclick=(ev)=>{ev.stopPropagation();this.upvoteBook(f.name);};
+        metaDiv.appendChild(vBtn);
       }
 
-      el.innerHTML=`
-        <div class="lib-info">
-          <div class="lib-title">${t.title}</div>
-          ${t.author?`<div class="lib-author">${t.author}</div>`:''}
-          <div class="lib-meta">${metaHtml} ${voteHtml}</div>
-        </div>
-        <button class="lib-bkmk ${bkmk?'saved':''}" onclick="event.stopPropagation();App.toggleBookmark('${f.name}')">${bkmk?'♥':'♡'}</button>
-      `;
+      const infoDiv=document.createElement('div');
+      infoDiv.className='lib-info';
+      const titleDiv=document.createElement('div');
+      titleDiv.className='lib-title';
+      titleDiv.textContent=t.title;  // textContent = safe
+      infoDiv.appendChild(titleDiv);
+      if(t.author){const authDiv=document.createElement('div');authDiv.className='lib-author';authDiv.textContent=t.author;infoDiv.appendChild(authDiv);}
+      infoDiv.appendChild(metaDiv);
+
+      const bkmkBtn=document.createElement('button');
+      bkmkBtn.className='lib-bkmk'+(bkmk?' saved':'');
+      bkmkBtn.textContent=bkmk?'♥':'♡';
+      bkmkBtn.onclick=(ev)=>{ev.stopPropagation();this.toggleBookmark(f.name);};
+
+      el.appendChild(infoDiv);
+      el.appendChild(bkmkBtn);
       list.appendChild(el);
     });
   },
@@ -662,8 +661,10 @@ const App={
     saveState();this.renderLib();
   },
 
+  /* FIX #4: Per-user upvote tracking */
   async upvoteBook(bookId){
     if(!currentUser){toast('Sign in to upvote');return;}
+    if(S.votedBooks.includes(bookId)){toast('Already upvoted');return;}
     try{
       const ref=doc(db,"community_books",bookId);
       const snap=await getDoc(ref);
@@ -672,18 +673,18 @@ const App={
         await updateDoc(ref,{votes:v});
         const cf=communityFiles.find(f=>f.name===bookId);
         if(cf)cf.votes=v;
-        this.renderLib();
+        S.votedBooks.push(bookId);
+        saveState();this.renderLib();
         toast('Upvoted!');
       }
     }catch(e){toast('Failed to upvote');}
   },
 
-  /* ── BOOK TAP ── */
   async bookTap(fn,title,url){
     S.settings.active=fn;
     const cached=await idbGet(fn);
     if(cached){saveState();this.openReader(cached);return;}
-    document.getElementById('libList').innerHTML='<div class="loader">Downloading '+title+'...</div>';
+    document.getElementById('libList').innerHTML='<div class="loader">Downloading '+esc(title)+'...</div>';
     try{
       let buf;
       if(url&&url.startsWith('firestore://')){
@@ -702,17 +703,29 @@ const App={
       const newBook={title,text:parsed.text,chapters:parsed.chapters};
       await idbPut(fn,newBook);
       saveState();this.openReader(newBook);
-    }catch(e){toast('Failed: '+e.message);App.renderLib();}
+    }catch(e){toast(e.message||'Download failed');App.renderLib();}
   },
 
-  /* ── READER ── */
+  /* ══════════════════════════════
+     FIX #7: Cache word count (FIX #13)
+     FIX #15: Loading spinner
+     ══════════════════════════════ */
   async openReader(bookObj){
     this.go('reader');
     this.applySettingsUI();
     const fn=S.settings.active;
     const book=bookObj||await idbGet(fn);
     if(!book)return;
+
+    // Show loader
+    const loader=document.getElementById('bookLoader');
+    loader.classList.remove('hidden');
+
     const content=document.getElementById('rdrContent');
+
+    // Cache word count and title in memory
+    cachedWordCount=book.text.split(/\s+/).length;
+    cachedBookTitle=book.title||cleanTitle(fn).title;
 
     // TOC
     const tocList=document.getElementById('tocList');
@@ -746,10 +759,13 @@ const App={
         S.progress[fn]=cur;saveState();
         this.updatePageUI();
         pageStartTime=Date.now();
-      },200);
+        // Hide loader
+        loader.classList.add('hidden');
+      },250);
     });
   },
 
+  /* FIX #13: No idbGet on page turn — use cached values */
   async turnPage(dir){
     const fn=S.settings.active;
     const cur=S.progress[fn]||0;
@@ -757,9 +773,7 @@ const App={
     if(next>=0&&next<totalPages){
       if(dir>0&&pageStartTime>0){
         const elapsed=(Date.now()-pageStartTime)/1000;
-        const book=await idbGet(fn);
-        const bookWords=book?book.text.split(/\s+/).length:2000;
-        const wordsOnPage=bookWords/totalPages;
+        const wordsOnPage=cachedWordCount/totalPages;
         if(elapsed>5){
           const pageWpm=(wordsOnPage/elapsed)*60;
           if(pageWpm>50&&pageWpm<1000){
@@ -777,7 +791,8 @@ const App={
     }
   },
 
-  async updatePageUI(){
+  /* FIX #7: Use cached word count instead of idbGet */
+  updatePageUI(){
     const fn=S.settings.active;
     const cur=S.progress[fn]||0;
     const content=document.getElementById('rdrContent');
@@ -790,11 +805,9 @@ const App={
     const slider=document.getElementById('rSlider');
     if(slider)slider.value=sliderPct;
     document.getElementById('rPctLbl').textContent=Math.round(((cur+1)/totalPages)*100)+'%';
-    const book=await idbGet(fn);
-    if(book){
-      const tw=book.text.split(/\s+/).length;
-      const wpc=tw/totalPages;
-      const wl=Math.max(0,tw-(wpc*cur));
+    if(cachedWordCount>0){
+      const wpc=cachedWordCount/totalPages;
+      const wl=Math.max(0,cachedWordCount-(wpc*cur));
       const ml=Math.max(1,Math.ceil(wl/(S.stats.wpm||200)));
       document.getElementById('rTimeEst').textContent=`~${ml} min left`;
     }
@@ -804,9 +817,7 @@ const App={
     const content=document.getElementById('rdrContent');
     let target=Math.floor((val/100)*(totalPages-1));
     target=Math.max(0,Math.min(target,totalPages-1));
-    const ww=window.innerWidth;
-    const pad=Math.max(32,(ww-1400)/2);
-    const shiftDist=(ww-(pad*2))+64;
+    const ww=window.innerWidth;const pad=Math.max(32,(ww-1400)/2);const shiftDist=(ww-(pad*2))+64;
     content.style.transform=`translateX(-${shiftDist*target}px)`;
     document.getElementById('rPageLbl').textContent=`${target+1} / ${totalPages}`;
     document.getElementById('rPctLbl').textContent=Math.round(((target+1)/totalPages)*100)+'%';
@@ -817,11 +828,9 @@ const App={
     let target=Math.floor((val/100)*(totalPages-1));
     target=Math.max(0,Math.min(target,totalPages-1));
     S.progress[fn]=target;saveState();
-    this.updatePageUI();
-    pageStartTime=Date.now();
+    this.updatePageUI();pageStartTime=Date.now();
   },
 
-  /* ── IMMERSIVE MODE ── */
   toggleImmersive(){
     isImmersive=!isImmersive;
     const reader=document.getElementById('view-reader');
@@ -832,14 +841,11 @@ const App={
       reader.classList.remove('immersive');
       if(document.fullscreenElement)document.exitFullscreen();
     }
-    // Recalculate pages after layout change
     setTimeout(()=>this.openReader(),300);
   },
 
-  /* ── SETTINGS ── */
   toggleSettings(){
-    const s=document.getElementById('settingsSheet');
-    const b=document.getElementById('sheetBd');
+    const s=document.getElementById('settingsSheet');const b=document.getElementById('sheetBd');
     if(s.classList.contains('open')){s.classList.remove('open');b.classList.remove('show');}
     else{s.classList.add('open');b.classList.add('show');}
   },
@@ -850,6 +856,7 @@ const App={
     if(sb.classList.contains('active'))setTimeout(()=>document.getElementById('searchInput').focus(),300);
   },
 
+  /* FIX #2: Sanitize search snippets */
   async doSearch(){
     const q=document.getElementById('searchInput').value.trim().toLowerCase();
     const list=document.getElementById('searchList');
@@ -862,19 +869,26 @@ const App={
     let results=[],idx=lt.indexOf(q);
     while(idx!==-1&&results.length<50){
       const start=Math.max(0,idx-40),end=Math.min(text.length,idx+q.length+40);
-      let snip=text.slice(start,end).replace(/\n/g,' ');
-      const sl=snip.toLowerCase(),si=sl.indexOf(q);
-      if(si!==-1)snip=snip.slice(0,si)+`<b style="background:var(--accent);color:var(--bg);padding:0 2px;">`+snip.slice(si,si+q.length)+`</b>`+snip.slice(si+q.length);
-      results.push({index:idx,snippet:'...'+snip+'...'});
+      const rawSnip=text.slice(start,end).replace(/\n/g,' ');
+      results.push({index:idx,raw:rawSnip,matchStart:rawSnip.toLowerCase().indexOf(q),matchLen:q.length});
       idx=lt.indexOf(q,idx+1);
     }
     list.innerHTML='';
     if(!results.length){list.innerHTML='<div style="padding:16px;color:var(--text-muted);font-size:14px;">No results found.</div>';return;}
     results.forEach(r=>{
       const el=document.createElement('div');
-      el.className='toc-item';
-      el.style.fontSize='14px';
-      el.innerHTML=r.snippet;
+      el.className='toc-item';el.style.fontSize='14px';el.style.lineHeight='1.5';
+      // Build snippet safely
+      if(r.matchStart>=0){
+        el.appendChild(document.createTextNode('...'+r.raw.slice(0,r.matchStart)));
+        const b=document.createElement('b');
+        b.style.cssText='background:var(--accent);color:var(--bg);padding:0 2px;';
+        b.textContent=r.raw.slice(r.matchStart,r.matchStart+r.matchLen);
+        el.appendChild(b);
+        el.appendChild(document.createTextNode(r.raw.slice(r.matchStart+r.matchLen)+'...'));
+      }else{
+        el.textContent='...'+r.raw+'...';
+      }
       el.onclick=()=>{this.jumpToChapter(r.index);this.toggleSearch();};
       list.appendChild(el);
     });
@@ -915,7 +929,6 @@ const App={
   setSize(d){S.settings.fontSize=Math.max(14,Math.min(48,(S.settings.fontSize||22)+d));saveState();this.applySettingsUI();this.openReader();},
   toggleBionic(){S.settings.bionic=!S.settings.bionic;saveState();this.applySettingsUI();this.openReader();},
 
-  /* ── INTERACTIONS ── */
   setupInteractions(){
     const handleSelection=()=>{
       setTimeout(()=>{
@@ -943,13 +956,10 @@ const App={
     try{
       const span=document.createElement('span');
       span.style.backgroundColor=color==='yellow'?'#f1c40f55':color==='green'?'#2ecc7155':'#e74c3c55';
-      span.style.borderRadius='3px';
-      span.style.padding='0 1px';
+      span.style.borderRadius='3px';span.style.padding='0 1px';
       currentSelectionRange.surroundContents(span);
-      const fn=S.settings.active;
-      const book=await idbGet(fn);
       if(!S.quotes)S.quotes=[];
-      S.quotes.push({text:span.innerText,src:book?.title||'Unknown'});
+      S.quotes.push({text:span.innerText,src:cachedBookTitle});
       saveState();
       window.getSelection().removeAllRanges();
       document.getElementById('hlPill').style.display='none';
@@ -973,20 +983,27 @@ const App={
     document.getElementById('dictPh').textContent='Searching...';
     document.getElementById('dictDefs').innerHTML='';
     try{
-      const res=await fetch('https://api.dictionaryapi.dev/api/v2/entries/en/'+word);
+      const res=await fetch('https://api.dictionaryapi.dev/api/v2/entries/en/'+encodeURIComponent(word));
       if(!res.ok)throw new Error('Not found');
       const data=await res.json();
       const entry=data[0];
       document.getElementById('dictPh').textContent=entry.phonetic||'';
-      let html='';
+      const defsDiv=document.getElementById('dictDefs');
+      defsDiv.innerHTML='';
       entry.meanings.forEach(m=>{
-        html+=`<div style="color:var(--accent);font-size:11px;font-weight:700;text-transform:uppercase;margin-top:12px;letter-spacing:1px;">${m.partOfSpeech}</div>`;
-        m.definitions.slice(0,3).forEach(d=>{html+=`<div class="dict-def">• ${d.definition}</div>`;});
+        const posEl=document.createElement('div');
+        posEl.style.cssText='color:var(--accent);font-size:11px;font-weight:700;text-transform:uppercase;margin-top:12px;letter-spacing:1px;';
+        posEl.textContent=m.partOfSpeech;
+        defsDiv.appendChild(posEl);
+        m.definitions.slice(0,3).forEach(d=>{
+          const defEl=document.createElement('div');defEl.className='dict-def';
+          defEl.textContent='• '+d.definition;
+          defsDiv.appendChild(defEl);
+        });
       });
-      document.getElementById('dictDefs').innerHTML=html;
     }catch(e){
       document.getElementById('dictPh').textContent='';
-      document.getElementById('dictDefs').innerHTML='<div class="dict-def">Definition not found.</div>';
+      document.getElementById('dictDefs').textContent='Definition not found.';
     }
   },
 
@@ -995,12 +1012,12 @@ const App={
     document.getElementById('dictSheet').classList.remove('active');
   },
 
+  /* FIX #19: Use cached book title */
   saveQuote(){
     if(!currentSelection)return;
     if(!S.quotes)S.quotes=[];
-    S.quotes.push({text:currentSelection,src:'Manual'});
-    saveState();
-    toast('Quote Saved!');
+    S.quotes.push({text:currentSelection,src:cachedBookTitle||'Unknown'});
+    saveState();toast('Quote Saved!');
     document.getElementById('saveQuoteBtn').style.display='none';
     window.getSelection()?.removeAllRanges();
   },
@@ -1013,15 +1030,24 @@ const App={
     if(!S.quotes||!S.quotes.length){
       qList.innerHTML='<div style="font-size:14px;color:var(--text-muted)">Highlight text while reading to save quotes here.</div>';
     }else{
-      qList.innerHTML=[...S.quotes].reverse().map(q=>`
-        <div class="quote-card">"${q.text}" <div class="quote-src">— ${q.src}</div></div>
-      `).join('');
+      qList.innerHTML='';
+      [...S.quotes].reverse().forEach(q=>{
+        const card=document.createElement('div');card.className='quote-card';
+        card.textContent='"'+q.text+'"';
+        const src=document.createElement('div');src.className='quote-src';
+        src.textContent='— '+q.src;
+        card.appendChild(src);
+        qList.appendChild(card);
+      });
     }
   },
 
-  clearCache(){
+  /* FIX #8: Actually clear IndexedDB */
+  async clearCache(){
     if(!confirm('Delete all downloaded books?'))return;
+    await idbClear();
     S.progress={};S.settings.active=null;saveState();this.renderLib();
+    toast('Cache cleared!');
   }
 };
 
@@ -1035,18 +1061,30 @@ window.onload=async()=>{
   App.renderStats();
   App.fetchBooks();
   App.go('library');
+
+  /* FIX #11: Keyboard navigation */
+  document.addEventListener('keydown',(e)=>{
+    if(!document.getElementById('view-reader').classList.contains('active'))return;
+    if(e.key==='ArrowRight'||e.key===' ')App.turnPage(1);
+    else if(e.key==='ArrowLeft')App.turnPage(-1);
+    else if(e.key==='Escape'&&isImmersive)App.toggleImmersive();
+  });
+
   let resizeTimer;
   window.addEventListener('resize',()=>{
     clearTimeout(resizeTimer);
     resizeTimer=setTimeout(()=>{if(document.getElementById('view-reader').classList.contains('active'))App.openReader();},300);
   });
-  // Exit immersive when fullscreen exits
+
   document.addEventListener('fullscreenchange',()=>{
     if(!document.fullscreenElement&&isImmersive){
       isImmersive=false;
       document.getElementById('view-reader').classList.remove('immersive');
     }
   });
+
+  // Sync to Firestore before page unload
+  window.addEventListener('beforeunload',()=>syncNow());
 };
 </script>
 </body>
