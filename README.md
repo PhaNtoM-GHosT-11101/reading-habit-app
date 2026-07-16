@@ -1,6 +1,6 @@
-# 📖 PageHabit (Zen Edition)
+# 📖 PageHabit
 
-PageHabit is a gorgeous, ultra-minimalist, distraction-free EPUB reader. Built entirely as a single-file Progressive Web App (PWA), it runs entirely in your browser and functions offline.
+> A premium, distraction-free EPUB reader with cloud sync, community sharing, and intelligent reading tools.
 
 **[Try it live here!](https://PhaNtoM-GHosT-11101.github.io/reading-habit-app)**
 
@@ -8,33 +8,83 @@ PageHabit is a gorgeous, ultra-minimalist, distraction-free EPUB reader. Built e
 
 ## ✨ Features
 
-- 🧘 **Zen UI:** A museum-quality aesthetic with massive whitespace and gorgeous typography. Zero borders, zero distractions.
-- 📱 **Progressive Web App (PWA):** Install it directly to your phone's home screen. Download your books once, and read them on an airplane with zero internet connection.
-- 📖 **Strict Pagination:** Unlike most web readers, there is **zero vertical scrolling**. The engine dynamically calculates the exact dimensions of your screen and splits the text into precise pages. Tap the edges of your screen to turn the page just like a real physical Kindle.
-- ⚡ **Bionic Reading:** Toggle Bionic Reading in the settings to algorithmically bold the first half of every word, creating artificial fixation points that help you skim and read significantly faster.
-- ⏱️ **Smart WPM Tracking:** The app silently tracks how fast you read and calculates an exponential moving average of your real-world Words Per Minute. Your "Estimated Time Left" dynamically adjusts to your personal speed!
-- 🎨 **Themes & Typography:** Switch between gorgeous Serif, Sans-Serif, and Monospace fonts. Read comfortably with Light, Dark, Sepia (warm paper), and E-Ink (high contrast gray) themes.
-- ✍️ **Highlights & Quotes:** Highlight your favorite passages while reading to save them directly to a beautiful feed in your Stats tab.
+### 📖 The Reading Experience
+- **Immersive Mode:** True distraction-free reading. Enters native browser fullscreen while fading out all UI elements, leaving only pure text.
+- **Strict Pagination:** Zero vertical scrolling. The engine calculates your exact screen dimensions and splits text into precise, swipeable pages. Keyboard navigation (`←` / `→` / `Space`) is fully supported.
+- **Dictionary Lookup:** Select any word to instantly view its definition, pronunciation, and part of speech via an integrated dictionary panel.
+- **Highlights & Quotes:** Highlight passages in multiple colors and save your favorite quotes to your personal feed with automatic book attribution.
+- **Bionic Reading:** Algorithmically bold the first half of words to create artificial fixation points, increasing reading speed.
+- **Customizable Appearance:** Toggle between Serif, Sans-Serif, and Monospace fonts. Choose from Light, Dark, Sepia (warm paper), and E-Ink (high contrast gray) themes, with automatic system theme detection on first visit.
 
-## 📚 How to Add New Books
+### 🌐 Cloud & Community
+- **Cloud Sync:** Sign in with Google to automatically sync your reading progress, bookmarks, quotes, and stats across all your devices.
+- **Community Library:** Upload your own EPUBs (up to 10MB) to a shared community library. Discover new books uploaded by others.
+- **Voting System:** Upvote your favorite community books to help the best content rise to the top.
+- **Curated Library:** Access a fast, cached selection of built-in curated books hosted directly in the repository.
 
-PageHabit fetches `.epub` files directly from this repository's `/books/` folder. 
+### 📈 Smart Stats
+- **WPM Tracking:** Silently calculates your real-world Words Per Minute as you read.
+- **Dynamic Time Estimates:** Uses your personal WPM to estimate exactly how many minutes you have left in the book.
+- **Reading Streaks:** Tracks your daily reading habits and total pages read.
 
-1. Find any `.epub` file you want to read (e.g., from Project Gutenberg).
-2. Upload it to the `/books/` folder in this repository.
-3. Open the app and tap **Sync** in the Stats tab. Your new book will instantly appear in the library!
+---
 
-## 🛠️ Tech Stack
+## 🛠️ Architecture & Tech Stack
 
-- **Architecture:** Zero-build, pure vanilla HTML/CSS/JS. No bundlers, no frameworks, no backend.
-- **Parsing:** Powered by [JSZip](https://stuk.github.io/jszip/) to unzip and parse EPUBs entirely on the client side.
-- **State:** Uses `localStorage` to save your streaks, saved quotes, settings, and reading progress.
+PageHabit is engineered for premium performance, security, and offline capability.
 
-## 🚀 Installation
+- **Frontend:** Pure Vanilla HTML, CSS, and JavaScript. Zero bundlers, zero frameworks, zero bloat.
+- **Backend:** Powered by **Firebase** (Firestore & Auth) for real-time cloud syncing and user authentication.
+- **PWA & Offline Storage:** Fully functional Progressive Web App. Uses a custom Service Worker for intelligent network-first caching, and **IndexedDB** to store parsed EPUB structures locally for instant, offline access.
+- **Client-Side Parsing:** Uses [JSZip](https://stuk.github.io/jszip/) to unzip, parse, and validate EPUB files entirely in the browser. No server processing required.
+- **Production Hardened:** Built with scale and security in mind. Features debounced Firestore writes to prevent quota exhaustion, automatic GitHub API caching to avoid rate limits, and comprehensive HTML sanitization (`textContent` and custom escaping) to completely prevent XSS attacks in community uploads.
 
-Because PageHabit is a PWA, you don't need the App Store.
+---
 
-1. Open the [Live Link](https://PhaNtoM-GHosT-11101.github.io/reading-habit-app) in Safari (iOS) or Chrome (Android).
-2. Tap the **Share** button (iOS) or **Menu** button (Android).
-3. Select **"Add to Home Screen"**.
-4. You now have a native-feeling, fully-offline e-reader on your phone!
+## 🚀 Setup & Deployment
+
+PageHabit is ready to be hosted on any static file server (like GitHub Pages).
+
+### 1. Firebase Configuration
+To enable Cloud Sync and the Community Library, you need to set up Firebase:
+1. Create a project at [Firebase Console](https://console.firebase.google.com/).
+2. Enable **Authentication** (Google Sign-In).
+3. Enable **Firestore Database**.
+4. Update the `firebaseConfig` object in `index.html` with your project keys.
+
+**CRITICAL:** You must apply the following Firestore Security Rules to protect your database from abuse:
+
+```javascript
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    match /community_books/{docId} {
+      allow read: if true;
+      allow create: if request.auth != null;
+      allow update: if request.auth != null;
+      allow delete: if false;
+    }
+    match /community_books_chunks/{docId} {
+      allow read: if true;
+      allow create: if request.auth != null;
+      allow delete: if false;
+    }
+  }
+}
+```
+
+### 2. Adding Curated Books
+Place `.epub` files inside the `/books/` directory of your repository. The app automatically fetches the repository contents via the GitHub API (with aggressive `localStorage` caching) to display them in the main "Library" tab.
+
+### 3. Installation
+Since PageHabit is a PWA, users can install it directly from their browser for a native app experience:
+- **iOS (Safari):** Tap Share > "Add to Home Screen".
+- **Android (Chrome):** Tap Menu > "Install App" or "Add to Home Screen".
+
+---
+
+## 👨‍💻 Author
+Crafted with focus and care by **Aditya Priyadarshi**.
