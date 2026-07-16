@@ -1,143 +1,40 @@
-# 📚 PageHabit — Read More, Scroll Less
+# 📖 PageHabit (Zen Edition)
 
-> **Replace your Instagram/YouTube habit with a daily reading habit — one small chunk at a time.**
+PageHabit is a gorgeous, ultra-minimalist, distraction-free EPUB reader. Built entirely as a single-file Progressive Web App (PWA), it runs entirely in your browser and functions offline.
 
-[![Live Demo](https://img.shields.io/badge/Live%20Demo-Visit%20App-7c6aff?style=for-the-badge)](https://PhaNtoM-GHosT-11101.github.io/reading-habit-app)
-[![Made with](https://img.shields.io/badge/Made%20with-HTML%20%2B%20JS-orange?style=for-the-badge)]()
-[![No Backend](https://img.shields.io/badge/No%20Backend-100%25%20Local-green?style=for-the-badge)]()
-
----
-
-## 🎯 What Is This?
-
-PageHabit is a **mobile-friendly web app** that helps you build a reading habit by breaking books into **tiny, manageable chunks** — so small that you'll actually read them instead of doomscrolling.
-
-Upload any PDF, configure how big each chunk should be (by sentences, words, or characters), and read at your own pace. Earn XP, maintain streaks, and unlock badges as you go.
+**[Try it live here!](https://PhaNtoM-GHosT-11101.github.io/reading-habit-app)**
 
 ---
 
 ## ✨ Features
 
-| Feature | Description |
-|---|---|
-| 📂 **PDF Upload** | Upload any PDF book directly in the browser |
-| ✂️ **Smart Chunking** | Split by sentences, words, or characters — fully adjustable |
-| 📖 **Multi-Library** | Keep multiple books and switch between them anytime |
-| 🔥 **Streak Tracking** | Daily streak counter like Duolingo |
-| ⭐ **XP System** | Earn 10 XP per chunk read |
-| 📊 **Progress Bars** | Per-book progress tracking |
-| 🏆 **Badges** | Unlock achievements as you hit milestones |
-| 📅 **Activity Calendar** | 28-day heatmap of your reading days |
-| 🌙 **Dark / Light Mode** | Toggle between themes |
-| 💾 **Backup & Restore** | Export/import your progress as a JSON file |
-| 📱 **Mobile-First** | Designed for phones — use it anywhere |
+- 🧘 **Zen UI:** A museum-quality aesthetic with massive whitespace and gorgeous typography. Zero borders, zero distractions.
+- 📱 **Progressive Web App (PWA):** Install it directly to your phone's home screen. Download your books once, and read them on an airplane with zero internet connection.
+- 📖 **Strict Pagination:** Unlike most web readers, there is **zero vertical scrolling**. The engine dynamically calculates the exact dimensions of your screen and splits the text into precise pages. Tap the edges of your screen to turn the page just like a real physical Kindle.
+- ⚡ **Bionic Reading:** Toggle Bionic Reading in the settings to algorithmically bold the first half of every word, creating artificial fixation points that help you skim and read significantly faster.
+- ⏱️ **Smart WPM Tracking:** The app silently tracks how fast you read and calculates an exponential moving average of your real-world Words Per Minute. Your "Estimated Time Left" dynamically adjusts to your personal speed!
+- 🎨 **Themes & Typography:** Switch between gorgeous Serif, Sans-Serif, and Monospace fonts. Read comfortably with Light, Dark, Sepia (warm paper), and E-Ink (high contrast gray) themes.
+- ✍️ **Highlights & Quotes:** Highlight your favorite passages while reading to save them directly to a beautiful feed in your Stats tab.
 
----
+## 📚 How to Add New Books
 
-## 🚀 Getting Started
+PageHabit fetches `.epub` files directly from this repository's `/books/` folder. 
 
-### Use the Live App
-👉 **[https://PhaNtoM-GHosT-11101.github.io/reading-habit-app](https://PhaNtoM-GHosT-11101.github.io/reading-habit-app)**
-
-No install, no account, no sign-up. Just open and go.
-
-### Run Locally
-```bash
-# Clone the repo
-git clone https://github.com/PhaNtoM-GHosT-11101/reading-habit-app.git
-
-# Open the file in your browser
-open index.html
-# or just double-click index.html on Windows
-```
-
----
-
-## 📱 How to Use
-
-### 1. Add a Book
-- Go to the **Library** tab
-- Tap **"Add a Book"** and upload a PDF
-- The app extracts all the text automatically
-
-### 2. Configure Your Chunk Size
-- Go to **Stats → Settings**
-- Choose chunk mode: **Sentences**, **Words**, or **Characters**
-- Adjust the amount (e.g., 10 sentences per chunk)
-
-### 3. Read
-- Tap **"Read Now"** on any book
-- Read the chunk shown on screen
-- Tap **"✅ Done Reading This Chunk"** when finished
-- Earn XP and keep your streak alive!
-
-### 4. Track Progress
-- View your **streak**, **XP**, **total pages**, and **badges** in the Stats tab
-- See your 28-day reading calendar
-
----
-
-## 🏆 Badges
-
-| Badge | Requirement |
-|---|---|
-| 📖 First Read | Read your first chunk |
-| 🔥 3-Day Fire | 3-day streak |
-| 🏆 Week Warrior | 7-day streak |
-| 💎 Diamond | 30-day streak |
-| 📄 10 Pages | Read 10 pages |
-| 📚 Centurion | Read 100 pages |
-| ⚡ Speedster | 50 chunks completed |
-| ⭐ Star Reader | 500 XP earned |
-| 🌟 Collector | 3 books started |
-
----
-
-## 🔒 Privacy
-
-**100% offline & private.** All your data (books, progress, streaks) is stored in your browser's `localStorage`. Nothing is sent to any server.
-
-> ⚠️ Use **Export Backup** regularly to save your progress — clearing browser data will erase it.
-
----
+1. Find any `.epub` file you want to read (e.g., from Project Gutenberg).
+2. Upload it to the `/books/` folder in this repository.
+3. Open the app and tap **Sync** in the Stats tab. Your new book will instantly appear in the library!
 
 ## 🛠️ Tech Stack
 
-- **HTML5** — structure
-- **Vanilla CSS** — styling with CSS custom properties (theming)
-- **Vanilla JavaScript** — all logic
-- **PDF.js** (CDN) — PDF text extraction
-- **localStorage** — data persistence
-- **GitHub Pages** — hosting
+- **Architecture:** Zero-build, pure vanilla HTML/CSS/JS. No bundlers, no frameworks, no backend.
+- **Parsing:** Powered by [JSZip](https://stuk.github.io/jszip/) to unzip and parse EPUBs entirely on the client side.
+- **State:** Uses `localStorage` to save your streaks, saved quotes, settings, and reading progress.
 
-No frameworks, no build tools, no dependencies to install. Just one file.
+## 🚀 Installation
 
----
+Because PageHabit is a PWA, you don't need the App Store.
 
-## 📂 Project Structure
-
-```
-reading-habit-app/
-├── index.html      # The entire app — HTML + CSS + JS in one file
-└── README.md       # This file
-```
-
----
-
-## 🤝 Contributing
-
-Feel free to fork and improve! Some ideas:
-- Night mode auto-switch based on time
-- Pomodoro timer integration
-- Notes/highlights per chunk
-- Sync across devices via GitHub Gist
-
----
-
-## 📄 License
-
-MIT License — use freely, modify freely.
-
----
-
-<p align="center">Made with ❤️ to fight doomscrolling, one page at a time.</p>
+1. Open the [Live Link](https://PhaNtoM-GHosT-11101.github.io/reading-habit-app) in Safari (iOS) or Chrome (Android).
+2. Tap the **Share** button (iOS) or **Menu** button (Android).
+3. Select **"Add to Home Screen"**.
+4. You now have a native-feeling, fully-offline e-reader on your phone!
