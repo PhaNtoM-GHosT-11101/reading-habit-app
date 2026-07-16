@@ -463,7 +463,7 @@ const App={
         S.books[fn]={title,text};
         S.progress[fn]=0;
         saveState();toast('Ready');this.renderLib();this.openReader();
-      }catch(e){toast('Failed to download');}
+      }catch(e){toast('Failed: ' + e.message);}
     }
   },
 
