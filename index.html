@@ -307,8 +307,9 @@ button{font-family:var(--font-ui);background:none;border:none;color:var(--text);
       <div class="rdr-back" onclick="App.go('library')">← Back</div>
       <div id="rTimeEst">~ min</div>
       <div class="rdr-tools">
-        <button class="hdr-btn" onclick="App.toggleTOC()">☰</button>
-        <button class="hdr-btn" onclick="App.toggleSettings()">Aa</button>
+        <button class="hdr-btn" title="Fullscreen" onclick="App.toggleFullscreen()">⛶</button>
+        <button class="hdr-btn" title="Chapters" onclick="App.toggleTOC()">☰</button>
+        <button class="hdr-btn" title="Appearance" onclick="App.toggleSettings()">Aa</button>
       </div>
     </div>
     
@@ -951,6 +952,14 @@ const App={
   
   toggleTOC() {
     document.getElementById('tocSidebar').classList.toggle('active');
+  },
+  
+  toggleFullscreen() {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(err => toast('Fullscreen not supported'));
+    } else {
+      if (document.exitFullscreen) document.exitFullscreen();
+    }
   },
   
   async jumpToChapter(charIndex) {
