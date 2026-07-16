@@ -113,7 +113,7 @@ button{font-family:var(--font-ui);background:none;border:none;color:var(--text);
 .rdr-content{
   height:calc(100dvh - var(--safe-t) - var(--safe-b) - 120px);
   /* 32px padding each side = 64px gap */
-  columns:calc(100vw - 64px) 1;
+  column-width: calc(100vw - 64px);
   column-gap:64px;
   padding:0 32px;
   /* Typography */
@@ -333,7 +333,7 @@ let pageStartTime=0;
 let currentSelection='';
 
 function saveState(){try{localStorage.setItem('zh2',JSON.stringify(S));}catch(e){}}
-function loadState(){try{const raw=localStorage.getItem('zh2');if(raw)S={...S,...JSON.parse(raw)};}catch(e){}}
+function loadState(){try{const raw=localStorage.getItem('zh2');if(raw){const p=JSON.parse(raw);if(p.settings)S.settings={...S.settings,...p.settings};if(p.stats)S.stats={...S.stats,...p.stats};if(p.books)S.books=p.books;if(p.progress)S.progress=p.progress;if(p.quotes)S.quotes=p.quotes;}}catch(e){}}
 const today=()=>new Date().toISOString().slice(0,10);
 function toast(msg,ms=2500){
   const el=document.getElementById('toast');
@@ -451,8 +451,9 @@ const App={
   },
 
   async bookTap(fn,title,url){
+    S.settings.active=fn;
     if(S.books[fn]){
-      S.settings.active=fn;saveState();this.openReader();
+      saveState();this.openReader();
     }else{
       toast('Downloading...');
       try{
@@ -461,7 +462,7 @@ const App={
         if(!text)throw new Error('Empty');
         S.books[fn]={title,text};
         S.progress[fn]=0;
-        saveState();toast('Ready');this.renderLib();
+        saveState();toast('Ready');this.renderLib();this.openReader();
       }catch(e){toast('Failed to download');}
     }
   },
@@ -563,7 +564,7 @@ const App={
     if(S.settings.font==='sans') fFam = "'Inter', sans-serif";
     if(S.settings.font==='mono') fFam = "'JetBrains Mono', monospace";
     document.documentElement.style.setProperty('--font-read', fFam);
-    document.getElementById('rdrContent').style.fontSize = S.settings.fontSize + 'px';
+    document.getElementById('rdrContent').style.fontSize = (S.settings.fontSize || 22) + 'px';
     
     // Theme colors
     let tc = '#000000';
