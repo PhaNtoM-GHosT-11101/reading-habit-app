@@ -103,16 +103,19 @@ button{font-family:var(--font-ui);background:none;border:none;color:var(--text);
   display:flex;align-items:center;justify-content:space-between;
   flex-shrink:0;font-size:12px;font-weight:500;color:var(--text-muted);
   text-transform:uppercase;letter-spacing:1px;
+  width:100%; max-width:800px; margin:0 auto;
 }
 .rdr-back{cursor:pointer;padding:10px 10px 10px 0;margin-left:-10px;}
 .rdr-tools{display:flex;align-items:center;gap:16px;}
 
 .rdr-wrapper{
   flex:1;width:100vw;overflow:hidden;position:relative;
+  display:flex;justify-content:center;
 }
 .rdr-content{
+  width:100%; max-width:800px;
   height:calc(100dvh - var(--safe-t) - var(--safe-b) - 120px);
-  column-width: calc(100vw - 64px);
+  column-width: calc(100% - 64px);
   column-gap:64px;
   padding:0 32px;
   font-family:var(--font-read);
@@ -133,6 +136,7 @@ button{font-family:var(--font-ui);background:none;border:none;color:var(--text);
   padding:16px 24px calc(var(--safe-b) + 16px);
   display:flex;align-items:center;justify-content:space-between;
   font-size:12px;color:var(--text-muted);
+  width:100%; max-width:800px; margin:0 auto;
 }
 .rdr-progress-bar{
   flex:1;margin:0 24px;height:1px;background:var(--text-faint);position:relative;
@@ -323,6 +327,10 @@ button{font-family:var(--font-ui);background:none;border:none;color:var(--text);
             <div class="stat-lbl" id="authStatusLbl">Account</div>
             <button class="hdr-btn" onclick="App.authAction()" id="authActionBtn">Sign In</button>
           </div>
+        </div>
+
+        <div style="margin-top:40px; text-align:center; font-family:var(--font-read); font-style:italic; font-size:14px; color:var(--text-muted); opacity:0.6;">
+          Crafted by Aditya Priyadarshi
         </div>
       </div>
     </div>
@@ -594,7 +602,8 @@ const App={
     
     requestAnimationFrame(()=>{
       setTimeout(()=>{
-        totalPages = Math.max(1, Math.ceil(content.scrollWidth / window.innerWidth));
+        const cw = content.clientWidth || window.innerWidth;
+        totalPages = Math.max(1, Math.ceil(content.scrollWidth / cw));
         let cur = Math.min(S.progress[fn]||0, totalPages-1);
         S.progress[fn] = cur; saveState();
         this.updatePageUI();
@@ -634,7 +643,7 @@ const App={
     const fn=S.settings.active;
     const cur=S.progress[fn]||0;
     const content=document.getElementById('rdrContent');
-    content.style.transform = `translateX(calc(-100vw * ${cur}))`;
+    content.style.transform = `translateX(calc(-100% * ${cur}))`;
     
     document.getElementById('rPageLbl').textContent=`${cur+1} / ${totalPages}`;
     const pct = Math.round(((cur+1)/totalPages)*100);
