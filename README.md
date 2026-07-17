@@ -1,78 +1,73 @@
 <div align="center">
-  <h1>📖 PageHabit</h1>
-  <p><strong>The uncompromising, brutally minimalist EPUB reader engineered for focus.</strong></p>
-  
-  [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
-  [![PWA Ready](https://img.shields.io/badge/PWA-Ready-success)](#)
-  [![Firebase](https://img.shields.io/badge/Firebase-Powered-orange)](#)
+
+<img width="100%" src="https://capsule-render.vercel.app/api?type=waving&height=200&color=gradient&customColorList=1,5,10&text=PageHabit&fontColor=f0a500&fontSize=70&fontAlignY=38&desc=The%20uncompromising%2C%20distraction-free%20EPUB%20reader.&descColor=e0af68&descSize=18&descAlignY=58&animation=fadeIn" />
+
+<br/>
+
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-Visit%20App-f0a500?style=for-the-badge&logo=githubpages&logoColor=black)](https://PhaNtoM-GHosT-11101.github.io/reading-habit-app)
+[![PWA](https://img.shields.io/badge/PWA-Ready-e0af68?style=for-the-badge&logo=pwa&logoColor=black)](#)
+[![Firebase](https://img.shields.io/badge/Firebase-Cloud%20Synced-f0a500?style=for-the-badge&logo=firebase&logoColor=black)](#)
+[![License: MIT](https://img.shields.io/badge/License-MIT-e0af68?style=for-the-badge)](#)
+
 </div>
-
-<br />
-
-PageHabit isn't just another e-reader. It's a high-performance, single-page Progressive Web App (PWA) designed to strip away everything between you and the author's words. No ads, no tracking, no subscription fees. Just pure text, perfectly typeset, synced across all your devices.
-
-**[Launch PageHabit Live](https://PhaNtoM-GHosT-11101.github.io/reading-habit-app)**
 
 ---
 
-## 🏔️ The Philosophy
+## The Problem
 
-Modern apps are noisy. PageHabit is silent. It relies on a custom-built, strict pagination engine that completely eliminates vertical scrolling. It transforms your browser into a physical book—predictable, tactile, and immersive. 
-
-When you enter **Immersive Mode**, the UI dissolves completely. It's just you and the typography.
+Every reading app is designed to steal your attention — infinite scroll, recommendations, notifications. PageHabit is the opposite. It's engineered around a single principle: **get out of your way and let you read.**
 
 ---
 
 ## ✨ Features
 
-### 📖 Flawless Reading Experience
-*   **Zero-Scroll Pagination:** A custom CSS column-based engine dynamically measures your viewport and splits chapters into precise, swipeable pages.
-*   **Immersive Mode:** Tap once to banish all UI chrome and enter native browser fullscreen. 
-*   **Bionic Reading:** Algorithmically bolded fixation points guide your eyes, significantly increasing your reading speed and comprehension.
-*   **Built-in Dictionary:** Highlight any word to instantly pull up definitions, phonetic pronunciations, and parts of speech via the Free Dictionary API.
-*   **Highlighting & Quotes:** Select passages in multiple colors (Yellow, Green, Pink) and save them to your personal Quotes feed with automatic book attribution.
-
-### 🧠 Smart Analytics
-*   **WPM Engine:** PageHabit silently calculates your real-world Words Per Minute in the background.
-*   **Dynamic Time Remaining:** "Minutes left in chapter" isn't a guess. It's calculated precisely against your exponentially smoothed historical reading speed.
-*   **Habit Tracking:** Visualize your daily streaks and total pages read to keep yourself accountable.
+### 📖 The Reading Engine
+- **Zero-Scroll Pagination** — CSS column engine splits text into exact pages. Tap edges to turn like a physical book.
+- **Immersive Mode** — One tap hides every UI element. Browser goes fullscreen. Only text remains.
+- **Bionic Reading** — Algorithmically bold the first half of every word. Read measurably faster.
+- **Built-in Dictionary** — Highlight any word. Definition, pronunciation, and part of speech appear instantly.
+- **Highlights & Quotes** — Mark passages in yellow, green, or pink. Auto-saved to your personal quotes feed.
+- **Keyboard Navigation** — `←` `→` `Space` all work. Built for desktop power users.
 
 ### 🌍 Cloud & Community
-*   **Google Auth & Cloud Sync:** Sign in to instantly sync your reading progress, bookmarks, and highlights across desktop, tablet, and mobile.
-*   **Community Library:** Upload `.epub` files (up to 10MB) to a globally shared library.
-*   **Democratized Curation:** Upvote the best community uploads to surface the highest quality books to the top.
+- **Google Auth + Cloud Sync** — Progress, bookmarks, and highlights synced across all devices instantly.
+- **Community Library** — Anyone can upload an EPUB. It becomes publicly accessible to all users.
+- **Upvote System** — Per-user voting surfaces the best community books. One vote per user, enforced.
+
+### 🧠 Smart Reading Intelligence
+- **Personal WPM Engine** — Tracks your real reading speed using exponential smoothing.
+- **Dynamic Time Remaining** — Calculates exactly how many minutes are left based on *your* speed, not an average.
+- **Streak Tracking** — Daily habit tracking with 90-day rolling window.
 
 ---
 
-## 🛠️ The Engineering
+## 🛠️ Architecture
 
-PageHabit is a masterclass in modern vanilla web development. 
-
-*   **Zero Build Step:** Written in pure HTML, CSS, and ES6 JavaScript. No Webpack, no React, no bloat. It loads instantly.
-*   **100% Offline Capable (PWA):** A custom Service Worker aggressively caches assets. **IndexedDB** is used to store entire parsed EPUB structures locally, meaning you can read a 1,000-page book in airplane mode.
-*   **Client-Side Parsing:** Powered by [JSZip](https://stuk.github.io/jszip/), EPUB files are unzipped, parsed, and validated entirely on the client. No server processing. No privacy leaks.
-*   **Production Hardened:** 
-    *   **XSS Protection:** Strict DOM injection (`textContent`) prevents malicious payload execution from community-uploaded books.
-    *   **Debounced Syncing:** Firestore writes are debounced (15s intervals) and batched on `beforeunload` to respect Firebase quotas.
-    *   **API Caching:** GitHub API responses are aggressively cached in `localStorage` to bypass 60-req/hr rate limits.
+```
+PageHabit Architecture
+├── Frontend       → Pure Vanilla JS + CSS (zero frameworks)
+├── Storage        → IndexedDB (full offline EPUB cache)
+├── Cloud          → Firebase Firestore (sync) + Auth (Google)
+├── Parsing        → JSZip (client-side EPUB unzip + parse)
+├── PWA            → Custom Service Worker (network-first cache)
+└── Security       → textContent injection, debounced writes, API caching
+```
 
 ---
 
-## 🚀 Deployment & Setup
+## 🚀 Install (PWA)
 
-Want to host your own instance? It's ready for GitHub Pages out of the box.
+| Platform | Steps |
+|:---|:---|
+| **iOS Safari** | Share → Add to Home Screen |
+| **Android Chrome** | Menu → Install App |
+| **Desktop** | Address bar → Install icon |
 
-### 1. The Curated Library
-Drop `.epub` files into the `/books/` directory of the repository. The app dynamically fetches this directory tree using the GitHub API to populate the default library.
+---
 
-### 2. Firebase Infrastructure
-To enable the Community Library and Cloud Sync, connect your Firebase project:
-1. Create a project at [Firebase Console](https://console.firebase.google.com/).
-2. Enable **Authentication** (Google Sign-In) and **Firestore**.
-3. Swap the `firebaseConfig` in `index.html` with your keys.
+## ⚠️ Firestore Security Rules
 
-**Crucial Security Rules:**
-Lock down your Firestore to prevent abuse. Paste this into your Rules tab:
+If self-hosting, apply these rules immediately:
 
 ```javascript
 rules_version = '2';
@@ -86,11 +81,6 @@ service cloud.firestore {
       allow create, update: if request.auth != null;
       allow delete: if false;
     }
-    match /community_books_chunks/{docId} {
-      allow read: if true;
-      allow create: if request.auth != null;
-      allow delete: if false;
-    }
   }
 }
 ```
@@ -98,5 +88,6 @@ service cloud.firestore {
 ---
 
 <div align="center">
-  <p>Engineered with precision by <strong>Aditya Priyadarshi</strong>.</p>
+<img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=1,5,10&height=100&section=footer" />
+<sub>Engineered by <b>Aditya Priyadarshi</b></sub>
 </div>
