@@ -60,6 +60,14 @@ button{font-family:var(--font-ui);background:none;border:none;color:var(--text);
 .tab-btn.active::after{content:'';position:absolute;bottom:-1px;left:0;right:0;height:2px;background:var(--accent);border-radius:1px;}
 
 /* ═══ LIBRARY ═══ */
+.lib-filters{padding:12px 24px 4px;display:flex;flex-direction:column;gap:10px;flex-shrink:0;}
+.lib-search{width:100%;padding:10px 14px;border-radius:10px;border:1px solid var(--text-faint);background:var(--ui);color:var(--text);font-family:var(--font-ui);font-size:14px;outline:none;}
+.lib-search:focus{border-color:var(--text-muted);}
+.genre-row{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none;}
+.genre-row::-webkit-scrollbar{display:none;}
+.genre-chip{flex-shrink:0;padding:6px 14px;border-radius:100px;border:1px solid var(--text-faint);background:transparent;color:var(--text-muted);font-size:12px;font-weight:600;cursor:pointer;transition:all 0.2s;}
+.genre-chip:hover{border-color:var(--text-muted);color:var(--text);}
+.genre-chip.active{background:var(--text);color:var(--bg);border-color:var(--text);}
 .lib-list{padding:16px 24px 120px;display:flex;flex-direction:column;gap:1px;}
 .lib-item{cursor:pointer;padding:20px 0;border-bottom:1px solid var(--text-faint);transition:opacity 0.15s;display:flex;align-items:flex-start;gap:16px;}
 .lib-item:active{opacity:0.5;}
@@ -205,6 +213,10 @@ button{font-family:var(--font-ui);background:none;border:none;color:var(--text);
       <button class="tab-btn" id="tabCommunity" onclick="App.setLibTab('community')">Community</button>
     </div>
     <div class="scroller">
+      <div class="lib-filters">
+        <input type="search" class="lib-search" id="libSearch" placeholder="Search books by title or author..." oninput="App.setQuery(this.value)">
+        <div class="genre-row" id="genreRow"></div>
+      </div>
       <div class="lib-list" id="libList"><div class="loader">Loading library...</div></div>
     </div>
     <button id="fabUpload" onclick="document.getElementById('uploadInput').click()" style="display:none;position:fixed;bottom:32px;right:32px;width:56px;height:56px;border-radius:28px;background:var(--text);color:var(--bg);font-size:28px;box-shadow:0 6px 20px rgba(0,0,0,0.25);justify-content:center;align-items:center;z-index:100;border:none;cursor:pointer;">+</button>
@@ -355,6 +367,8 @@ let S={
 let ghFiles=[],communityFiles=[],libTab='curated',totalPages=1,pageStartTime=0;
 let currentSelection='',currentSelectionRange=null,interactionsSetup=false,isImmersive=false;
 let cachedWordCount=0,cachedBookTitle='';
+let libQuery='',libGenre='All';
+const GENRES=['All','Mystery','Romance','Adventure','Sci-Fi','Fantasy','Horror','Poetry','Drama','History','Philosophy','Religion','Nonfiction','Classics'];
 
 /* ── INDEXEDDB ── */
 const DB_NAME='zhDB',DB_VERSION=1,STORE_NAME='books';
@@ -493,8 +507,25 @@ const App={
     document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
     document.getElementById(tab==='curated'?'tabLibrary':tab==='toread'?'tabToRead':'tabCommunity').classList.add('active');
     document.getElementById('fabUpload').style.display=(tab==='community'&&currentUser)?'flex':'none';
+    this.renderGenreChips();
     this.renderLib();
     if(tab==='community'&&communityFiles.length===0)this.fetchCommunityBooks();
+  },
+
+  setQuery(q){libQuery=q.trim().toLowerCase();this.renderLib();},
+
+  setGenre(g){libGenre=g;this.renderGenreChips();this.renderLib();},
+
+  renderGenreChips(){
+    const row=document.getElementById('genreRow');
+    row.innerHTML='';
+    GENRES.forEach(g=>{
+      const chip=document.createElement('button');
+      chip.className='genre-chip'+(g===libGenre?' active':'');
+      chip.textContent=g;
+      chip.onclick=()=>this.setGenre(g);
+      row.appendChild(chip);
+    });
   },
 
   /* ══════════════════════════════
@@ -595,6 +626,18 @@ const App={
     if(libTab==='curated')files=ghFiles;
     else if(libTab==='community')files=communityFiles;
     else files=[...ghFiles,...communityFiles].filter(f=>S.bookmarks.includes(f.name));
+
+    // Apply search + genre filters
+    if(libQuery){
+      files=files.filter(f=>{
+        const t=f.title||cleanTitle(f.name).title;
+        const a=f.author||cleanTitle(f.name).author;
+        return t.toLowerCase().includes(libQuery)||a.toLowerCase().includes(libQuery);
+      });
+    }
+    if(libGenre!=='All'&&libTab!=='community'){
+      files=files.filter(f=>!f.genres||f.genres.includes(libGenre));
+    }
 
     if(!files.length){
       const msg=libTab==='curated'?'No books found.':libTab==='toread'?'No saved books yet. Tap ♡ on any book to save it here.':'No community books yet.';

@@ -47,13 +47,42 @@ def clean(filename: str) -> tuple[str, str]:
     return title, author
 
 
+GENRE_KEYWORDS = {
+    "Horror": ["horror", "gothic", "ghost", "supernatural", "vampire", "occult", "weird"],
+    "Mystery": ["mystery", "detective", "crime", "murder", "sherlock", "poe"],
+    "Romance": ["romance", "love", "courtship", "marriage", "passion", "lovers"],
+    "Sci-Fi": ["science fiction", "sci-fi", "space", "martian", "mars", "adventure stories -- science"],
+    "Adventure": ["adventure", "voyages", "pirates", "sea stories", "explorers", "western", "frontier"],
+    "Fantasy": ["fantasy", "fairy", "myth", "knights", "arthur", "legend", "tales"],
+    "Poetry": ["poetry", "poems", "verse", "sonnets", "lyrics", "ballads"],
+    "Drama": ["drama", "plays", "tragedy", "comedy", "theatre"],
+    "History": ["history", "historical", "antiqu", "biography", "kings", "queens", "civil war", "revolution"],
+    "Philosophy": ["philosophy", "ethics", "stoic", "meditation", "moral", "political science"],
+    "Religion": ["religion", "bible", "christian", "theology", "saint", "confession", "spiritual"],
+    "Nonfiction": ["essays", "letters", "autobiography", "memoir", "travel", "journal", "diary", "reference", "dictionary", "encyclopedia"],
+}
+
+
+def subjects_to_genres(subjects: list[str]) -> list[str]:
+    genres = []
+    hay = " ".join(subjects).lower()
+    for genre, keywords in GENRE_KEYWORDS.items():
+        if any(k in hay for k in keywords):
+            genres.append(genre)
+    if not genres:
+        genres.append("Classics")
+    return genres
+
+
 def opf_metadata(zf: zipfile.ZipFile, opf_path: str) -> dict:
     xml = zf.read(opf_path).decode("utf-8", "replace")
     lang = re.search(r"<dc:language[^>]*>(.*?)</dc:language>", xml, re.S)
     creator = re.search(r"<dc:creator[^>]*>(.*?)</dc:creator>", xml, re.S)
+    subjects = [s.strip() for s in re.findall(r"<dc:subject[^>]*>(.*?)</dc:subject>", xml, re.S)]
     return {
         "lang": (lang.group(1).strip() if lang else ""),
         "creator": (creator.group(1).strip() if creator else ""),
+        "subjects": subjects,
     }
 
 
@@ -106,6 +135,7 @@ def main() -> int:
         title, author = clean(path.name)
         cover = None
         lang = ""
+        genres = []
         try:
             with zipfile.ZipFile(path) as zf:
                 names = zf.namelist()
@@ -113,6 +143,7 @@ def main() -> int:
                 if opf:
                     meta = opf_metadata(zf, opf)
                     lang = meta["lang"]
+                    genres = subjects_to_genres(meta["subjects"])
                     if not author:
                         author = meta["creator"]
                     cover = extract_cover(zf, opf, path.stem)
@@ -124,6 +155,7 @@ def main() -> int:
                 "title": title,
                 "author": author,
                 "lang": lang,
+                "genres": genres,
                 "cover": cover,
                 "size": path.stat().st_size,
             }

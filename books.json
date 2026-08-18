@@ -7,6 +7,9 @@
       "title": "Victorian Short Stories Stories of Courtship",
       "author": "",
       "lang": "en",
+      "genres": [
+        "Romance"
+      ],
       "cover": "15381 - Victorian Short Stories Stories of Courtship (3222).png",
       "size": 158168
     },
@@ -15,6 +18,9 @@
       "title": "A Honeymoon in Space",
       "author": "George Chetwynd Griffith",
       "lang": "en",
+      "genres": [
+        "Sci-Fi"
+      ],
       "cover": "A Honeymoon in Space by George Chetwynd Griffith.png",
       "size": 212144
     },
@@ -23,6 +29,10 @@
       "title": "A Journey to the Centre of the Earth",
       "author": "Jules Verne",
       "lang": "en",
+      "genres": [
+        "Sci-Fi",
+        "Adventure"
+      ],
       "cover": "A Journey to the Centre of the Earth - Jules Verne.png",
       "size": 288666
     },
@@ -31,6 +41,9 @@
       "title": "A Room with a View",
       "author": "E. M. Forster",
       "lang": "en",
+      "genres": [
+        "Classics"
+      ],
       "cover": "A Room with a View by E. M. Forster.jpg",
       "size": 254476
     },
@@ -39,6 +52,9 @@
       "title": "A Study in Scarlet",
       "author": "Arthur Conan Doyle",
       "lang": "en",
+      "genres": [
+        "Mystery"
+      ],
       "cover": "A Study in Scarlet by Arthur Conan Doyle.png",
       "size": 194519
     },
@@ -47,6 +63,9 @@
       "title": "A farewell to arms",
       "author": "Ernest Hemingway",
       "lang": "en",
+      "genres": [
+        "Classics"
+      ],
       "cover": "A farewell to arms by Ernest Hemingway.jpg",
       "size": 214680
     },
@@ -55,6 +74,9 @@
       "title": "A pair of blue eyes",
       "author": "Thomas Hardy",
       "lang": "en",
+      "genres": [
+        "Classics"
+      ],
       "cover": "A pair of blue eyes by Thomas Hardy.png",
       "size": 428982
     },
@@ -63,6 +85,9 @@
       "title": "Alice's Adventures in Wonderland",
       "author": "Lewis Carroll",
       "lang": "en",
+      "genres": [
+        "Fantasy"
+      ],
       "cover": "Alice's Adventures in Wonderland by Lewis Carroll.jpg",
       "size": 136761
     },
@@ -71,6 +96,9 @@
       "title": "Around the World in Eighty Days",
       "author": "Jules Verne",
       "lang": "en",
+      "genres": [
+        "Adventure"
+      ],
       "cover": "Around the World in Eighty Days by Jules Verne.jpg",
       "size": 269763
     },
@@ -79,6 +107,9 @@
       "title": "As You Like It",
       "author": "William Shakespeare",
       "lang": "en",
+      "genres": [
+        "Drama"
+      ],
       "cover": "As You Like It by William Shakespeare.jpg",
       "size": 198297
     },
@@ -87,6 +118,9 @@
       "title": "Aus dem Leben eines Taugenichts Novelle",
       "author": "Freiherr von Joseph Eichendorff",
       "lang": "de",
+      "genres": [
+        "Classics"
+      ],
       "cover": "Aus dem Leben eines Taugenichts Novelle - Freiherr von Joseph Eichendorff.jpg",
       "size": 299075
     },
@@ -95,6 +129,9 @@
       "title": "Autobiography of Benjamin Franklin",
       "author": "Benjamin Franklin",
       "lang": "en",
+      "genres": [
+        "History"
+      ],
       "cover": "Autobiography of Benjamin Franklin by Benjamin Franklin.jpg",
       "size": 216377
     },
@@ -103,6 +140,9 @@
       "title": "Bidwell's Travels, from Wall Street to London Prison: Fifteen Years in Solitude",
       "author": "Austin Bidwell",
       "lang": "en",
+      "genres": [
+        "History"
+      ],
       "cover": "Bidwell's Travels, from Wall Street to London Prison_ Fifteen Years in Solitude by Austin Bidwell.jpg",
       "size": 418868
     },
@@ -111,6 +151,9 @@
       "title": "Blow The Man Down: A Romance Of The Coast",
       "author": "Holman Day",
       "lang": "en",
+      "genres": [
+        "Romance"
+      ],
       "cover": "Blow The Man Down_ A Romance Of The Coast by Holman Day.png",
       "size": 421943
     },
@@ -119,6 +162,9 @@
       "title": "Camille (La Dame aux Camilias)",
       "author": "Alexandre Dumas",
       "lang": "en",
+      "genres": [
+        "Romance"
+      ],
       "cover": "Camille (La Dame aux Camilias) by Alexandre Dumas.png",
       "size": 241053
     },
@@ -127,6 +173,9 @@
       "title": "Carmen",
       "author": "Prosper Mérimée",
       "lang": "en",
+      "genres": [
+        "Classics"
+      ],
       "cover": "Carmen by Prosper Mérimée.jpg",
       "size": 126630
     },
@@ -135,6 +184,10 @@
       "title": "Catriona",
       "author": "Robert Louis Stevenson",
       "lang": "en",
+      "genres": [
+        "Adventure",
+        "History"
+      ],
       "cover": "Catriona by Robert Louis Stevenson.png",
       "size": 324576
     },
@@ -143,6 +196,9 @@
       "title": "Chambers's Edinburgh Journal, No. 452",
       "author": "Various",
       "lang": "en",
+      "genres": [
+        "Classics"
+      ],
       "cover": "Chambers's Edinburgh Journal, No. 452 - Various.png",
       "size": 180039
     },
@@ -151,6 +207,9 @@
       "title": "Complete Short Works of George Meredith",
       "author": "George Meredith",
       "lang": "en",
+      "genres": [
+        "Classics"
+      ],
       "cover": "Complete Short Works of George Meredith by George Meredith.png",
       "size": 507354
     },
@@ -159,6 +218,10 @@
       "title": "Crime and Punishment",
       "author": "Fyodor Dostoyevsky",
       "lang": "en",
+      "genres": [
+        "Mystery",
+        "Religion"
+      ],
       "cover": "Crime and Punishment by Fyodor Dostoyevsky.jpg",
       "size": 783515
     },
@@ -167,6 +230,9 @@
       "title": "Cynthia's Chauffeur",
       "author": "Louis Tracy",
       "lang": "en",
+      "genres": [
+        "Romance"
+      ],
       "cover": "Cynthia's Chauffeur by Louis Tracy.jpg",
       "size": 275330
     },
@@ -175,6 +241,10 @@
       "title": "Dainty's Cruel Rivals; Or, The Fatal Birthday",
       "author": "Mrs. Alex. McVeigh Miller",
       "lang": "en",
+      "genres": [
+        "Romance",
+        "Adventure"
+      ],
       "cover": "Dainty's Cruel Rivals; Or, The Fatal Birthday - Mrs. Alex. McVeigh Miller.jpg",
       "size": 249919
     },
@@ -183,6 +253,9 @@
       "title": "De Profundis",
       "author": "Oscar Wilde",
       "lang": "en",
+      "genres": [
+        "Classics"
+      ],
       "cover": "De Profundis by Oscar Wilde.png",
       "size": 110776
     },
@@ -191,6 +264,9 @@
       "title": "Doctor Cupid A Novel",
       "author": "Rhoda Broughton",
       "lang": "en",
+      "genres": [
+        "Classics"
+      ],
       "cover": "Doctor Cupid A Novel - Rhoda Broughton.png",
       "size": 393956
     },
@@ -199,6 +275,10 @@
       "title": "Dracula",
       "author": "Bram Stoker",
       "lang": "en",
+      "genres": [
+        "Horror",
+        "Fantasy"
+      ],
       "cover": "Dracula by Bram Stoker.jpg",
       "size": 433229
     },
@@ -207,6 +287,10 @@
       "title": "El crimen y el castigo",
       "author": "Fyodor Dostoyevsky",
       "lang": "es",
+      "genres": [
+        "Mystery",
+        "Religion"
+      ],
       "cover": "El crimen y el castigo by Fyodor Dostoyevsky.jpg",
       "size": 588264
     },
@@ -215,6 +299,9 @@
       "title": "Eloisa ",
       "author": "Jean-Jacques Rousseau",
       "lang": "en",
+      "genres": [
+        "History"
+      ],
       "cover": "Eloisa _ by Jean-Jacques Rousseau.jpg",
       "size": 841565
     },
@@ -223,6 +310,10 @@
       "title": "Erotica Romana",
       "author": "Johann Wolfgang von Goethe",
       "lang": "en",
+      "genres": [
+        "Mystery",
+        "Poetry"
+      ],
       "cover": "Erotica Romana by Johann Wolfgang von Goethe.png",
       "size": 90366
     },
@@ -231,6 +322,11 @@
       "title": "Forest Days A Romance of Old Times",
       "author": "G. P. R. James",
       "lang": "en",
+      "genres": [
+        "Adventure",
+        "Fantasy",
+        "History"
+      ],
       "cover": "Forest Days A Romance of Old Times - G. P. R. James.png",
       "size": 482045
     },
@@ -239,6 +335,10 @@
       "title": "Four Arthurian Romances",
       "author": "active 12th century de Troyes Chrétien",
       "lang": "en",
+      "genres": [
+        "Romance",
+        "Fantasy"
+      ],
       "cover": "Four Arthurian Romances by active 12th century de Troyes Chrétien.jpg",
       "size": 516158
     },
@@ -247,6 +347,9 @@
       "title": "Hypnerotomachia The Strife of Loue in a Dreame",
       "author": "Francesco Colonna",
       "lang": "en",
+      "genres": [
+        "Romance"
+      ],
       "cover": "Hypnerotomachia The Strife of Loue in a Dreame - Francesco Colonna.jpg",
       "size": 1180933
     },
@@ -255,6 +358,9 @@
       "title": "I am a woman",
       "author": "Ann Bannon",
       "lang": "en",
+      "genres": [
+        "Romance"
+      ],
       "cover": "I am a woman by Ann Bannon.jpg",
       "size": 308080
     },
@@ -263,6 +369,10 @@
       "title": "India's Love Lyrics",
       "author": "Laurence Hope",
       "lang": "en",
+      "genres": [
+        "Mystery",
+        "Poetry"
+      ],
       "cover": "India's Love Lyrics - Laurence Hope.png",
       "size": 134620
     },
@@ -271,6 +381,9 @@
       "title": "Jane Eyre: An Autobiography",
       "author": "Charlotte Brontë",
       "lang": "en",
+      "genres": [
+        "Romance"
+      ],
       "cover": "Jane Eyre_ An Autobiography by Charlotte Brontë.jpg",
       "size": 607556
     },
@@ -279,6 +392,10 @@
       "title": "King Arthur and the Knights of the Round Table",
       "author": "Sir Thomas Malory",
       "lang": "en",
+      "genres": [
+        "Romance",
+        "Fantasy"
+      ],
       "cover": "King Arthur and the Knights of the Round Table by Sir Thomas Malory.jpg",
       "size": 263147
     },
@@ -287,6 +404,10 @@
       "title": "Le Fantôme de l'Opéra",
       "author": "Gaston Leroux",
       "lang": "fr",
+      "genres": [
+        "Horror",
+        "Fantasy"
+      ],
       "cover": "Le Fantôme de l'Opéra by Gaston Leroux.jpg",
       "size": 325831
     },
@@ -295,6 +416,10 @@
       "title": "Life on the Mississippi",
       "author": "Mark Twain",
       "lang": "en",
+      "genres": [
+        "History",
+        "Nonfiction"
+      ],
       "cover": "Life on the Mississippi by Mark Twain.jpg",
       "size": 454349
     },
@@ -303,6 +428,9 @@
       "title": "Linnet: A Romance",
       "author": "Grant Allen",
       "lang": "en",
+      "genres": [
+        "Classics"
+      ],
       "cover": "Linnet_ A Romance by Grant Allen.jpg",
       "size": 468841
     },
@@ -311,6 +439,9 @@
       "title": "Little Women; Or, Meg, Jo, Beth, and Amy",
       "author": "Louisa May Alcott",
       "lang": "en",
+      "genres": [
+        "Classics"
+      ],
       "cover": "Little Women; Or, Meg, Jo, Beth, and Amy by Louisa May Alcott.png",
       "size": 558296
     },
@@ -319,6 +450,10 @@
       "title": "Lorna Doone A Romance of Exmoor",
       "author": "R. D. Blackmore",
       "lang": "en",
+      "genres": [
+        "Romance",
+        "History"
+      ],
       "cover": "Lorna Doone A Romance of Exmoor - R. D. Blackmore.jpg",
       "size": 12355209
     },
@@ -327,6 +462,9 @@
       "title": "Love and Freindship",
       "author": "Jane Austen",
       "lang": "en",
+      "genres": [
+        "Nonfiction"
+      ],
       "cover": "Love and Freindship - Jane Austen.jpg",
       "size": 371967
     },
@@ -335,6 +473,9 @@
       "title": "Love and Freindship [sic]",
       "author": "Jane Austen",
       "lang": "en",
+      "genres": [
+        "Nonfiction"
+      ],
       "cover": "Love and Freindship [sic] by Jane Austen.jpg",
       "size": 177677
     },
@@ -343,6 +484,9 @@
       "title": "Manon Lescaut",
       "author": "abbé Prévost",
       "lang": "en",
+      "genres": [
+        "Adventure"
+      ],
       "cover": "Manon Lescaut by abbé Prévost.png",
       "size": 215104
     },
@@ -351,6 +495,9 @@
       "title": "Meditations",
       "author": "Emperor of Rome Marcus Aurelius",
       "lang": "en",
+      "genres": [
+        "Philosophy"
+      ],
       "cover": "Meditations by Emperor of Rome Marcus Aurelius.jpg",
       "size": 306086
     },
@@ -359,6 +506,9 @@
       "title": "Middlemarch",
       "author": "George Eliot",
       "lang": "en",
+      "genres": [
+        "Romance"
+      ],
       "cover": "Middlemarch by George Eliot.jpg",
       "size": 906007
     },
@@ -367,6 +517,9 @@
       "title": "Moby Dick; Or, The Whale",
       "author": "Herman Melville",
       "lang": "en",
+      "genres": [
+        "Adventure"
+      ],
       "cover": "Moby Dick; Or, The Whale by Herman Melville.jpg",
       "size": 727453
     },
@@ -375,6 +528,9 @@
       "title": "Modern English biography, volume 2 (of 4), I-Q",
       "author": "Frederic Boase",
       "lang": "en",
+      "genres": [
+        "History"
+      ],
       "cover": "Modern English biography, volume 2 (of 4), I-Q by Frederic Boase.jpg",
       "size": 2131262
     },
@@ -383,6 +539,9 @@
       "title": "Moods",
       "author": "Louisa May Alcott",
       "lang": "en",
+      "genres": [
+        "Classics"
+      ],
       "cover": "Moods - Louisa May Alcott.jpg",
       "size": 665906
     },
@@ -391,6 +550,9 @@
       "title": "My Life — Volume 1",
       "author": "Richard Wagner",
       "lang": "en",
+      "genres": [
+        "History"
+      ],
       "cover": "My Life — Volume 1 by Richard Wagner.jpg",
       "size": 663897
     },
@@ -399,6 +561,9 @@
       "title": "Narrative of the Life of Frederick Douglass, an American Slave",
       "author": "Frederick Douglass",
       "lang": "en",
+      "genres": [
+        "History"
+      ],
       "cover": "Narrative of the Life of Frederick Douglass, an American Slave by Frederick Douglass.jpg",
       "size": 175968
     },
@@ -407,6 +572,9 @@
       "title": "Oliver Twist, Vol. 2 (of 3)",
       "author": "Charles Dickens",
       "lang": "en",
+      "genres": [
+        "Classics"
+      ],
       "cover": "Oliver Twist, Vol. 2 (of 3) by Charles Dickens.jpg",
       "size": 200562
     },
@@ -415,6 +583,9 @@
       "title": "One of the Six Hundred: A Novel",
       "author": "James Grant",
       "lang": "en",
+      "genres": [
+        "Mystery"
+      ],
       "cover": "One of the Six Hundred_ A Novel.jpg",
       "size": 514637
     },
@@ -423,6 +594,9 @@
       "title": "Only a girl's love",
       "author": "Charles Garvice",
       "lang": "en",
+      "genres": [
+        "Romance"
+      ],
       "cover": "Only a girl's love - Charles Garvice.jpg",
       "size": 813286
     },
@@ -431,6 +605,9 @@
       "title": "Pride and Prejudice",
       "author": "Jane Austen",
       "lang": "en",
+      "genres": [
+        "Romance"
+      ],
       "cover": "Pride and Prejudice by Jane Austen.jpg",
       "size": 558547
     },
@@ -439,6 +616,9 @@
       "title": "Romeo and Juliet",
       "author": "William Shakespeare",
       "lang": "en",
+      "genres": [
+        "Drama"
+      ],
       "cover": "Romeo and Juliet by William Shakespeare.jpg",
       "size": 199219
     },
@@ -447,6 +627,9 @@
       "title": "Roméo et Juliette",
       "author": "William Shakespeare",
       "lang": "fr",
+      "genres": [
+        "Drama"
+      ],
       "cover": "Roméo et Juliette by William Shakespeare.png",
       "size": 171682
     },
@@ -455,6 +638,9 @@
       "title": "Sense and Sensibility",
       "author": "Jane Austen",
       "lang": "en",
+      "genres": [
+        "Romance"
+      ],
       "cover": "Sense and Sensibility by Jane Austen.jpg",
       "size": 421052
     },
@@ -463,6 +649,11 @@
       "title": "Sonnets from the Portuguese",
       "author": "Elizabeth Barrett Browning",
       "lang": "en",
+      "genres": [
+        "Mystery",
+        "Romance",
+        "Poetry"
+      ],
       "cover": "Sonnets from the Portuguese by Elizabeth Barrett Browning.jpg",
       "size": 65380
     },
@@ -471,6 +662,9 @@
       "title": "That Which Hath Wings: A Novel of the Day",
       "author": "Richard Dehan",
       "lang": "en",
+      "genres": [
+        "Classics"
+      ],
       "cover": "That Which Hath Wings_ A Novel of the Day.jpg",
       "size": 604457
     },
@@ -479,6 +673,9 @@
       "title": "The Adventures of Sherlock Holmes",
       "author": "Arthur Conan Doyle",
       "lang": "en",
+      "genres": [
+        "Mystery"
+      ],
       "cover": "The Adventures of Sherlock Holmes by Arthur Conan Doyle.jpg",
       "size": 311604
     },
@@ -487,6 +684,9 @@
       "title": "The Anabasis of Alexander",
       "author": "Arrian",
       "lang": "en",
+      "genres": [
+        "History"
+      ],
       "cover": "The Anabasis of Alexander - Arrian.jpg",
       "size": 492497
     },
@@ -495,6 +695,10 @@
       "title": "The Blue Castle: a novel",
       "author": "L. M. Montgomery",
       "lang": "en",
+      "genres": [
+        "Romance",
+        "History"
+      ],
       "cover": "The Blue Castle_ a novel by L. M. Montgomery.jpg",
       "size": 364492
     },
@@ -503,6 +707,10 @@
       "title": "The Blue Lagoon: A Romance",
       "author": "H. De Vere Stacpoole",
       "lang": "en",
+      "genres": [
+        "Romance",
+        "Adventure"
+      ],
       "cover": "The Blue Lagoon_ A Romance by H. De Vere Stacpoole.jpg",
       "size": 212629
     },
@@ -511,6 +719,9 @@
       "title": "The Book of the Thousand Nights and a Night — Volume 01 (of 10)",
       "author": "",
       "lang": "en",
+      "genres": [
+        "Fantasy"
+      ],
       "cover": "The Book of the Thousand Nights and a Night — Volume 01 (of 10).jpg",
       "size": 683021
     },
@@ -519,6 +730,9 @@
       "title": "The Boy with Wings",
       "author": "Berta Ruck",
       "lang": "en",
+      "genres": [
+        "Romance"
+      ],
       "cover": "The Boy with Wings - Berta Ruck.jpg",
       "size": 573886
     },
@@ -527,6 +741,10 @@
       "title": "The Cask of Amontillado",
       "author": "Edgar Allan Poe",
       "lang": "en",
+      "genres": [
+        "Horror",
+        "Fantasy"
+      ],
       "cover": "The Cask of Amontillado by Edgar Allan Poe.png",
       "size": 71392
     },
@@ -535,6 +753,9 @@
       "title": "The Complete Project Gutenberg Works of Jane Austen",
       "author": "Jane Austen",
       "lang": "en",
+      "genres": [
+        "Romance"
+      ],
       "cover": "The Complete Project Gutenberg Works of Jane Austen by Jane Austen.jpg",
       "size": 71039
     },
@@ -543,6 +764,9 @@
       "title": "The Complete Works of William Shakespeare",
       "author": "William Shakespeare",
       "lang": "en",
+      "genres": [
+        "Drama"
+      ],
       "cover": "The Complete Works of William Shakespeare by William Shakespeare.jpg",
       "size": 2878807
     },
@@ -551,6 +775,10 @@
       "title": "The Confessions of St. Augustine",
       "author": "Saint of Hippo Augustine",
       "lang": "en",
+      "genres": [
+        "History",
+        "Religion"
+      ],
       "cover": "The Confessions of St. Augustine by Saint of Hippo Augustine.png",
       "size": 328046
     },
@@ -559,6 +787,10 @@
       "title": "The Count of Monte Cristo",
       "author": "Alexandre Dumas and Auguste Maquet",
       "lang": "en",
+      "genres": [
+        "Adventure",
+        "History"
+      ],
       "cover": "The Count of Monte Cristo by Alexandre Dumas and Auguste Maquet.jpg",
       "size": 1294288
     },
@@ -567,6 +799,9 @@
       "title": "The Countess of Pembroke's Arcadia",
       "author": "Philip Sidney",
       "lang": "en",
+      "genres": [
+        "Classics"
+      ],
       "cover": "The Countess of Pembroke's Arcadia by Philip Sidney.jpg",
       "size": 1081145
     },
@@ -575,6 +810,10 @@
       "title": "The Extraordinary Adventures of Arsène Lupin, Gentleman-Burglar",
       "author": "Maurice Leblanc",
       "lang": "en",
+      "genres": [
+        "Mystery",
+        "Adventure"
+      ],
       "cover": "The Extraordinary Adventures of Arsène Lupin, Gentleman-Burglar by Maurice Leblanc.jpg",
       "size": 212650
     },
@@ -583,6 +822,9 @@
       "title": "The Gay Adventure A Romance",
       "author": "Richard Bird",
       "lang": "en",
+      "genres": [
+        "Classics"
+      ],
       "cover": "The Gay Adventure A Romance - Richard Bird.png",
       "size": 408341
     },
@@ -591,6 +833,10 @@
       "title": "The Green Mouse",
       "author": "Robert W. Chambers",
       "lang": "en",
+      "genres": [
+        "Romance",
+        "Fantasy"
+      ],
       "cover": "The Green Mouse - Robert W. Chambers.png",
       "size": 1114480
     },
@@ -599,6 +845,9 @@
       "title": "The Green Mummy",
       "author": "Fergus Hume",
       "lang": "en",
+      "genres": [
+        "Mystery"
+      ],
       "cover": "The Green Mummy by Fergus Hume.jpg",
       "size": 271857
     },
@@ -607,6 +856,9 @@
       "title": "The History of Sir Richard Calmady A Romance",
       "author": "Lucas Malet",
       "lang": "en",
+      "genres": [
+        "Classics"
+      ],
       "cover": "The History of Sir Richard Calmady A Romance - Lucas Malet.png",
       "size": 745925
     },
@@ -615,6 +867,10 @@
       "title": "The Home Book of Verse — Volume 2",
       "author": "Burton Egbert Stevenson",
       "lang": "en",
+      "genres": [
+        "Mystery",
+        "Poetry"
+      ],
       "cover": "The Home Book of Verse — Volume 2 by Burton Egbert Stevenson.png",
       "size": 702446
     },
@@ -623,6 +879,9 @@
       "title": "The Hound of the Baskervilles",
       "author": "Arthur Conan Doyle",
       "lang": "en",
+      "genres": [
+        "Mystery"
+      ],
       "cover": "The Hound of the Baskervilles by Arthur Conan Doyle.jpg",
       "size": 228105
     },
@@ -631,6 +890,9 @@
       "title": "The Kama Sutra of Vatsyayana",
       "author": "Vatsyayana",
       "lang": "en",
+      "genres": [
+        "Romance"
+      ],
       "cover": "The Kama Sutra of Vatsyayana by Vatsyayana.png",
       "size": 212990
     },
@@ -639,6 +901,10 @@
       "title": "The King in Yellow",
       "author": "Robert W. Chambers",
       "lang": "en",
+      "genres": [
+        "Horror",
+        "Fantasy"
+      ],
       "cover": "The King in Yellow by Robert W. Chambers.jpg",
       "size": 286933
     },
@@ -647,6 +913,10 @@
       "title": "The Lady of the Lake",
       "author": "Walter Scott",
       "lang": "en",
+      "genres": [
+        "Romance",
+        "Fantasy"
+      ],
       "cover": "The Lady of the Lake by Walter Scott.jpg",
       "size": 370378
     },
@@ -655,6 +925,9 @@
       "title": "The Landloper The Romance of a Man on Foot",
       "author": "Holman Day",
       "lang": "en",
+      "genres": [
+        "Classics"
+      ],
       "cover": "The Landloper The Romance of a Man on Foot - Holman Day.png",
       "size": 325415
     },
@@ -663,6 +936,11 @@
       "title": "The Love Letters of Henry VIII to Anne Boleyn; With Notes",
       "author": "King of England Henry VIII",
       "lang": "en",
+      "genres": [
+        "Romance",
+        "History",
+        "Nonfiction"
+      ],
       "cover": "The Love Letters of Henry VIII to Anne Boleyn; With Notes - King of England Henry VIII.png",
       "size": 971872
     },
@@ -671,6 +949,10 @@
       "title": "The Love Letters of Mary Wollstonecraft to Gilbert Imlay",
       "author": "Mary Wollstonecraft",
       "lang": "en",
+      "genres": [
+        "Romance",
+        "Nonfiction"
+      ],
       "cover": "The Love Letters of Mary Wollstonecraft to Gilbert Imlay by Mary Wollstonecraft.jpg",
       "size": 160565
     },
@@ -679,6 +961,10 @@
       "title": "The Man Who Was Thursday: A Nightmare",
       "author": "G. K. Chesterton",
       "lang": "en",
+      "genres": [
+        "Mystery",
+        "Fantasy"
+      ],
       "cover": "The Man Who Was Thursday_ A Nightmare by G. K. Chesterton.jpg",
       "size": 196433
     },
@@ -687,6 +973,9 @@
       "title": "The Memoirs of Sherlock Holmes",
       "author": "Arthur Conan Doyle",
       "lang": "en",
+      "genres": [
+        "Mystery"
+      ],
       "cover": "The Memoirs of Sherlock Holmes by Arthur Conan Doyle.jpg",
       "size": 291329
     },
@@ -695,6 +984,9 @@
       "title": "The Misplaced Battleship",
       "author": "Harry Harrison",
       "lang": "en",
+      "genres": [
+        "Sci-Fi"
+      ],
       "cover": "The Misplaced Battleship by Harry Harrison.png",
       "size": 100109
     },
@@ -703,6 +995,10 @@
       "title": "The Monk: A Romance",
       "author": "M. G. Lewis",
       "lang": "en",
+      "genres": [
+        "Horror",
+        "Fantasy"
+      ],
       "cover": "The Monk_ A Romance by M. G. Lewis.jpg",
       "size": 396443
     },
@@ -711,6 +1007,10 @@
       "title": "The Mysteries of Udolpho",
       "author": "Ann Ward Radcliffe",
       "lang": "en",
+      "genres": [
+        "Horror",
+        "Fantasy"
+      ],
       "cover": "The Mysteries of Udolpho by Ann Ward Radcliffe.jpg",
       "size": 984862
     },
@@ -719,6 +1019,9 @@
       "title": "The Mysterious Affair at Styles",
       "author": "Agatha Christie",
       "lang": "en",
+      "genres": [
+        "Mystery"
+      ],
       "cover": "The Mysterious Affair at Styles by Agatha Christie.jpg",
       "size": 223129
     },
@@ -727,6 +1030,9 @@
       "title": "The Mystery of Edwin Drood",
       "author": "Charles Dickens",
       "lang": "en",
+      "genres": [
+        "Mystery"
+      ],
       "cover": "The Mystery of Edwin Drood by Charles Dickens.jpg",
       "size": 324949
     },
@@ -735,6 +1041,11 @@
       "title": "The Odyssey",
       "author": "Homer",
       "lang": "en",
+      "genres": [
+        "Mystery",
+        "Fantasy",
+        "Poetry"
+      ],
       "cover": "The Odyssey by Homer.jpg",
       "size": 381037
     },
@@ -743,6 +1054,9 @@
       "title": "The Passionate Elopement",
       "author": "Compton MacKenzie",
       "lang": "en",
+      "genres": [
+        "Classics"
+      ],
       "cover": "The Passionate Elopement by Compton MacKenzie.jpg",
       "size": 342023
     },
@@ -751,6 +1065,10 @@
       "title": "The Phantom of the Opera",
       "author": "Gaston Leroux",
       "lang": "en",
+      "genres": [
+        "Horror",
+        "Fantasy"
+      ],
       "cover": "The Phantom of the Opera by Gaston Leroux.png",
       "size": 271263
     },
@@ -759,6 +1077,11 @@
       "title": "The Pirate",
       "author": "Walter Scott",
       "lang": "en",
+      "genres": [
+        "Romance",
+        "Adventure",
+        "History"
+      ],
       "cover": "The Pirate - Walter Scott.jpg",
       "size": 1328234
     },
@@ -767,6 +1090,9 @@
       "title": "The Prairie Wife",
       "author": "Arthur Stringer",
       "lang": "en",
+      "genres": [
+        "Adventure"
+      ],
       "cover": "The Prairie Wife - Arthur Stringer.jpg",
       "size": 217376
     },
@@ -775,6 +1101,9 @@
       "title": "The Red Lily — Complete",
       "author": "Anatole France",
       "lang": "en",
+      "genres": [
+        "Classics"
+      ],
       "cover": "The Red Lily — Complete by Anatole France.png",
       "size": 259308
     },
@@ -783,6 +1112,9 @@
       "title": "The Return of Sherlock Holmes",
       "author": "Arthur Conan Doyle",
       "lang": "en",
+      "genres": [
+        "Mystery"
+      ],
       "cover": "The Return of Sherlock Holmes by Arthur Conan Doyle.jpg",
       "size": 340245
     },
@@ -791,6 +1123,9 @@
       "title": "The Secret of Chimneys",
       "author": "Agatha Christie",
       "lang": "en",
+      "genres": [
+        "Mystery"
+      ],
       "cover": "The Secret of Chimneys by Agatha Christie.jpg",
       "size": 334514
     },
@@ -799,6 +1134,9 @@
       "title": "The Sex Life of the Gods",
       "author": "M. E. Knerr",
       "lang": "en",
+      "genres": [
+        "Sci-Fi"
+      ],
       "cover": "The Sex Life of the Gods by M. E. Knerr.jpg",
       "size": 172453
     },
@@ -807,6 +1145,9 @@
       "title": "The Sign of the Four",
       "author": "Arthur Conan Doyle",
       "lang": "en",
+      "genres": [
+        "Mystery"
+      ],
       "cover": "The Sign of the Four by Arthur Conan Doyle.jpg",
       "size": 187515
     },
@@ -815,6 +1156,11 @@
       "title": "The Silent Barrier",
       "author": "Louis Tracy",
       "lang": "en",
+      "genres": [
+        "Mystery",
+        "Adventure",
+        "Nonfiction"
+      ],
       "cover": "The Silent Barrier - Louis Tracy.png",
       "size": 2741905
     },
@@ -823,6 +1169,12 @@
       "title": "The String of Pearls; Or, The Barber of Fleet Street. A Domestic Romance.",
       "author": "Prest and Rymer",
       "lang": "en",
+      "genres": [
+        "Horror",
+        "Mystery",
+        "Fantasy",
+        "History"
+      ],
       "cover": "The String of Pearls; Or, The Barber of Fleet Street. A Domestic Romance. by Prest and Rymer.jpg",
       "size": 1242805
     },
@@ -831,6 +1183,9 @@
       "title": "The Treasure of Pearls A Romance of Adventures in California",
       "author": "Gustave Aimard",
       "lang": "en",
+      "genres": [
+        "Adventure"
+      ],
       "cover": "The Treasure of Pearls A Romance of Adventures in California - Gustave Aimard.png",
       "size": 409657
     },
@@ -839,6 +1194,9 @@
       "title": "The Turn of the Screw",
       "author": "Henry James",
       "lang": "en",
+      "genres": [
+        "Horror"
+      ],
       "cover": "The Turn of the Screw by Henry James.jpg",
       "size": 183995
     },
@@ -847,6 +1205,11 @@
       "title": "The Works of Edgar Allan Poe — Volume 1",
       "author": "Edgar Allan Poe",
       "lang": "en",
+      "genres": [
+        "Horror",
+        "Mystery",
+        "Fantasy"
+      ],
       "cover": "The Works of Edgar Allan Poe — Volume 1 by Edgar Allan Poe.png",
       "size": 292268
     },
@@ -855,6 +1218,10 @@
       "title": "The Works of Edgar Allan Poe — Volume 2",
       "author": "Edgar Allan Poe",
       "lang": "en",
+      "genres": [
+        "Horror",
+        "Fantasy"
+      ],
       "cover": "The Works of Edgar Allan Poe — Volume 2 by Edgar Allan Poe.png",
       "size": 322623
     },
@@ -863,6 +1230,9 @@
       "title": "The Yeoman Adventurer",
       "author": "George W. Gough",
       "lang": "en",
+      "genres": [
+        "Adventure"
+      ],
       "cover": "The Yeoman Adventurer by George W. Gough.png",
       "size": 351259
     },
@@ -871,6 +1241,10 @@
       "title": "The call of Cthulhu",
       "author": "H. P. Lovecraft",
       "lang": "en",
+      "genres": [
+        "Horror",
+        "Fantasy"
+      ],
       "cover": "The call of Cthulhu by H. P. Lovecraft.jpg",
       "size": 101769
     },
@@ -879,6 +1253,9 @@
       "title": "The innocence of Father Brown",
       "author": "G. K. Chesterton",
       "lang": "en",
+      "genres": [
+        "Mystery"
+      ],
       "cover": "The innocence of Father Brown by G. K. Chesterton.jpg",
       "size": 257604
     },
@@ -887,6 +1264,9 @@
       "title": "The murder of Roger Ackroyd",
       "author": "Agatha Christie",
       "lang": "en",
+      "genres": [
+        "Mystery"
+      ],
       "cover": "The murder of Roger Ackroyd by Agatha Christie.jpg",
       "size": 345997
     },
@@ -895,6 +1275,11 @@
       "title": "The strange case of Dr. Jekyll and Mr. Hyde",
       "author": "Robert Louis Stevenson",
       "lang": "en",
+      "genres": [
+        "Horror",
+        "Sci-Fi",
+        "Fantasy"
+      ],
       "cover": "The strange case of Dr. Jekyll and Mr. Hyde by Robert Louis Stevenson.jpg",
       "size": 142920
     },
@@ -903,6 +1288,9 @@
       "title": "The wisdom of Father Brown",
       "author": "G. K. Chesterton",
       "lang": "en",
+      "genres": [
+        "Mystery"
+      ],
       "cover": "The wisdom of Father Brown by G. K. Chesterton.png",
       "size": 244525
     },
@@ -911,6 +1299,9 @@
       "title": "Thuvia, maid of Mars",
       "author": "Edgar Rice Burroughs",
       "lang": "en",
+      "genres": [
+        "Sci-Fi"
+      ],
       "cover": "Thuvia, maid of Mars by Edgar Rice Burroughs.jpg",
       "size": 185982
     },
@@ -919,6 +1310,9 @@
       "title": "Trial",
       "author": "water by Sewell Peaslee Wright",
       "lang": "en",
+      "genres": [
+        "Classics"
+      ],
       "cover": "Trial by water by Sewell Peaslee Wright.jpg",
       "size": 232264
     },
@@ -927,6 +1321,9 @@
       "title": "Twenty years after",
       "author": "Alexandre Dumas and Auguste Maquet",
       "lang": "en",
+      "genres": [
+        "History"
+      ],
       "cover": "Twenty years after by Alexandre Dumas and Auguste Maquet.jpg",
       "size": 810714
     },
@@ -935,6 +1332,9 @@
       "title": "Under the Red Dragon: A Novel",
       "author": "James Grant",
       "lang": "en",
+      "genres": [
+        "Mystery"
+      ],
       "cover": "Under the Red Dragon_ A Novel by James Grant.png",
       "size": 457216
     },
@@ -943,6 +1343,10 @@
       "title": "Undine",
       "author": "Freiherr de Friedrich Heinrich Karl La Motte-Fouqué",
       "lang": "en",
+      "genres": [
+        "Romance",
+        "Fantasy"
+      ],
       "cover": "Undine by Freiherr de Friedrich Heinrich Karl La Motte-Fouqué.png",
       "size": 149340
     },
@@ -951,6 +1355,9 @@
       "title": "What Will People Say: A Novel",
       "author": "Rupert Hughes",
       "lang": "en",
+      "genres": [
+        "Classics"
+      ],
       "cover": "What Will People Say_ A Novel by Rupert Hughes.jpg",
       "size": 453569
     }
