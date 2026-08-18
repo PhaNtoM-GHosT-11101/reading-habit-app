@@ -185,6 +185,28 @@ button{font-family:var(--font-ui);background:none;border:none;color:var(--text);
 .quote-share{align-self:flex-end;font-size:11px;font-weight:700;letter-spacing:0.5px;color:var(--text-muted);border:1px solid var(--text-faint);border-radius:100px;padding:6px 14px;cursor:pointer;background:none;transition:all 0.2s;}
 .quote-share:hover{color:var(--text);border-color:var(--text-muted);}
 
+.lib-footer{display:flex;gap:10px;align-items:center;justify-content:center;padding:28px 16px 40px;font-size:12px;color:var(--text-muted);flex-wrap:wrap;}
+.lib-footer button{background:none;border:none;color:var(--text-muted);font-size:12px;cursor:pointer;text-decoration:underline;text-underline-offset:3px;}
+.lib-footer button:hover{color:var(--text);}
+
+/* ═══ MODALS ═══ */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:300;display:flex;align-items:center;justify-content:center;padding:20px;}
+.modal{background:var(--bg);border:1px solid var(--text-faint);border-radius:18px;padding:24px;width:100%;max-width:460px;max-height:86vh;overflow:auto;box-shadow:0 20px 60px rgba(0,0,0,0.5);}
+.modal-h{font-family:var(--font-ui);font-size:18px;font-weight:700;margin-bottom:6px;}
+.modal-sub{font-size:13px;color:var(--text-muted);margin-bottom:16px;}
+.modal-body{font-size:14px;line-height:1.7;color:var(--text-muted);}
+.modal-body p{margin-bottom:12px;}
+.modal-body a{color:var(--accent);}
+.report-reasons{display:flex;flex-direction:column;gap:10px;font-size:14px;margin-bottom:14px;}
+.report-reasons label{display:flex;gap:8px;align-items:center;cursor:pointer;}
+.report-note{width:100%;box-sizing:border-box;background:var(--bg);color:var(--text);border:1px solid var(--text-faint);border-radius:10px;padding:10px 12px;font-size:13px;font-family:var(--font-ui);resize:vertical;min-height:64px;}
+.modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:18px;}
+.modal-btn{border-radius:100px;padding:9px 20px;font-size:13px;font-weight:700;cursor:pointer;border:1px solid var(--text-faint);background:none;color:var(--text);}
+.modal-btn.solid{background:var(--text);color:var(--bg);border-color:var(--text);}
+.modal-btn.ghost:hover{border-color:var(--text-muted);}
+
+.lib-flag{background:none;border:1px solid var(--text-faint);border-radius:100px;padding:4px 10px;font-size:11px;color:var(--text-muted);cursor:pointer;font-weight:600;}
+
 /* ═══ GOAL ═══ */
 .goal-bar-wrap{margin:12px 0 4px;}
 .goal-bar{height:8px;background:var(--ui);border-radius:4px;overflow:hidden;margin-top:10px;}
@@ -237,6 +259,56 @@ button{font-family:var(--font-ui);background:none;border:none;color:var(--text);
   <div class="toast" id="toast"></div>
   <button class="quote-btn" id="saveQuoteBtn" onclick="App.saveQuote()">Save Quote</button>
 
+  <!-- REPORT MODAL -->
+  <div class="modal-overlay" id="reportModal" style="display:none" onclick="if(event.target===this)App.closeModals()">
+    <div class="modal">
+      <div class="modal-h">Report book</div>
+      <div class="modal-sub" id="reportTitle"></div>
+      <div class="report-reasons">
+        <label><input type="radio" name="reason" value="Copyright violation" checked> Copyright violation</label>
+        <label><input type="radio" name="reason" value="Inappropriate content"> Inappropriate content</label>
+        <label><input type="radio" name="reason" value="Spam or broken file"> Spam or broken file</label>
+        <label><input type="radio" name="reason" value="Other"> Other</label>
+      </div>
+      <textarea id="reportNote" class="report-note" placeholder="Optional details (e.g. which work is infringed)"></textarea>
+      <div class="modal-actions">
+        <button class="modal-btn ghost" onclick="App.closeModals()">Cancel</button>
+        <button class="modal-btn solid" onclick="App.submitReport()">Submit report</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- DMCA MODAL -->
+  <div class="modal-overlay" id="dmcaModal" style="display:none" onclick="if(event.target===this)App.closeModals()">
+    <div class="modal">
+      <div class="modal-h">DMCA &amp; Copyright</div>
+      <div class="modal-body">
+        <p>The curated <b>Library</b> contains only public-domain works from Project Gutenberg (published 1929 or earlier in the US).</p>
+        <p>The <b>Community</b> tab is a user-uploaded space. Uploaders are responsible for the files they share, and PageHabit does not host them for profit.</p>
+        <p>If you are a rights holder and believe a community upload infringes your copyright, file a report using the flag button on the book, or open a GitHub issue at
+        <a href="https://github.com/PhaNtoM-GHosT-11101/reading-habit-app/issues" target="_blank" rel="noopener">the repository</a>
+        with the book title and your contact details. Compliant takedowns are processed promptly.</p>
+      </div>
+      <div class="modal-actions">
+        <button class="modal-btn solid" onclick="App.closeModals()">Got it</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ABOUT MODAL -->
+  <div class="modal-overlay" id="aboutModal" style="display:none" onclick="if(event.target===this)App.closeModals()">
+    <div class="modal">
+      <div class="modal-h">About PageHabit</div>
+      <div class="modal-body">
+        <p>A premium EPUB reader with cloud sync, community sharing, dictionary lookup, streaks, badges, text-to-speech, and a distraction-free reading experience.</p>
+        <p>All curated books are public-domain classics from Project Gutenberg. Built by Aditya Priyadarshi.</p>
+      </div>
+      <div class="modal-actions">
+        <button class="modal-btn solid" onclick="App.closeModals()">Close</button>
+      </div>
+    </div>
+  </div>
+
   <div class="hdr" id="mainHdr">
     <div class="logo">PageHabit</div>
     <div class="hdr-r">
@@ -258,6 +330,13 @@ button{font-family:var(--font-ui);background:none;border:none;color:var(--text);
         <div class="genre-row" id="genreRow"></div>
       </div>
       <div class="lib-list" id="libList"><div class="loader">Loading library...</div></div>
+      <div class="lib-footer">
+        <button onclick="App.openAbout()">About</button>
+        <span>·</span>
+        <button onclick="App.openDmca()">DMCA &amp; Copyright</button>
+        <span>·</span>
+        <span>Built by Aditya Priyadarshi</span>
+      </div>
     </div>
     <button id="fabUpload" onclick="document.getElementById('uploadInput').click()" style="display:none;position:fixed;bottom:32px;right:32px;width:56px;height:56px;border-radius:28px;background:var(--text);color:var(--bg);font-size:28px;box-shadow:0 6px 20px rgba(0,0,0,0.25);justify-content:center;align-items:center;z-index:100;border:none;cursor:pointer;">+</button>
     <input type="file" id="uploadInput" accept=".epub" style="display:none;" onchange="App.handleUpload(event)">
@@ -777,6 +856,11 @@ const App={
         vBtn.textContent='▲ '+f.votes;
         vBtn.onclick=(ev)=>{ev.stopPropagation();this.upvoteBook(f.name);};
         metaDiv.appendChild(vBtn);
+        const flagBtn=document.createElement('button');
+        flagBtn.className='lib-flag';
+        flagBtn.textContent='Report';
+        flagBtn.onclick=(ev)=>{ev.stopPropagation();this.openReport(f);};
+        metaDiv.appendChild(flagBtn);
       }
 
       const infoDiv=document.createElement('div');
@@ -823,6 +907,38 @@ const App={
         toast('Upvoted!');
       }
     }catch(e){toast('Failed to upvote');}
+  },
+
+  openReport(f){
+    if(!currentUser){toast('Sign in to report');return;}
+    document.getElementById('reportTitle').textContent='"'+f.title+'" by '+(f.uploader||'unknown');
+    document.getElementById('reportNote').value='';
+    document.querySelectorAll('input[name=reason]').forEach(r=>r.checked=(r.value==='Copyright violation'));
+    document.getElementById('reportModal').style.display='flex';
+  },
+
+  async submitReport(){
+    const reason=document.querySelector('input[name=reason]:checked');
+    const note=document.getElementById('reportNote').value.trim();
+    const raw=document.getElementById('reportTitle').textContent;
+    const bookId=raw.slice(1,raw.indexOf('"',1));
+    try{
+      await addDoc(collection(db,"reports"),{
+        bookId:bookId,
+        reason:reason?reason.value:'Other',
+        note:note,
+        uid:currentUser.uid,
+        timestamp:new Date().toISOString()
+      });
+      this.closeModals();
+      toast('Report submitted. Thank you');
+    }catch(e){toast('Failed to submit report');}
+  },
+
+  openAbout(){document.getElementById('aboutModal').style.display='flex';},
+  openDmca(){document.getElementById('dmcaModal').style.display='flex';},
+  closeModals(){
+    document.querySelectorAll('.modal-overlay').forEach(m=>m.style.display='none');
   },
 
   async bookTap(fn,title,url){
