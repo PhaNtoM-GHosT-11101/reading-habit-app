@@ -24,20 +24,26 @@ Every reading app is designed to steal your attention — infinite scroll, recom
 ### 📖 The Reading Engine
 - **Zero-Scroll Pagination** — CSS column engine splits text into exact pages. Tap edges to turn like a physical book.
 - **Immersive Mode** — One tap hides every UI element. Browser goes fullscreen. Only text remains.
+- **Text-to-Speech** — Listen to any book from your current position with the Web Speech API.
 - **Bionic Reading** — Algorithmically bold the first half of every word. Read measurably faster.
 - **Built-in Dictionary** — Highlight any word. Definition, pronunciation, and part of speech appear instantly.
-- **Highlights & Quotes** — Mark passages in yellow, green, or pink. Auto-saved to your personal quotes feed.
+- **Highlights & Quotes** — Mark passages in yellow, green, or pink. Auto-saved to your personal quotes feed, and exported as beautiful shareable quote cards.
+- **Semantic Typography** — Chapter headings, italics, and blockquotes are preserved from the original EPUB.
 - **Keyboard Navigation** — `←` `→` `Space` all work. Built for desktop power users.
 
 ### 🌍 Cloud & Community
 - **Google Auth + Cloud Sync** — Progress, bookmarks, and highlights synced across all devices instantly.
 - **Community Library** — Anyone can upload an EPUB. It becomes publicly accessible to all users.
 - **Upvote System** — Per-user voting surfaces the best community books. One vote per user, enforced.
+- **Moderation** — Flag any community book for copyright, spam, or inappropriate content. Compliant takedowns processed promptly (see DMCA notice in-app).
+- **119 Public-Domain Classics** — A curated library from Project Gutenberg, searchable by title, author, and genre.
 
 ### 🧠 Smart Reading Intelligence
 - **Personal WPM Engine** — Tracks your real reading speed using exponential smoothing.
 - **Dynamic Time Remaining** — Calculates exactly how many minutes are left based on *your* speed, not an average.
 - **Streak Tracking** — Daily habit tracking with 90-day rolling window.
+- **Reading Charts** — Pages-per-day activity chart with 7/30/90-day views.
+- **Daily Goals & Badges** — Set a page goal and unlock 8 badges as your habit grows.
 
 ---
 
@@ -46,11 +52,12 @@ Every reading app is designed to steal your attention — infinite scroll, recom
 ```
 PageHabit Architecture
 ├── Frontend       → Pure Vanilla JS + CSS (zero frameworks)
+├── Library        → Static books.json index (GitHub Pages, no API rate limits)
 ├── Storage        → IndexedDB (full offline EPUB cache)
-├── Cloud          → Firebase Firestore (sync) + Auth (Google)
-├── Parsing        → JSZip (client-side EPUB unzip + parse)
-├── PWA            → Custom Service Worker (network-first cache)
-└── Security       → textContent injection, debounced writes, API caching
+├── Cloud          → Firebase Firestore (sync) + Auth (Google) + Storage (community EPUBs)
+├── Parsing        → JSZip (client-side EPUB unzip + parse, covers + metadata)
+├── PWA            → Custom Service Worker (network-first cache), real PNG icons
+└── Security       → textContent injection, debounced writes, serverless rules
 ```
 
 ---
@@ -65,25 +72,28 @@ PageHabit Architecture
 
 ---
 
-## ⚠️ Firestore Security Rules
+## ⚠️ Firestore & Storage Security Rules
 
-If self-hosting, apply these rules immediately:
+If self-hosting, deploy the rules in this repo immediately (they are the ones running in production):
 
-```javascript
-rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    match /users/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
-    }
-    match /community_books/{docId} {
-      allow read: if true;
-      allow create, update: if request.auth != null;
-      allow delete: if false;
-    }
-  }
-}
+```bash
+firebase deploy --only firestore:rules,storage
 ```
+
+- `firestore.rules` — per-user data isolation, authenticated community uploads, reports, no client-side deletes.
+- `storage.rules` — 50MB upload cap, community EPUBs only under `community/{uid}/`.
+
+---
+
+## 🧱 Contributing
+
+New to the project? Read [`CONTRIBUTING.md`](CONTRIBUTING.md) first — it covers how the library index and covers are generated, and how to add books.
+
+---
+
+## 📜 License
+
+MIT — except curated books, which are all public-domain works from Project Gutenberg. Community uploads are user-generated content; see the in-app DMCA notice.
 
 ---
 
