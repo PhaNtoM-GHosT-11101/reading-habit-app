@@ -169,8 +169,10 @@ button{font-family:var(--font-ui);background:none;border:none;color:var(--text);
 .set-row{display:flex;justify-content:space-between;align-items:center;padding:16px 0;border-bottom:1px solid var(--text-faint);}
 .set-row:last-child{border:none;}
 .quotes-sec{margin-top:20px;}
-.quote-card{padding:16px 0;border-bottom:1px solid var(--text-faint);font-family:var(--font-read);font-size:17px;line-height:1.6;}
+.quote-card{padding:16px 0;border-bottom:1px solid var(--text-faint);font-family:var(--font-read);font-size:17px;line-height:1.6;display:flex;flex-direction:column;gap:10px;}
 .quote-src{font-size:12px;font-family:var(--font-ui);color:var(--text-muted);margin-top:8px;}
+.quote-share{align-self:flex-end;font-size:11px;font-weight:700;letter-spacing:0.5px;color:var(--text-muted);border:1px solid var(--text-faint);border-radius:100px;padding:6px 14px;cursor:pointer;background:none;transition:all 0.2s;}
+.quote-share:hover{color:var(--text);border-color:var(--text-muted);}
 
 /* ═══ GOAL ═══ */
 .goal-bar-wrap{margin:12px 0 4px;}
@@ -1169,6 +1171,58 @@ const App={
     window.getSelection()?.removeAllRanges();
   },
 
+  /* ══════════════════════════════
+     Quote cards: canvas-generated share image
+     ══════════════════════════════ */
+  async shareQuote(q){
+    const W=1080,H=1350,pad=90;
+    const c=document.createElement('canvas');c.width=W;c.height=H;
+    const ctx=c.getContext('2d');
+    // Background
+    const grad=ctx.createLinearGradient(0,0,W,H);
+    grad.addColorStop(0,'#0a0a0a');grad.addColorStop(1,'#1c1c1c');
+    ctx.fillStyle=grad;ctx.fillRect(0,0,W,H);
+    // Accent line
+    ctx.fillStyle='#f0a500';
+    ctx.fillRect(pad,H*0.13,64,6);
+    await document.fonts.ready;
+    // Quote text
+    const lines=this.wrapText(ctx,q.text||'',W-pad*2,pad+140,56);
+    if(lines.length>12){lines.length=12;lines.push('...');}
+    ctx.fillStyle='#ffffff';
+    ctx.font="500 56px 'Lora',Georgia,serif";
+    lines.forEach((l,i)=>ctx.fillText(l,pad,pad+140+i*80, W-pad*2));
+    // Attribution
+    ctx.fillStyle='#8a8a8a';
+    ctx.font="400 32px 'Inter',sans-serif";
+    ctx.fillText('— '+(q.src||'PageHabit'),pad,H-pad-90);
+    ctx.fillStyle='#f0a500';
+    ctx.font="700 40px 'Inter',sans-serif";
+    ctx.fillText('PageHabit',pad,H-pad-30);
+    const blob=await new Promise(r=>c.toBlob(r,'image/png'));
+    const file=new File([blob],'pagehabit-quote.png',{type:'image/png'});
+    if(navigator.canShare&&navigator.canShare({files:[file]})){
+      try{await navigator.share({files:[file],title:'Quote from '+q.src});toast('Shared!');return;}catch(e){}
+    }
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');a.href=url;a.download='pagehabit-quote.png';a.click();
+    setTimeout(()=>URL.revokeObjectURL(url),10000);
+    try{await navigator.clipboard.writeText('"'+q.text+'" — '+q.src);toast('Quote copied + image downloaded');}
+    catch(e){toast('Image downloaded');}
+  },
+
+  wrapText(ctx,text,maxWidth,startY,lineHeight){
+    const words=text.split(/\s+/);
+    const lines=[];let line='';
+    for(const w of words){
+      const test=line?line+' '+w:w;
+      if(ctx.measureText(test).width>maxWidth&&line){lines.push(line);line=w;}
+      else line=test;
+    }
+    if(line)lines.push(line);
+    return lines;
+  },
+
   renderStats(){
     document.getElementById('stStreak').textContent=S.stats.streak||0;
     document.getElementById('stPages').textContent=S.stats.pages||0;
@@ -1205,12 +1259,19 @@ const App={
       qList.innerHTML='<div style="font-size:14px;color:var(--text-muted)">Highlight text while reading to save quotes here.</div>';
     }else{
       qList.innerHTML='';
-      [...S.quotes].reverse().forEach(q=>{
+      [...S.quotes].reverse().forEach((q,i)=>{
         const card=document.createElement('div');card.className='quote-card';
-        card.textContent='"'+q.text+'"';
+        const qt=document.createElement('div');
+        qt.textContent='"'+q.text+'"';
+        card.appendChild(qt);
         const src=document.createElement('div');src.className='quote-src';
         src.textContent='— '+q.src;
         card.appendChild(src);
+        const share=document.createElement('button');
+        share.className='quote-share';
+        share.textContent='Share';
+        share.onclick=()=>this.shareQuote(q);
+        card.appendChild(share);
         qList.appendChild(card);
       });
     }
