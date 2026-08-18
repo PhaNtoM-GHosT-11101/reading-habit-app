@@ -171,6 +171,22 @@ button{font-family:var(--font-ui);background:none;border:none;color:var(--text);
 .quote-card{padding:16px 0;border-bottom:1px solid var(--text-faint);font-family:var(--font-read);font-size:17px;line-height:1.6;}
 .quote-src{font-size:12px;font-family:var(--font-ui);color:var(--text-muted);margin-top:8px;}
 
+/* ═══ GOAL ═══ */
+.goal-bar-wrap{margin:12px 0 4px;}
+.goal-bar{height:8px;background:var(--ui);border-radius:4px;overflow:hidden;margin-top:10px;}
+.goal-fill{height:100%;background:var(--accent);border-radius:4px;transition:width 0.4s;}
+.goal-num{font-size:24px;font-weight:600;font-family:var(--font-read);}
+.goal-ctrl{display:flex;align-items:center;gap:14px;}
+.goal-btn{width:36px;height:36px;border-radius:10px;border:1px solid var(--text-faint);background:transparent;color:var(--text);font-size:18px;cursor:pointer;}
+
+/* ═══ BADGES ═══ */
+.badge-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:12px;margin-top:12px;}
+.badge{display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 8px;border:1px solid var(--text-faint);border-radius:14px;text-align:center;opacity:0.35;filter:grayscale(1);transition:all 0.3s;}
+.badge.unlocked{opacity:1;filter:none;border-color:var(--accent);}
+.badge-icon{font-size:26px;line-height:1;}
+.badge-name{font-size:11px;font-weight:700;letter-spacing:0.3px;}
+.badge-desc{font-size:10px;color:var(--text-muted);line-height:1.3;}
+
 /* ═══ UTILS ═══ */
 .loader{font-size:14px;color:var(--text-muted);padding:48px 24px;text-align:center;}
 .toast{position:fixed;bottom:calc(40px + var(--safe-b));left:50%;transform:translateX(-50%) translateY(10px);background:var(--text);color:var(--bg);padding:12px 24px;border-radius:100px;font-size:13px;font-weight:600;opacity:0;transition:all 0.3s;pointer-events:none;z-index:9999;}
@@ -292,7 +308,28 @@ button{font-family:var(--font-ui);background:none;border:none;color:var(--text);
         <div><div class="stat-huge" id="stStreak">0</div><div class="stat-lbl">Day Streak</div></div>
         <div><div class="stat-huge" id="stPages">0</div><div class="stat-lbl">Pages Read</div></div>
         <div><div class="stat-huge" id="stWpm">200</div><div class="stat-lbl">Avg Words Per Minute</div></div>
+
+        <div>
+          <div class="set-row" style="border:none;padding-bottom:0;">
+            <div class="stat-lbl">Daily Goal</div>
+            <div class="goal-ctrl">
+              <button class="goal-btn" onclick="App.setGoal(-5)">−</button>
+              <div class="goal-num" id="goalNum">20</div>
+              <button class="goal-btn" onclick="App.setGoal(5)">+</button>
+            </div>
+          </div>
+          <div class="goal-bar-wrap">
+            <div style="font-size:12px;color:var(--text-muted);" id="goalStatus"></div>
+            <div class="goal-bar"><div class="goal-fill" id="goalFill" style="width:0%"></div></div>
+          </div>
+        </div>
+
         <div class="quotes-sec"><div class="stat-lbl" style="margin-bottom:16px;">Saved Quotes</div><div id="quotesList"></div></div>
+
+        <div>
+          <div class="stat-lbl">Badges</div>
+          <div class="badge-grid" id="badgeGrid"></div>
+        </div>
         <div style="margin-top:20px;">
           <div class="set-row"><div class="stat-lbl">Refresh Library</div><button class="hdr-btn" onclick="App.fetchBooks()">Sync</button></div>
           <div class="set-row"><div class="stat-lbl">Clear Cache</div><button class="hdr-btn" onclick="App.clearCache()">Reset</button></div>
@@ -360,8 +397,8 @@ const COVERS_BASE='https://raw.githubusercontent.com/PhaNtoM-GHosT-11101/reading
 
 /* ── STATE ── */
 let S={
-  settings:{theme:'auto',font:'serif',fontSize:22,bionic:false,active:null},
-  stats:{streak:0,pages:0,lastDay:null,days:[],wpm:200},
+  settings:{theme:'auto',font:'serif',fontSize:22,bionic:false,active:null,goal:20},
+  stats:{streak:0,pages:0,lastDay:null,days:[],dayPages:{},wpm:200},
   progress:{},bookmarks:[],quotes:[],votedBooks:[]
 };
 let ghFiles=[],communityFiles=[],libTab='curated',totalPages=1,pageStartTime=0;
@@ -412,6 +449,8 @@ function loadState(){
   if(!S.quotes)S.quotes=[];
   if(!S.votedBooks)S.votedBooks=[];
   if(!S.stats.days)S.stats.days=[];
+  if(!S.stats.dayPages)S.stats.dayPages={};
+  if(!S.settings.goal)S.settings.goal=20;
   // FIX #12: Trim days array to last 90 entries
   if(S.stats.days.length>90)S.stats.days=S.stats.days.slice(-90);
   // FIX #18: Auto-detect system theme on first visit
@@ -842,6 +881,11 @@ const App={
           if(pageWpm>50&&pageWpm<1000){
             S.stats.wpm=Math.round((S.stats.wpm*0.9)+(pageWpm*0.1));
             S.stats.pages=(S.stats.pages||0)+1;
+            const t=today();
+            if(!S.stats.dayPages)S.stats.dayPages={};
+            S.stats.dayPages[t]=(S.stats.dayPages[t]||0)+1;
+            const goal=S.settings.goal||20;
+            if(S.stats.dayPages[t]===goal)toast('Daily goal reached! '+goal+' pages today');
             updateStreak();
           }
         }
@@ -1089,6 +1133,33 @@ const App={
     document.getElementById('stStreak').textContent=S.stats.streak||0;
     document.getElementById('stPages').textContent=S.stats.pages||0;
     document.getElementById('stWpm').textContent=S.stats.wpm||200;
+    // Goal
+    const goal=S.settings.goal||20;
+    document.getElementById('goalNum').textContent=goal;
+    const todayPages=S.stats.dayPages?.[today()]||0;
+    const pct=Math.min(100,Math.round((todayPages/goal)*100));
+    document.getElementById('goalFill').style.width=pct+'%';
+    document.getElementById('goalStatus').textContent=`${todayPages} / ${goal} pages today`;
+    // Badges
+    const pages=S.stats.pages||0,streak=S.stats.streak||0,quotes=(S.quotes||[]).length;
+    const badges=[
+      {icon:'✦',name:'First Page',desc:'Read your first page',got:pages>=1},
+      {icon:'✦',name:'Bookworm',desc:'Read 100 pages',got:pages>=100},
+      {icon:'✦',name:'Centurion',desc:'Read 1,000 pages',got:pages>=1000},
+      {icon:'✦',name:'Marathoner',desc:'Read 5,000 pages',got:pages>=5000},
+      {icon:'✦',name:'On Fire',desc:'3-day streak',got:streak>=3},
+      {icon:'✦',name:'Unstoppable',desc:'7-day streak',got:streak>=7},
+      {icon:'✦',name:'Legend',desc:'30-day streak',got:streak>=30},
+      {icon:'✦',name:'Quote Collector',desc:'Save 5 quotes',got:quotes>=5}
+    ];
+    const grid=document.getElementById('badgeGrid');
+    grid.innerHTML='';
+    badges.forEach(b=>{
+      const el=document.createElement('div');
+      el.className='badge'+(b.got?' unlocked':'');
+      el.innerHTML=`<div class="badge-icon">${b.icon}</div><div class="badge-name">${esc(b.name)}</div><div class="badge-desc">${esc(b.desc)}</div>`;
+      grid.appendChild(el);
+    });
     const qList=document.getElementById('quotesList');
     if(!S.quotes||!S.quotes.length){
       qList.innerHTML='<div style="font-size:14px;color:var(--text-muted)">Highlight text while reading to save quotes here.</div>';
@@ -1106,6 +1177,12 @@ const App={
   },
 
   /* FIX #8: Actually clear IndexedDB */
+  setGoal(d){
+    S.settings.goal=Math.max(5,Math.min(500,(S.settings.goal||20)+d));
+    saveState();this.renderStats();
+    toast('Daily goal: '+S.settings.goal+' pages');
+  },
+
   async clearCache(){
     if(!confirm('Delete all downloaded books?'))return;
     await idbClear();
