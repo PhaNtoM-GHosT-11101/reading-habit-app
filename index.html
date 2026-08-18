@@ -101,6 +101,8 @@ button{font-family:var(--font-ui);background:none;border:none;color:var(--text);
 @media(min-width:900px){.rdr-content{column-width:40%;}}
 .rdr-content p{margin-bottom:1.5em;text-align:justify;}
 .rdr-content b{font-weight:700;}
+.rdr-content .rdr-h{font-family:var(--font-ui);font-size:1.15em;font-weight:700;margin:1.2em 0 0.6em;letter-spacing:0.2px;}
+.rdr-content .rdr-q{margin:0 0 1.5em;padding-left:1.2em;border-left:3px solid var(--text-muted);color:var(--text-muted);font-style:italic;}
 
 .tap-zone{position:absolute;top:0;bottom:0;z-index:20;cursor:pointer;}
 .tap-prev{left:0;width:15%;}
@@ -524,7 +526,12 @@ async function parseEpub(buf){
       const hm=html.match(/<h[123][^>]*>(.*?)<\/h[123]>/i);
       if(hm){let ct=hm[1].replace(/<[^>]+>/g,'').trim();if(ct.length>0&&ct.length<80)chapters.push({title:ct,index:out.length});}
       const clean=html.replace(/<style[^>]*>[\s\S]*?<\/style>/gi,'').replace(/<script[^>]*>[\s\S]*?<\/script>/gi,'')
-        .replace(/<br\s*\/?>/gi,'\n').replace(/<\/p>/gi,'\n\n').replace(/<[^>]+>/g,' ')
+        .replace(/<br\s*\/?>/gi,'\n').replace(/<\/p>/gi,'\n\n')
+        .replace(/<h[1-3][^>]*>([\s\S]*?)<\/h[1-3]>/gi,'\n\n## $1\n\n')
+        .replace(/<blockquote[^>]*>([\s\S]*?)<\/blockquote>/gi,'\n\n> $1\n\n')
+        .replace(/<(i|em)[^>]*>([\s\S]*?)<\/\1>/gi,'*$2*')
+        .replace(/<(b|strong)[^>]*>([\s\S]*?)<\/\1>/gi,'**$2**')
+        .replace(/<[^>]+>/g,' ')
         .replace(/&nbsp;/g,' ').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&#39;/g,"'")
         .replace(/[ \t]+/g,' ').replace(/\n{3,}/g,'\n\n').trim();
       if(clean.length>50)out+=clean+'\n\n';
@@ -544,7 +551,14 @@ function cleanTitle(fn){
 
 function applyBionic(text){
   if(!S.settings.bionic)return text;
-  return text.split(/(\s+)/).map(w=>{if(!w.trim())return w;const l=w.length;if(l===1)return`<b>${w}</b>`;const m=Math.ceil(l/2);return`<b>${w.slice(0,m)}</b>${w.slice(m)}`;}).join('');
+  return text.split(/(<[^>]+>)/).map(part=>{
+    if(part.startsWith('<'))return part;
+    return part.split(/(\s+)/).map(w=>{
+      if(!w.trim())return w;
+      const l=w.length;if(l===1)return`<b>${w}</b>`;
+      const m=Math.ceil(l/2);return`<b>${w.slice(0,m)}</b>${w.slice(m)}`;
+    }).join('');
+  }).join('');
 }
 
 /* ══════════════════════════════════════
@@ -875,7 +889,14 @@ const App={
 
     const paragraphs=book.text.split('\n\n').filter(p=>p.trim().length>0);
     cachedParagraphs=paragraphs;
-    content.innerHTML=paragraphs.map(p=>`<p>${applyBionic(p)}</p>`).join('');
+    const html=paragraphs.map(b=>{
+      const safe=esc(b.trim());
+      let inl=safe.replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/\*(.+?)\*/g,'<i>$1</i>');
+      if(/^##\s+/.test(safe))return '<h3 class="rdr-h">'+applyBionic(safe.replace(/^##\s+/,''))+'</h3>';
+      if(/^>\s?/.test(safe))return '<blockquote class="rdr-q">'+applyBionic(inl.replace(/^>\s?/,''))+'</blockquote>';
+      return '<p>'+applyBionic(inl)+'</p>';
+    }).join('');
+    content.innerHTML=html;
     content.innerHTML+=`<div style="display:inline-block;width:100vw;height:100vh;"></div>`;
     content.style.transform='translateX(0)';
 
@@ -1094,9 +1115,21 @@ const App={
   },
 
   setTheme(t){S.settings.theme=t;saveState();this.applySettingsUI();},
-  setFont(f){S.settings.font=f;saveState();this.applySettingsUI();this.openReader();},
-  setSize(d){S.settings.fontSize=Math.max(14,Math.min(48,(S.settings.fontSize||22)+d));saveState();this.applySettingsUI();this.openReader();},
+  setFont(f){S.settings.font=f;saveState();this.applySettingsUI();this.recalcPages();},
+  setSize(d){S.settings.fontSize=Math.max(14,Math.min(48,(S.settings.fontSize||22)+d));saveState();this.applySettingsUI();this.recalcPages();},
   toggleBionic(){S.settings.bionic=!S.settings.bionic;saveState();this.applySettingsUI();this.openReader();},
+
+  recalcPages(){
+    const content=document.getElementById('rdrContent');
+    if(!content||!content.innerHTML)return;
+    const ww=window.innerWidth;
+    const pad=Math.max(32,(ww-1400)/2);
+    const shiftDist=(ww-(pad*2))+64;
+    totalPages=Math.max(1,Math.round((content.scrollWidth-(pad*2)+64)/shiftDist));
+    const fn=S.settings.active;
+    S.progress[fn]=Math.min(S.progress[fn]||0,totalPages-1);
+    saveState();this.updatePageUI();
+  },
 
   setupInteractions(){
     const handleSelection=()=>{
