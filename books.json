@@ -9,30 +9,6 @@
       "size": 158168
     },
     {
-      "name": "21839 - Sense and Sensibility by Jane Austen (4643).epub",
-      "title": "Sense and Sensibility",
-      "author": "Jane Austen",
-      "size": 1928113
-    },
-    {
-      "name": "42671 - Pride and Prejudice by Jane Austen (4184).epub",
-      "title": "Pride and Prejudice",
-      "author": "Jane Austen",
-      "size": 4758847
-    },
-    {
-      "name": "43 - The strange case of Dr. Jekyll and Mr. Hyde by Robert Louis Stevenson (3693).epub",
-      "title": "The strange case of Dr. Jekyll and Mr. Hyde",
-      "author": "Robert Louis Stevenson",
-      "size": 302979
-    },
-    {
-      "name": "45839 - Dracula by Bram Stoker (3932).epub",
-      "title": "Dracula",
-      "author": "Bram Stoker",
-      "size": 472805
-    },
-    {
       "name": "51428 - That Which Hath Wings A Novel of the Day (3220).epub",
       "title": "That Which Hath Wings A Novel of the Day",
       "author": "",
@@ -193,6 +169,12 @@
       "title": "Doctor Cupid A Novel",
       "author": "Rhoda Broughton",
       "size": 393956
+    },
+    {
+      "name": "Dracula by Bram Stoker.epub",
+      "title": "Dracula",
+      "author": "Bram Stoker",
+      "size": 433229
     },
     {
       "name": "El crimen y el castigo by Fyodor Dostoyevsky.epub",
@@ -375,6 +357,12 @@
       "size": 813286
     },
     {
+      "name": "Pride and Prejudice by Jane Austen.epub",
+      "title": "Pride and Prejudice",
+      "author": "Jane Austen",
+      "size": 558547
+    },
+    {
       "name": "Romeo and Juliet by William Shakespeare.epub",
       "title": "Romeo and Juliet",
       "author": "William Shakespeare",
@@ -385,6 +373,12 @@
       "title": "Roméo et Juliette",
       "author": "William Shakespeare",
       "size": 171682
+    },
+    {
+      "name": "Sense and Sensibility by Jane Austen.epub",
+      "title": "Sense and Sensibility",
+      "author": "Jane Austen",
+      "size": 421052
     },
     {
       "name": "Sonnets from the Portuguese by Elizabeth Barrett Browning.epub",
@@ -733,6 +727,12 @@
       "title": "The murder of Roger Ackroyd",
       "author": "Agatha Christie",
       "size": 345997
+    },
+    {
+      "name": "The strange case of Dr. Jekyll and Mr. Hyde by Robert Louis Stevenson.epub",
+      "title": "The strange case of Dr. Jekyll and Mr. Hyde",
+      "author": "Robert Louis Stevenson",
+      "size": 142920
     },
     {
       "name": "The wisdom of Father Brown by G. K. Chesterton.epub",
