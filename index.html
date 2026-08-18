@@ -190,6 +190,16 @@ button{font-family:var(--font-ui);background:none;border:none;color:var(--text);
 .badge-name{font-size:11px;font-weight:700;letter-spacing:0.3px;}
 .badge-desc{font-size:10px;color:var(--text-muted);line-height:1.3;}
 
+/* ═══ CHART ═══ */
+.chart-ctrl{display:flex;gap:8px;margin-bottom:16px;}
+.chart-ctrl button{padding:6px 14px;border-radius:100px;border:1px solid var(--text-faint);background:none;color:var(--text-muted);font-size:12px;font-weight:600;cursor:pointer;}
+.chart-ctrl button.active{background:var(--text);color:var(--bg);border-color:var(--text);}
+.chart-wrap{display:flex;align-items:flex-end;gap:4px;height:120px;padding-top:8px;}
+.chart-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;height:100%;justify-content:flex-end;}
+.chart-bar{width:100%;max-width:28px;border-radius:4px 4px 0 0;background:var(--text);opacity:0.8;min-height:2px;transition:height 0.3s;}
+.chart-bar.today{background:var(--accent);opacity:1;}
+.chart-lbl{font-size:9px;color:var(--text-muted);transform:rotate(-45deg);white-space:nowrap;}
+
 /* ═══ UTILS ═══ */
 .loader{font-size:14px;color:var(--text-muted);padding:48px 24px;text-align:center;}
 .toast{position:fixed;bottom:calc(40px + var(--safe-b));left:50%;transform:translateX(-50%) translateY(10px);background:var(--text);color:var(--bg);padding:12px 24px;border-radius:100px;font-size:13px;font-weight:600;opacity:0;transition:all 0.3s;pointer-events:none;z-index:9999;}
@@ -326,6 +336,16 @@ button{font-family:var(--font-ui);background:none;border:none;color:var(--text);
             <div style="font-size:12px;color:var(--text-muted);" id="goalStatus"></div>
             <div class="goal-bar"><div class="goal-fill" id="goalFill" style="width:0%"></div></div>
           </div>
+        </div>
+
+        <div>
+          <div class="stat-lbl" style="margin-bottom:12px;">Reading Activity</div>
+          <div class="chart-ctrl" id="chartCtrl">
+            <button data-days="7" class="active" onclick="App.setChartPeriod(7)">7 days</button>
+            <button data-days="30" onclick="App.setChartPeriod(30)">30 days</button>
+            <button data-days="90" onclick="App.setChartPeriod(90)">90 days</button>
+          </div>
+          <div class="chart-wrap" id="chartWrap"></div>
         </div>
 
         <div class="quotes-sec"><div class="stat-lbl" style="margin-bottom:16px;">Saved Quotes</div><div id="quotesList"></div></div>
@@ -1227,6 +1247,7 @@ const App={
     document.getElementById('stStreak').textContent=S.stats.streak||0;
     document.getElementById('stPages').textContent=S.stats.pages||0;
     document.getElementById('stWpm').textContent=S.stats.wpm||200;
+    this.renderChart(7);
     // Goal
     const goal=S.settings.goal||20;
     document.getElementById('goalNum').textContent=goal;
@@ -1282,6 +1303,41 @@ const App={
     S.settings.goal=Math.max(5,Math.min(500,(S.settings.goal||20)+d));
     saveState();this.renderStats();
     toast('Daily goal: '+S.settings.goal+' pages');
+  },
+
+  setChartPeriod(days){
+    document.querySelectorAll('#chartCtrl button').forEach(b=>b.classList.toggle('active',+b.dataset.days===days));
+    this.renderChart(days);
+  },
+
+  renderChart(days){
+    const wrap=document.getElementById('chartWrap');
+    if(!wrap)return;
+    wrap.innerHTML='';
+    const dp=S.stats.dayPages||{};
+    const t=today();
+    const data=[];
+    const dt=new Date();
+    for(let i=days-1;i>=0;i--){
+      const d=new Date(dt);d.setDate(dt.getDate()-i);
+      const key=d.toISOString().slice(0,10);
+      data.push({key,pages:dp[key]||0});
+    }
+    const max=Math.max(1,...data.map(x=>x.pages));
+    data.forEach(x=>{
+      const col=document.createElement('div');
+      col.className='chart-col';
+      const bar=document.createElement('div');
+      bar.className='chart-bar'+(x.key===t?' today':'');
+      bar.style.height=Math.max(2,Math.round((x.pages/max)*100))+'%';
+      bar.title=x.pages+' pages';
+      col.appendChild(bar);
+      const lbl=document.createElement('div');
+      lbl.className='chart-lbl';
+      lbl.textContent=x.key.slice(5).replace('-','/');
+      col.appendChild(lbl);
+      wrap.appendChild(col);
+    });
   },
 
   async clearCache(){
