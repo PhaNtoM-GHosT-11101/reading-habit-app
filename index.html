@@ -296,6 +296,7 @@ button{font-family:var(--font-ui);background:none;border:none;color:var(--text);
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, getDocs, addDoc, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
 /* ══════════════════════════════
    SECURITY: HTML Escaper (FIX #1)
@@ -308,6 +309,7 @@ const firebaseConfig={apiKey:"AIzaSyDPQxGMh5KbXmwAk2f0Xmh8E6QWcNib110",authDomai
 const fbApp=initializeApp(firebaseConfig);
 const auth=getAuth(fbApp);
 const db=getFirestore(fbApp);
+const storage=getStorage(fbApp);
 const provider=new GoogleAuthProvider();
 let currentUser=null;
 
@@ -546,11 +548,12 @@ const App={
 
   /* ══════════════════════════════
      FIX #16: Validate EPUB before upload
+     Upload: direct to Firebase Storage (no base64 chunk dance)
      ══════════════════════════════ */
   async handleUpload(e){
     const file=e.target.files[0];
     if(!file||!currentUser)return;
-    if(file.size>10*1024*1024){toast('File too large (max 10MB)');return;}
+    if(file.size>50*1024*1024){toast('File too large (max 50MB)');return;}
     document.getElementById('uploadToast').style.display='block';
     document.getElementById('uploadPct').textContent='Validating...';
     // Validate first
@@ -562,31 +565,24 @@ const App={
       toast('Invalid EPUB file: '+err.message);
       return;
     }
-    document.getElementById('uploadPct').textContent='Reading...';
-    const reader=new FileReader();
-    reader.onload=async()=>{
-      try{
-        const b64=reader.result.split(',')[1];
-        const chunkSize=800000;
-        const chunks=Math.ceil(b64.length/chunkSize);
-        const docRef=await addDoc(collection(db,"community_books"),{
-          title:file.name.replace('.epub',''),
-          uploaderName:currentUser.displayName,
-          timestamp:serverTimestamp(),chunks,votes:0
-        });
-        for(let i=0;i<chunks;i++){
-          document.getElementById('uploadPct').textContent=`${i+1}/${chunks}`;
-          await setDoc(doc(db,"community_books_chunks",docRef.id+"_"+i),{data:b64.slice(i*chunkSize,(i+1)*chunkSize)});
-        }
-        document.getElementById('uploadToast').style.display='none';
-        toast('Upload complete!');
-        this.fetchCommunityBooks();
-      }catch(err){
-        document.getElementById('uploadToast').style.display='none';
-        toast('Upload failed');
-      }
-    };
-    reader.readAsDataURL(file);
+    document.getElementById('uploadPct').textContent='Uploading...';
+    try{
+      const docRef=await addDoc(collection(db,"community_books"),{
+        title:file.name.replace('.epub',''),
+        uploaderName:currentUser.displayName,
+        uploaderUid:currentUser.uid,
+        timestamp:serverTimestamp(),votes:0
+      });
+      const storageRef=ref(storage,'community/'+currentUser.uid+'/'+docRef.id+'.epub');
+      await uploadBytes(storageRef,file);
+      await updateDoc(docRef,{storagePath:storageRef.fullPath});
+      document.getElementById('uploadToast').style.display='none';
+      toast('Upload complete!');
+      this.fetchCommunityBooks();
+    }catch(err){
+      document.getElementById('uploadToast').style.display='none';
+      toast('Upload failed');
+    }
   },
 
   /* ══════════════════════════════
@@ -706,10 +702,19 @@ const App={
         const bookId=url.split('://')[1];
         const metaSnap=await getDoc(doc(db,"community_books",bookId));
         const meta=metaSnap.data();
-        let b64="";
-        for(let i=0;i<meta.chunks;i++){const cs=await getDoc(doc(db,"community_books_chunks",bookId+"_"+i));b64+=cs.data().data;}
-        const res=await fetch('data:application/epub+zip;base64,'+b64);
-        buf=await res.arrayBuffer();
+        if(meta.storagePath){
+          const dl=await getDownloadURL(ref(storage,meta.storagePath));
+          const res=await fetch(dl);if(!res.ok)throw new Error('HTTP '+res.status);
+          buf=await res.arrayBuffer();
+        }else if(meta.chunks){
+          // Legacy books uploaded as base64 chunks
+          let b64="";
+          for(let i=0;i<meta.chunks;i++){const cs=await getDoc(doc(db,"community_books_chunks",bookId+"_"+i));b64+=cs.data().data;}
+          const res=await fetch('data:application/epub+zip;base64,'+b64);
+          buf=await res.arrayBuffer();
+        }else{
+          throw new Error('Book payload missing');
+        }
       }else{
         const res=await fetch(url||BOOKS_BASE+encodeURIComponent(fn));if(!res.ok)throw new Error('HTTP '+res.status);
         buf=await res.arrayBuffer();
