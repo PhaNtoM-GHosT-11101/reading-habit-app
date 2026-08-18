@@ -93,6 +93,7 @@ button{font-family:var(--font-ui);background:none;border:none;color:var(--text);
 .rdr-tools{display:flex;align-items:center;gap:4px;}
 .rdr-tool{width:36px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:8px;color:var(--text-muted);transition:all 0.2s;background:none;border:none;cursor:pointer;}
 .rdr-tool:hover{background:var(--ui);color:var(--text);}
+.rdr-tool.active{color:var(--accent);}
 .rdr-tool svg{width:18px;height:18px;}
 
 .rdr-wrapper{flex:1;position:relative;overflow:hidden;}
@@ -250,6 +251,7 @@ button{font-family:var(--font-ui);background:none;border:none;color:var(--text);
       <div id="rTimeEst" style="font-size:12px;color:var(--text-muted);">~ min</div>
       <div class="rdr-tools">
         <button class="rdr-tool" title="Search" onclick="App.toggleSearch()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg></button>
+        <button class="rdr-tool" id="btnTTS" title="Listen" onclick="App.toggleTTS()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M15.5 8.5a5 5 0 010 7"/><path d="M18.5 5.5a9 9 0 010 13"/></svg></button>
         <button class="rdr-tool" id="btnFullscreen" title="Fullscreen" onclick="App.toggleImmersive()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 00-2 2v3m18 0V5a2 2 0 00-2-2h-3m0 18h3a2 2 0 002-2v-3M3 16v3a2 2 0 002 2h3"/></svg></button>
         <button class="rdr-tool" title="Chapters" onclick="App.toggleTOC()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg></button>
         <button class="rdr-tool" title="Appearance" onclick="App.toggleSettings()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7V4h16v3M9 20h6M12 4v16"/></svg></button>
@@ -404,6 +406,7 @@ let S={
 let ghFiles=[],communityFiles=[],libTab='curated',totalPages=1,pageStartTime=0;
 let currentSelection='',currentSelectionRange=null,interactionsSetup=false,isImmersive=false;
 let cachedWordCount=0,cachedBookTitle='';
+let cachedParagraphs=[],ttsActive=false,ttsParaIdx=0;
 let libQuery='',libGenre='All';
 const GENRES=['All','Mystery','Romance','Adventure','Sci-Fi','Fantasy','Horror','Poetry','Drama','History','Philosophy','Religion','Nonfiction','Classics'];
 
@@ -531,6 +534,10 @@ const App={
   authAction(){if(currentUser){signOut(auth).then(()=>toast('Signed out'));}else{this.signIn();}},
 
   go(view){
+    if(view!=='reader'&&ttsActive){
+      speechSynthesis.cancel();ttsActive=false;
+      document.getElementById('btnTTS').classList.remove('active');
+    }
     if(view==='reader')document.getElementById('mainHdr').style.display='none';
     else document.getElementById('mainHdr').style.display='flex';
     document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
@@ -845,6 +852,7 @@ const App={
     }
 
     const paragraphs=book.text.split('\n\n').filter(p=>p.trim().length>0);
+    cachedParagraphs=paragraphs;
     content.innerHTML=paragraphs.map(p=>`<p>${applyBionic(p)}</p>`).join('');
     content.innerHTML+=`<div style="display:inline-block;width:100vw;height:100vh;"></div>`;
     content.style.transform='translateX(0)';
@@ -936,6 +944,38 @@ const App={
     target=Math.max(0,Math.min(target,totalPages-1));
     S.progress[fn]=target;saveState();
     this.updatePageUI();pageStartTime=Date.now();
+  },
+
+  /* ══════════════════════════════
+     TTS: Web Speech API — read aloud from current position
+     ══════════════════════════════ */
+  async toggleTTS(){
+    if(!('speechSynthesis' in window)){toast('Text-to-speech not supported on this browser');return;}
+    if(ttsActive){
+      speechSynthesis.cancel();ttsActive=false;
+      document.getElementById('btnTTS').classList.remove('active');
+      return;
+    }
+    const cur=S.progress[S.settings.active]||0;
+    ttsParaIdx=Math.floor((cur/Math.max(1,totalPages))*cachedParagraphs.length);
+    ttsActive=true;
+    document.getElementById('btnTTS').classList.add('active');
+    this.speakNext();
+  },
+  speakNext(){
+    if(!ttsActive)return;
+    if(ttsParaIdx>=cachedParagraphs.length){
+      speechSynthesis.cancel();ttsActive=false;
+      document.getElementById('btnTTS').classList.remove('active');
+      toast('Finished reading!');
+      return;
+    }
+    const u=new SpeechSynthesisUtterance(cachedParagraphs[ttsParaIdx].replace(/<[^>]+>/g,''));
+    ttsParaIdx++;
+    u.rate=1;u.pitch=1;
+    u.onend=()=>this.speakNext();
+    u.onerror=()=>{ttsActive=false;document.getElementById('btnTTS').classList.remove('active');};
+    speechSynthesis.speak(u);
   },
 
   toggleImmersive(){
