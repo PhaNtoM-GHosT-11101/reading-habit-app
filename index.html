@@ -63,6 +63,7 @@ button{font-family:var(--font-ui);background:none;border:none;color:var(--text);
 .lib-list{padding:16px 24px 120px;display:flex;flex-direction:column;gap:1px;}
 .lib-item{cursor:pointer;padding:20px 0;border-bottom:1px solid var(--text-faint);transition:opacity 0.15s;display:flex;align-items:flex-start;gap:16px;}
 .lib-item:active{opacity:0.5;}
+.lib-cover{width:48px;height:72px;flex-shrink:0;border-radius:4px;object-fit:cover;background:var(--ui);box-shadow:0 2px 8px rgba(0,0,0,0.35);display:block;}
 .lib-info{flex:1;min-width:0;}
 .lib-title{font-family:var(--font-read);font-size:18px;line-height:1.3;font-weight:500;margin-bottom:4px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
 .lib-author{font-size:13px;color:var(--text-muted);margin-bottom:6px;}
@@ -344,6 +345,7 @@ if('serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js').cat
 
 const BOOKS_INDEX='https://raw.githubusercontent.com/PhaNtoM-GHosT-11101/reading-habit-app/main/books.json';
 const BOOKS_BASE='https://raw.githubusercontent.com/PhaNtoM-GHosT-11101/reading-habit-app/main/books/';
+const COVERS_BASE='https://raw.githubusercontent.com/PhaNtoM-GHosT-11101/reading-habit-app/main/covers/';
 
 /* ── STATE ── */
 let S={
@@ -618,6 +620,17 @@ const App={
       const el=document.createElement('div');
       el.className='lib-item';
       el.onclick=()=>this.bookTap(f.name,t.title,f.download_url);
+
+      if(f.cover){
+        const img=document.createElement('img');
+        img.className='lib-cover';
+        img.loading='lazy';
+        img.alt=t.title;
+        img.referrerPolicy='no-referrer';
+        img.src=COVERS_BASE+encodeURIComponent(f.cover);
+        img.onerror=()=>img.remove();
+        el.appendChild(img);
+      }
 
       // Build meta safely
       const metaDiv=document.createElement('div');
