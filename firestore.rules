@@ -1,0 +1,31 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // User data: only the owner may read/write their own document
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Community library metadata: readable by everyone,
+    // created/updated only by signed-in users, never deleted by clients
+    match /community_books/{docId} {
+      allow read: if true;
+      allow create, update: if request.auth != null;
+      allow delete: if false;
+    }
+
+    // Community book payload chunks (base64): same policy as metadata
+    match /community_books_chunks/{chunkId} {
+      allow read: if true;
+      allow create, update: if request.auth != null;
+      allow delete: if false;
+    }
+
+    // Moderation reports: any signed-in user may file a report
+    match /reports/{reportId} {
+      allow create: if request.auth != null;
+      allow read, update, delete: if false;
+    }
+  }
+}
