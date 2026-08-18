@@ -169,25 +169,20 @@ button{font-family:var(--font-ui);background:none;border:none;color:var(--text);
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 .quote-btn{position:fixed;bottom:calc(100px + var(--safe-b));left:50%;transform:translateX(-50%);background:var(--accent);color:var(--bg);padding:12px 24px;border-radius:100px;font-weight:600;font-size:14px;box-shadow:0 10px 30px rgba(0,0,0,0.3);z-index:150;display:none;}
 
-/* ═══ AUTH ═══ */
-#authOverlay{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;transition:opacity 0.4s;}
-.auth-title{font-size:42px;font-weight:700;letter-spacing:-1.5px;margin-bottom:4px;}
-.auth-sub{color:var(--text-muted);text-align:center;max-width:280px;font-size:15px;line-height:1.5;margin-bottom:16px;}
-.auth-btn{background:var(--text);color:var(--bg);padding:14px 32px;border-radius:100px;font-size:15px;font-weight:600;cursor:pointer;border:none;font-family:var(--font-ui);width:260px;transition:opacity 0.2s;}
-.auth-btn:hover{opacity:0.85;}
-.auth-skip{background:none;border:1px solid var(--text-faint);color:var(--text-muted);padding:12px 32px;border-radius:100px;font-size:14px;font-weight:500;cursor:pointer;width:260px;transition:all 0.2s;}
-.auth-skip:hover{border-color:var(--text-muted);color:var(--text);}
-.auth-credit{margin-top:48px;text-align:center;font-family:var(--font-read);font-style:italic;font-size:13px;color:var(--text-muted);opacity:0.5;}
+/* ═══ AUTH BANNER ═══ */
+#authBanner{position:fixed;bottom:0;left:0;right:0;background:var(--ui);border-top:1px solid var(--text-faint);padding:14px 24px calc(14px + var(--safe-b));display:flex;align-items:center;gap:12px;z-index:300;font-size:13px;}
+#authBanner .auth-txt{flex:1;color:var(--text-muted);line-height:1.4;}
+#authBanner .auth-txt b{color:var(--text);}
+#authBanner .auth-btn{background:var(--text);color:var(--bg);padding:10px 20px;border-radius:100px;font-size:13px;font-weight:600;border:none;cursor:pointer;flex-shrink:0;}
+#authBanner .auth-x{background:none;border:none;color:var(--text-muted);font-size:20px;cursor:pointer;padding:4px;flex-shrink:0;}
   </style>
 </head>
 <body>
 
-<div id="authOverlay">
-  <div class="auth-title">PageHabit</div>
-  <div class="auth-sub">Sign in to sync your library, progress, and highlights across all devices.</div>
+<div id="authBanner">
+  <div class="auth-txt">Sign in to <b>sync progress &amp; highlights</b> across devices, upvote community books, and upload your own.</div>
   <button class="auth-btn" onclick="App.signIn()">Sign in with Google</button>
-  <button class="auth-skip" onclick="App.skipAuth()">Continue Offline</button>
-  <div class="auth-credit">Crafted by Aditya Priyadarshi</div>
+  <button class="auth-x" onclick="App.dismissAuth()" aria-label="Dismiss">×</button>
 </div>
 
 <div id="app">
@@ -317,9 +312,10 @@ const provider=new GoogleAuthProvider();
 let currentUser=null;
 
 onAuthStateChanged(auth,async(user)=>{
+  const banner=document.getElementById('authBanner');
   if(user){
     currentUser=user;
-    document.getElementById('authOverlay').style.display='none';
+    banner.style.display='none';
     document.getElementById('authStatusLbl').textContent=`Signed in as ${esc(user.displayName?.split(' ')[0]||'User')}`;
     document.getElementById('authActionBtn').textContent='Sign Out';
     try{
@@ -338,6 +334,7 @@ onAuthStateChanged(auth,async(user)=>{
     currentUser=null;
     document.getElementById('authStatusLbl').textContent='Account';
     document.getElementById('authActionBtn').textContent='Sign In';
+    banner.style.display='flex';
   }
 });
 
@@ -475,7 +472,7 @@ function applyBionic(text){
    ══════════════════════════════════════ */
 const App={
   signIn(){signInWithPopup(auth,provider).catch(e=>toast('Sign in failed'));},
-  skipAuth(){document.getElementById('authOverlay').style.display='none';},
+  dismissAuth(){document.getElementById('authBanner').style.display='none';},
   authAction(){if(currentUser){signOut(auth).then(()=>toast('Signed out'));}else{this.signIn();}},
 
   go(view){
