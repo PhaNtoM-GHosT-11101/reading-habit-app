@@ -342,7 +342,8 @@ onAuthStateChanged(auth,async(user)=>{
 
 if('serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js').catch(e=>console.log('SW err',e));}
 
-const GH_API='https://api.github.com/repos/PhaNtoM-GHosT-11101/reading-habit-app/contents/books';
+const BOOKS_INDEX='https://raw.githubusercontent.com/PhaNtoM-GHosT-11101/reading-habit-app/main/books.json';
+const BOOKS_BASE='https://raw.githubusercontent.com/PhaNtoM-GHosT-11101/reading-habit-app/main/books/';
 
 /* ── STATE ── */
 let S={
@@ -498,12 +499,15 @@ const App={
   /* ══════════════════════════════
      PERF: GitHub API Caching (FIX #5)
      ══════════════════════════════ */
+  /* ══════════════════════════════
+     FIX: Static index (books.json) instead of GitHub API — no rate limits
+     ══════════════════════════════ */
   async fetchBooks(){
     const list=document.getElementById('libList');
     if(libTab==='curated'||libTab==='toread'){
       // Check cache first
       try{
-        const cached=JSON.parse(localStorage.getItem('ghFilesCache')||'null');
+        const cached=JSON.parse(localStorage.getItem('booksIndexCache')||'null');
         if(cached&&Date.now()-cached.ts<3600000){
           ghFiles=cached.data;
           this.renderLib();
@@ -512,14 +516,15 @@ const App={
       }catch(e){}
       list.innerHTML='<div class="loader">Syncing library...</div>';
       try{
-        const res=await fetch(GH_API,{headers:{'Accept':'application/vnd.github.v3+json'}});
-        if(!res.ok)throw new Error('API Error');
-        ghFiles=(await res.json()).filter(f=>f.name.toLowerCase().endsWith('.epub'));
-        try{localStorage.setItem('ghFilesCache',JSON.stringify({ts:Date.now(),data:ghFiles}));}catch(e){}
+        const res=await fetch(BOOKS_INDEX);
+        if(!res.ok)throw new Error('HTTP '+res.status);
+        const idx=await res.json();
+        ghFiles=Array.isArray(idx.books)?idx.books:[];
+        try{localStorage.setItem('booksIndexCache',JSON.stringify({ts:Date.now(),data:ghFiles}));}catch(e){}
         this.renderLib();
       }catch(e){
         // Fallback to stale cache
-        try{const stale=JSON.parse(localStorage.getItem('ghFilesCache')||'null');if(stale){ghFiles=stale.data;this.renderLib();toast('Using cached library');return;}}catch(ex){}
+        try{const stale=JSON.parse(localStorage.getItem('booksIndexCache')||'null');if(stale){ghFiles=stale.data;this.renderLib();toast('Using cached library');return;}}catch(ex){}
         list.innerHTML=`<div class="loader">Failed to load. <button onclick="App.fetchBooks()" style="text-decoration:underline;color:var(--text);">Retry</button></div>`;
       }
     }else{
@@ -604,7 +609,7 @@ const App={
     list.innerHTML='';
     const cachedKeys=await idbKeys();
     files.forEach(f=>{
-      let t=f.title?{title:f.title,author:''}:cleanTitle(f.name);
+      let t={title:f.title||cleanTitle(f.name).title,author:f.author||cleanTitle(f.name).author};
       const cached=cachedKeys.includes(f.name);
       const prog=S.progress[f.name]||0;
       const bkmk=S.bookmarks.includes(f.name);
@@ -696,7 +701,7 @@ const App={
         const res=await fetch('data:application/epub+zip;base64,'+b64);
         buf=await res.arrayBuffer();
       }else{
-        const res=await fetch(url);if(!res.ok)throw new Error('HTTP '+res.status);
+        const res=await fetch(url||BOOKS_BASE+encodeURIComponent(fn));if(!res.ok)throw new Error('HTTP '+res.status);
         buf=await res.arrayBuffer();
       }
       const parsed=await parseEpub(buf);

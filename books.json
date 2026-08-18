@@ -1,0 +1,792 @@
+{
+  "generated": "2026-08-18",
+  "count": 131,
+  "books": [
+    {
+      "name": "15381 - Victorian Short Stories Stories of Courtship (3222).epub",
+      "title": "Victorian Short Stories Stories of Courtship",
+      "author": "",
+      "size": 158168
+    },
+    {
+      "name": "21839 - Sense and Sensibility by Jane Austen (4643).epub",
+      "title": "Sense and Sensibility",
+      "author": "Jane Austen",
+      "size": 1928113
+    },
+    {
+      "name": "42671 - Pride and Prejudice by Jane Austen (4184).epub",
+      "title": "Pride and Prejudice",
+      "author": "Jane Austen",
+      "size": 4758847
+    },
+    {
+      "name": "43 - The strange case of Dr. Jekyll and Mr. Hyde by Robert Louis Stevenson (3693).epub",
+      "title": "The strange case of Dr. Jekyll and Mr. Hyde",
+      "author": "Robert Louis Stevenson",
+      "size": 302979
+    },
+    {
+      "name": "45839 - Dracula by Bram Stoker (3932).epub",
+      "title": "Dracula",
+      "author": "Bram Stoker",
+      "size": 472805
+    },
+    {
+      "name": "51428 - That Which Hath Wings A Novel of the Day (3220).epub",
+      "title": "That Which Hath Wings A Novel of the Day",
+      "author": "",
+      "size": 673505
+    },
+    {
+      "name": "55179 - One of the Six Hundred A Novel (3313).epub",
+      "title": "One of the Six Hundred A Novel",
+      "author": "",
+      "size": 584543
+    },
+    {
+      "name": "A Honeymoon in Space by George Chetwynd Griffith.epub",
+      "title": "A Honeymoon in Space",
+      "author": "George Chetwynd Griffith",
+      "size": 212144
+    },
+    {
+      "name": "A Journey to the Centre of the Earth - Jules Verne.epub",
+      "title": "A Journey to the Centre of the Earth",
+      "author": "Jules Verne",
+      "size": 288666
+    },
+    {
+      "name": "A Room with a View by E. M. Forster.epub",
+      "title": "A Room with a View",
+      "author": "E. M. Forster",
+      "size": 254476
+    },
+    {
+      "name": "A Study in Scarlet by Arthur Conan Doyle.epub",
+      "title": "A Study in Scarlet",
+      "author": "Arthur Conan Doyle",
+      "size": 194519
+    },
+    {
+      "name": "A farewell to arms by Ernest Hemingway.epub",
+      "title": "A farewell to arms",
+      "author": "Ernest Hemingway",
+      "size": 214680
+    },
+    {
+      "name": "A pair of blue eyes by Thomas Hardy.epub",
+      "title": "A pair of blue eyes",
+      "author": "Thomas Hardy",
+      "size": 428982
+    },
+    {
+      "name": "Alice's Adventures in Wonderland by Lewis Carroll.epub",
+      "title": "Alice's Adventures in Wonderland",
+      "author": "Lewis Carroll",
+      "size": 136761
+    },
+    {
+      "name": "Around the World in Eighty Days by Jules Verne.epub",
+      "title": "Around the World in Eighty Days",
+      "author": "Jules Verne",
+      "size": 269763
+    },
+    {
+      "name": "As You Like It by William Shakespeare.epub",
+      "title": "As You Like It",
+      "author": "William Shakespeare",
+      "size": 198297
+    },
+    {
+      "name": "Aus dem Leben eines Taugenichts Novelle - Freiherr von Joseph Eichendorff.epub",
+      "title": "Aus dem Leben eines Taugenichts Novelle",
+      "author": "Freiherr von Joseph Eichendorff",
+      "size": 299075
+    },
+    {
+      "name": "Autobiography of Benjamin Franklin by Benjamin Franklin.epub",
+      "title": "Autobiography of Benjamin Franklin",
+      "author": "Benjamin Franklin",
+      "size": 216377
+    },
+    {
+      "name": "Bidwell's Travels, from Wall Street to London Prison Fifteen Years in Solitude - Austin Bidwell.epub",
+      "title": "Bidwell's Travels, from Wall Street to London Prison Fifteen Years in Solitude",
+      "author": "Austin Bidwell",
+      "size": 4510604
+    },
+    {
+      "name": "Bidwell's Travels, from Wall Street to London Prison_ Fifteen Years in Solitude by Austin Bidwell.epub",
+      "title": "Bidwell's Travels, from Wall Street to London Prison: Fifteen Years in Solitude",
+      "author": "Austin Bidwell",
+      "size": 418868
+    },
+    {
+      "name": "Blow The Man Down A Romance Of The Coast - Holman Day.epub",
+      "title": "Blow The Man Down A Romance Of The Coast",
+      "author": "Holman Day",
+      "size": 433695
+    },
+    {
+      "name": "Blow The Man Down_ A Romance Of The Coast by Holman Day.epub",
+      "title": "Blow The Man Down: A Romance Of The Coast",
+      "author": "Holman Day",
+      "size": 421943
+    },
+    {
+      "name": "Camille (La Dame aux Camilias) by Alexandre Dumas.epub",
+      "title": "Camille (La Dame aux Camilias)",
+      "author": "Alexandre Dumas",
+      "size": 241053
+    },
+    {
+      "name": "Carmen by Prosper Mérimée.epub",
+      "title": "Carmen",
+      "author": "Prosper Mérimée",
+      "size": 126630
+    },
+    {
+      "name": "Catriona by Robert Louis Stevenson.epub",
+      "title": "Catriona",
+      "author": "Robert Louis Stevenson",
+      "size": 324576
+    },
+    {
+      "name": "Chambers's Edinburgh Journal, No. 452 - Various.epub",
+      "title": "Chambers's Edinburgh Journal, No. 452",
+      "author": "Various",
+      "size": 180039
+    },
+    {
+      "name": "Complete Short Works of George Meredith by George Meredith.epub",
+      "title": "Complete Short Works of George Meredith",
+      "author": "George Meredith",
+      "size": 507354
+    },
+    {
+      "name": "Crime and Punishment by Fyodor Dostoyevsky.epub",
+      "title": "Crime and Punishment",
+      "author": "Fyodor Dostoyevsky",
+      "size": 783515
+    },
+    {
+      "name": "Cynthia's Chauffeur by Louis Tracy.epub",
+      "title": "Cynthia's Chauffeur",
+      "author": "Louis Tracy",
+      "size": 275330
+    },
+    {
+      "name": "Dainty's Cruel Rivals; Or, The Fatal Birthday - Mrs. Alex. McVeigh Miller.epub",
+      "title": "Dainty's Cruel Rivals; Or, The Fatal Birthday",
+      "author": "Mrs. Alex. McVeigh Miller",
+      "size": 249919
+    },
+    {
+      "name": "De Profundis by Oscar Wilde.epub",
+      "title": "De Profundis",
+      "author": "Oscar Wilde",
+      "size": 110776
+    },
+    {
+      "name": "Doctor Cupid A Novel - Rhoda Broughton.epub",
+      "title": "Doctor Cupid A Novel",
+      "author": "Rhoda Broughton",
+      "size": 393956
+    },
+    {
+      "name": "El crimen y el castigo by Fyodor Dostoyevsky.epub",
+      "title": "El crimen y el castigo",
+      "author": "Fyodor Dostoyevsky",
+      "size": 588264
+    },
+    {
+      "name": "Eloisa - Jean-Jacques Rousseau.epub",
+      "title": "Eloisa",
+      "author": "Jean-Jacques Rousseau",
+      "size": 951952
+    },
+    {
+      "name": "Eloisa _ by Jean-Jacques Rousseau.epub",
+      "title": "Eloisa ",
+      "author": "Jean-Jacques Rousseau",
+      "size": 841565
+    },
+    {
+      "name": "Erotica Romana by Johann Wolfgang von Goethe.epub",
+      "title": "Erotica Romana",
+      "author": "Johann Wolfgang von Goethe",
+      "size": 90366
+    },
+    {
+      "name": "Forest Days A Romance of Old Times - G. P. R. James.epub",
+      "title": "Forest Days A Romance of Old Times",
+      "author": "G. P. R. James",
+      "size": 482045
+    },
+    {
+      "name": "Four Arthurian Romances by active 12th century de Troyes Chrétien.epub",
+      "title": "Four Arthurian Romances",
+      "author": "active 12th century de Troyes Chrétien",
+      "size": 516158
+    },
+    {
+      "name": "Hypnerotomachia The Strife of Loue in a Dreame - Francesco Colonna.epub",
+      "title": "Hypnerotomachia The Strife of Loue in a Dreame",
+      "author": "Francesco Colonna",
+      "size": 1180933
+    },
+    {
+      "name": "I am a woman by Ann Bannon.epub",
+      "title": "I am a woman",
+      "author": "Ann Bannon",
+      "size": 308080
+    },
+    {
+      "name": "India's Love Lyrics - Laurence Hope.epub",
+      "title": "India's Love Lyrics",
+      "author": "Laurence Hope",
+      "size": 134620
+    },
+    {
+      "name": "Jane Eyre_ An Autobiography by Charlotte Brontë.epub",
+      "title": "Jane Eyre: An Autobiography",
+      "author": "Charlotte Brontë",
+      "size": 607556
+    },
+    {
+      "name": "King Arthur and the Knights of the Round Table by Sir Thomas Malory.epub",
+      "title": "King Arthur and the Knights of the Round Table",
+      "author": "Sir Thomas Malory",
+      "size": 263147
+    },
+    {
+      "name": "Le Fantôme de l'Opéra by Gaston Leroux.epub",
+      "title": "Le Fantôme de l'Opéra",
+      "author": "Gaston Leroux",
+      "size": 325831
+    },
+    {
+      "name": "Life on the Mississippi by Mark Twain.epub",
+      "title": "Life on the Mississippi",
+      "author": "Mark Twain",
+      "size": 454349
+    },
+    {
+      "name": "Linnet A Romance - Grant Allen.epub",
+      "title": "Linnet A Romance",
+      "author": "Grant Allen",
+      "size": 644884
+    },
+    {
+      "name": "Linnet_ A Romance by Grant Allen.epub",
+      "title": "Linnet: A Romance",
+      "author": "Grant Allen",
+      "size": 468841
+    },
+    {
+      "name": "Little Women; Or, Meg, Jo, Beth, and Amy by Louisa May Alcott.epub",
+      "title": "Little Women; Or, Meg, Jo, Beth, and Amy",
+      "author": "Louisa May Alcott",
+      "size": 558296
+    },
+    {
+      "name": "Lorna Doone A Romance of Exmoor - R. D. Blackmore.epub",
+      "title": "Lorna Doone A Romance of Exmoor",
+      "author": "R. D. Blackmore",
+      "size": 12355209
+    },
+    {
+      "name": "Love and Freindship - Jane Austen.epub",
+      "title": "Love and Freindship",
+      "author": "Jane Austen",
+      "size": 371967
+    },
+    {
+      "name": "Love and Freindship [sic] by Jane Austen.epub",
+      "title": "Love and Freindship [sic]",
+      "author": "Jane Austen",
+      "size": 177677
+    },
+    {
+      "name": "Manon Lescaut by abbé Prévost.epub",
+      "title": "Manon Lescaut",
+      "author": "abbé Prévost",
+      "size": 215104
+    },
+    {
+      "name": "Meditations by Emperor of Rome Marcus Aurelius.epub",
+      "title": "Meditations",
+      "author": "Emperor of Rome Marcus Aurelius",
+      "size": 306086
+    },
+    {
+      "name": "Middlemarch by George Eliot.epub",
+      "title": "Middlemarch",
+      "author": "George Eliot",
+      "size": 906007
+    },
+    {
+      "name": "Moby Dick; Or, The Whale by Herman Melville.epub",
+      "title": "Moby Dick; Or, The Whale",
+      "author": "Herman Melville",
+      "size": 727453
+    },
+    {
+      "name": "Modern English biography, volume 2 (of 4), I-Q by Frederic Boase.epub",
+      "title": "Modern English biography, volume 2 (of 4), I-Q",
+      "author": "Frederic Boase",
+      "size": 2131262
+    },
+    {
+      "name": "Moods - Louisa May Alcott.epub",
+      "title": "Moods",
+      "author": "Louisa May Alcott",
+      "size": 665906
+    },
+    {
+      "name": "My Life — Volume 1 by Richard Wagner.epub",
+      "title": "My Life — Volume 1",
+      "author": "Richard Wagner",
+      "size": 663897
+    },
+    {
+      "name": "Narrative of the Life of Frederick Douglass, an American Slave by Frederick Douglass.epub",
+      "title": "Narrative of the Life of Frederick Douglass, an American Slave",
+      "author": "Frederick Douglass",
+      "size": 175968
+    },
+    {
+      "name": "Oliver Twist, Vol. 2 (of 3) by Charles Dickens.epub",
+      "title": "Oliver Twist, Vol. 2 (of 3)",
+      "author": "Charles Dickens",
+      "size": 200562
+    },
+    {
+      "name": "One of the Six Hundred_ A Novel.epub",
+      "title": "One of the Six Hundred: A Novel",
+      "author": "",
+      "size": 514637
+    },
+    {
+      "name": "Only a girl's love - Charles Garvice.epub",
+      "title": "Only a girl's love",
+      "author": "Charles Garvice",
+      "size": 813286
+    },
+    {
+      "name": "Romeo and Juliet by William Shakespeare.epub",
+      "title": "Romeo and Juliet",
+      "author": "William Shakespeare",
+      "size": 199219
+    },
+    {
+      "name": "Roméo et Juliette by William Shakespeare.epub",
+      "title": "Roméo et Juliette",
+      "author": "William Shakespeare",
+      "size": 171682
+    },
+    {
+      "name": "Sonnets from the Portuguese by Elizabeth Barrett Browning.epub",
+      "title": "Sonnets from the Portuguese",
+      "author": "Elizabeth Barrett Browning",
+      "size": 65380
+    },
+    {
+      "name": "That Which Hath Wings_ A Novel of the Day.epub",
+      "title": "That Which Hath Wings: A Novel of the Day",
+      "author": "",
+      "size": 604457
+    },
+    {
+      "name": "The Adventures of Sherlock Holmes by Arthur Conan Doyle.epub",
+      "title": "The Adventures of Sherlock Holmes",
+      "author": "Arthur Conan Doyle",
+      "size": 311604
+    },
+    {
+      "name": "The Anabasis of Alexander - Arrian.epub",
+      "title": "The Anabasis of Alexander",
+      "author": "Arrian",
+      "size": 492497
+    },
+    {
+      "name": "The Blue Castle a novel - L. M. Montgomery.epub",
+      "title": "The Blue Castle a novel",
+      "author": "L. M. Montgomery",
+      "size": 652793
+    },
+    {
+      "name": "The Blue Castle_ a novel by L. M. Montgomery.epub",
+      "title": "The Blue Castle: a novel",
+      "author": "L. M. Montgomery",
+      "size": 364492
+    },
+    {
+      "name": "The Blue Lagoon A Romance - H. De Vere Stacpoole.epub",
+      "title": "The Blue Lagoon A Romance",
+      "author": "H. De Vere Stacpoole",
+      "size": 261795
+    },
+    {
+      "name": "The Blue Lagoon_ A Romance by H. De Vere Stacpoole.epub",
+      "title": "The Blue Lagoon: A Romance",
+      "author": "H. De Vere Stacpoole",
+      "size": 212629
+    },
+    {
+      "name": "The Book of the Thousand Nights and a Night — Volume 01 (of 10).epub",
+      "title": "The Book of the Thousand Nights and a Night — Volume 01 (of 10)",
+      "author": "",
+      "size": 683021
+    },
+    {
+      "name": "The Boy with Wings - Berta Ruck.epub",
+      "title": "The Boy with Wings",
+      "author": "Berta Ruck",
+      "size": 573886
+    },
+    {
+      "name": "The Cask of Amontillado by Edgar Allan Poe.epub",
+      "title": "The Cask of Amontillado",
+      "author": "Edgar Allan Poe",
+      "size": 71392
+    },
+    {
+      "name": "The Complete Project Gutenberg Works of Jane Austen by Jane Austen.epub",
+      "title": "The Complete Project Gutenberg Works of Jane Austen",
+      "author": "Jane Austen",
+      "size": 71039
+    },
+    {
+      "name": "The Complete Works of William Shakespeare by William Shakespeare.epub",
+      "title": "The Complete Works of William Shakespeare",
+      "author": "William Shakespeare",
+      "size": 2878807
+    },
+    {
+      "name": "The Confessions of St. Augustine by Saint of Hippo Augustine.epub",
+      "title": "The Confessions of St. Augustine",
+      "author": "Saint of Hippo Augustine",
+      "size": 328046
+    },
+    {
+      "name": "The Count of Monte Cristo by Alexandre Dumas and Auguste Maquet.epub",
+      "title": "The Count of Monte Cristo",
+      "author": "Alexandre Dumas and Auguste Maquet",
+      "size": 1294288
+    },
+    {
+      "name": "The Countess of Pembroke's Arcadia by Philip Sidney.epub",
+      "title": "The Countess of Pembroke's Arcadia",
+      "author": "Philip Sidney",
+      "size": 1081145
+    },
+    {
+      "name": "The Extraordinary Adventures of Arsène Lupin, Gentleman-Burglar by Maurice Leblanc.epub",
+      "title": "The Extraordinary Adventures of Arsène Lupin, Gentleman-Burglar",
+      "author": "Maurice Leblanc",
+      "size": 212650
+    },
+    {
+      "name": "The Gay Adventure A Romance - Richard Bird.epub",
+      "title": "The Gay Adventure A Romance",
+      "author": "Richard Bird",
+      "size": 408341
+    },
+    {
+      "name": "The Green Mouse - Robert W. Chambers.epub",
+      "title": "The Green Mouse",
+      "author": "Robert W. Chambers",
+      "size": 1114480
+    },
+    {
+      "name": "The Green Mummy by Fergus Hume.epub",
+      "title": "The Green Mummy",
+      "author": "Fergus Hume",
+      "size": 271857
+    },
+    {
+      "name": "The History of Sir Richard Calmady A Romance - Lucas Malet.epub",
+      "title": "The History of Sir Richard Calmady A Romance",
+      "author": "Lucas Malet",
+      "size": 745925
+    },
+    {
+      "name": "The Home Book of Verse — Volume 2 by Burton Egbert Stevenson.epub",
+      "title": "The Home Book of Verse — Volume 2",
+      "author": "Burton Egbert Stevenson",
+      "size": 702446
+    },
+    {
+      "name": "The Hound of the Baskervilles by Arthur Conan Doyle.epub",
+      "title": "The Hound of the Baskervilles",
+      "author": "Arthur Conan Doyle",
+      "size": 228105
+    },
+    {
+      "name": "The Kama Sutra of Vatsyayana by Vatsyayana.epub",
+      "title": "The Kama Sutra of Vatsyayana",
+      "author": "Vatsyayana",
+      "size": 212990
+    },
+    {
+      "name": "The King in Yellow by Robert W. Chambers.epub",
+      "title": "The King in Yellow",
+      "author": "Robert W. Chambers",
+      "size": 286933
+    },
+    {
+      "name": "The Lady of the Lake by Walter Scott.epub",
+      "title": "The Lady of the Lake",
+      "author": "Walter Scott",
+      "size": 370378
+    },
+    {
+      "name": "The Landloper The Romance of a Man on Foot - Holman Day.epub",
+      "title": "The Landloper The Romance of a Man on Foot",
+      "author": "Holman Day",
+      "size": 325415
+    },
+    {
+      "name": "The Love Letters of Henry VIII to Anne Boleyn; With Notes - King of England Henry VIII.epub",
+      "title": "The Love Letters of Henry VIII to Anne Boleyn; With Notes",
+      "author": "King of England Henry VIII",
+      "size": 971872
+    },
+    {
+      "name": "The Love Letters of Mary Wollstonecraft to Gilbert Imlay by Mary Wollstonecraft.epub",
+      "title": "The Love Letters of Mary Wollstonecraft to Gilbert Imlay",
+      "author": "Mary Wollstonecraft",
+      "size": 160565
+    },
+    {
+      "name": "The Man Who Was Thursday A Nightmare - G. K. Chesterton.epub",
+      "title": "The Man Who Was Thursday A Nightmare",
+      "author": "G. K. Chesterton",
+      "size": 412428
+    },
+    {
+      "name": "The Man Who Was Thursday_ A Nightmare by G. K. Chesterton.epub",
+      "title": "The Man Who Was Thursday: A Nightmare",
+      "author": "G. K. Chesterton",
+      "size": 196433
+    },
+    {
+      "name": "The Memoirs of Sherlock Holmes by Arthur Conan Doyle.epub",
+      "title": "The Memoirs of Sherlock Holmes",
+      "author": "Arthur Conan Doyle",
+      "size": 291329
+    },
+    {
+      "name": "The Misplaced Battleship by Harry Harrison.epub",
+      "title": "The Misplaced Battleship",
+      "author": "Harry Harrison",
+      "size": 100109
+    },
+    {
+      "name": "The Monk A Romance - M. G. Lewis.epub",
+      "title": "The Monk A Romance",
+      "author": "M. G. Lewis",
+      "size": 404869
+    },
+    {
+      "name": "The Monk_ A Romance by M. G. Lewis.epub",
+      "title": "The Monk: A Romance",
+      "author": "M. G. Lewis",
+      "size": 396443
+    },
+    {
+      "name": "The Mysteries of Udolpho by Ann Ward Radcliffe.epub",
+      "title": "The Mysteries of Udolpho",
+      "author": "Ann Ward Radcliffe",
+      "size": 984862
+    },
+    {
+      "name": "The Mysterious Affair at Styles by Agatha Christie.epub",
+      "title": "The Mysterious Affair at Styles",
+      "author": "Agatha Christie",
+      "size": 223129
+    },
+    {
+      "name": "The Mystery of Edwin Drood by Charles Dickens.epub",
+      "title": "The Mystery of Edwin Drood",
+      "author": "Charles Dickens",
+      "size": 324949
+    },
+    {
+      "name": "The Odyssey by Homer.epub",
+      "title": "The Odyssey",
+      "author": "Homer",
+      "size": 381037
+    },
+    {
+      "name": "The Passionate Elopement by Compton MacKenzie.epub",
+      "title": "The Passionate Elopement",
+      "author": "Compton MacKenzie",
+      "size": 342023
+    },
+    {
+      "name": "The Phantom of the Opera by Gaston Leroux.epub",
+      "title": "The Phantom of the Opera",
+      "author": "Gaston Leroux",
+      "size": 271263
+    },
+    {
+      "name": "The Pirate - Walter Scott.epub",
+      "title": "The Pirate",
+      "author": "Walter Scott",
+      "size": 1328234
+    },
+    {
+      "name": "The Prairie Wife - Arthur Stringer.epub",
+      "title": "The Prairie Wife",
+      "author": "Arthur Stringer",
+      "size": 217376
+    },
+    {
+      "name": "The Red Lily — Complete by Anatole France.epub",
+      "title": "The Red Lily — Complete",
+      "author": "Anatole France",
+      "size": 259308
+    },
+    {
+      "name": "The Return of Sherlock Holmes by Arthur Conan Doyle.epub",
+      "title": "The Return of Sherlock Holmes",
+      "author": "Arthur Conan Doyle",
+      "size": 340245
+    },
+    {
+      "name": "The Secret of Chimneys by Agatha Christie.epub",
+      "title": "The Secret of Chimneys",
+      "author": "Agatha Christie",
+      "size": 334514
+    },
+    {
+      "name": "The Sex Life of the Gods by M. E. Knerr.epub",
+      "title": "The Sex Life of the Gods",
+      "author": "M. E. Knerr",
+      "size": 172453
+    },
+    {
+      "name": "The Sign of the Four by Arthur Conan Doyle.epub",
+      "title": "The Sign of the Four",
+      "author": "Arthur Conan Doyle",
+      "size": 187515
+    },
+    {
+      "name": "The Silent Barrier - Louis Tracy.epub",
+      "title": "The Silent Barrier",
+      "author": "Louis Tracy",
+      "size": 2741905
+    },
+    {
+      "name": "The String of Pearls; Or, The Barber of Fleet Street. A Domestic Romance. by Prest and Rymer.epub",
+      "title": "The String of Pearls; Or, The Barber of Fleet Street. A Domestic Romance.",
+      "author": "Prest and Rymer",
+      "size": 1242805
+    },
+    {
+      "name": "The Treasure of Pearls A Romance of Adventures in California - Gustave Aimard.epub",
+      "title": "The Treasure of Pearls A Romance of Adventures in California",
+      "author": "Gustave Aimard",
+      "size": 409657
+    },
+    {
+      "name": "The Turn of the Screw by Henry James.epub",
+      "title": "The Turn of the Screw",
+      "author": "Henry James",
+      "size": 183995
+    },
+    {
+      "name": "The Works of Edgar Allan Poe — Volume 1 by Edgar Allan Poe.epub",
+      "title": "The Works of Edgar Allan Poe — Volume 1",
+      "author": "Edgar Allan Poe",
+      "size": 292268
+    },
+    {
+      "name": "The Works of Edgar Allan Poe — Volume 2 by Edgar Allan Poe.epub",
+      "title": "The Works of Edgar Allan Poe — Volume 2",
+      "author": "Edgar Allan Poe",
+      "size": 322623
+    },
+    {
+      "name": "The Yeoman Adventurer by George W. Gough.epub",
+      "title": "The Yeoman Adventurer",
+      "author": "George W. Gough",
+      "size": 351259
+    },
+    {
+      "name": "The call of Cthulhu by H. P. Lovecraft.epub",
+      "title": "The call of Cthulhu",
+      "author": "H. P. Lovecraft",
+      "size": 101769
+    },
+    {
+      "name": "The innocence of Father Brown by G. K. Chesterton.epub",
+      "title": "The innocence of Father Brown",
+      "author": "G. K. Chesterton",
+      "size": 257604
+    },
+    {
+      "name": "The murder of Roger Ackroyd by Agatha Christie.epub",
+      "title": "The murder of Roger Ackroyd",
+      "author": "Agatha Christie",
+      "size": 345997
+    },
+    {
+      "name": "The wisdom of Father Brown by G. K. Chesterton.epub",
+      "title": "The wisdom of Father Brown",
+      "author": "G. K. Chesterton",
+      "size": 244525
+    },
+    {
+      "name": "Thuvia, maid of Mars by Edgar Rice Burroughs.epub",
+      "title": "Thuvia, maid of Mars",
+      "author": "Edgar Rice Burroughs",
+      "size": 185982
+    },
+    {
+      "name": "Trial by water by Sewell Peaslee Wright.epub",
+      "title": "Trial",
+      "author": "water by Sewell Peaslee Wright",
+      "size": 232264
+    },
+    {
+      "name": "Twenty years after by Alexandre Dumas and Auguste Maquet.epub",
+      "title": "Twenty years after",
+      "author": "Alexandre Dumas and Auguste Maquet",
+      "size": 810714
+    },
+    {
+      "name": "Under the Red Dragon A Novel - James Grant.epub",
+      "title": "Under the Red Dragon A Novel",
+      "author": "James Grant",
+      "size": 471986
+    },
+    {
+      "name": "Under the Red Dragon_ A Novel by James Grant.epub",
+      "title": "Under the Red Dragon: A Novel",
+      "author": "James Grant",
+      "size": 457216
+    },
+    {
+      "name": "Undine by Freiherr de Friedrich Heinrich Karl La Motte-Fouqué.epub",
+      "title": "Undine",
+      "author": "Freiherr de Friedrich Heinrich Karl La Motte-Fouqué",
+      "size": 149340
+    },
+    {
+      "name": "What Will People Say A Novel - Rupert Hughes.epub",
+      "title": "What Will People Say A Novel",
+      "author": "Rupert Hughes",
+      "size": 1185264
+    },
+    {
+      "name": "What Will People Say_ A Novel by Rupert Hughes.epub",
+      "title": "What Will People Say: A Novel",
+      "author": "Rupert Hughes",
+      "size": 453569
+    }
+  ]
+}
